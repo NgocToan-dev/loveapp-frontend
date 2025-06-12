@@ -1,0 +1,162 @@
+// Base types for the application
+
+export interface User {
+  id: string
+  email: string
+  displayName: string
+  photoURL?: string
+  emailVerified: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface AuthState {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  error: string | null
+}
+
+export interface FileItem {
+  id: string
+  name: string
+  size: number
+  type: string
+  url: string
+  thumbnailUrl?: string
+  uploadedBy: string
+  uploadedAt: Date
+  lastModified: Date
+  tags?: string[]
+  description?: string
+}
+
+export interface FileUploadProgress {
+  fileId: string
+  progress: number
+  status: 'uploading' | 'completed' | 'error' | 'cancelled'
+  error?: string
+}
+
+export interface FilesState {
+  files: FileItem[]
+  uploadProgress: FileUploadProgress[]
+  isLoading: boolean
+  error: string | null
+  currentPage: number
+  totalPages: number
+  totalFiles: number
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean
+  data?: T
+  message?: string
+  error?: string
+}
+
+export interface PaginationParams {
+  page: number
+  limit: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  search?: string
+}
+
+export interface UploadOptions {
+  maxSize?: number
+  allowedTypes?: string[]
+  generateThumbnail?: boolean
+  tags?: string[]
+  description?: string
+}
+
+export interface UserSettings {
+  theme: 'light' | 'dark' | 'auto'
+  language: 'vi' | 'en'
+  notifications: {
+    email: boolean
+    push: boolean
+    fileUploads: boolean
+    systemUpdates: boolean
+  }
+  privacy: {
+    publicProfile: boolean
+    showEmail: boolean
+  }
+}
+
+export interface DashboardStats {
+  totalFiles: number
+  totalSize: number
+  recentUploads: number
+  storageUsed: number
+  storageLimit: number
+}
+
+// API Error types
+export interface ApiError {
+  code: string
+  message: string
+  details?: any
+}
+
+// Firebase specific types
+export interface FirebaseAuthError {
+  code: string
+  message: string
+}
+
+// MinIO specific types
+export interface MinIOConfig {
+  endpoint: string
+  accessKey: string
+  secretKey: string
+  bucket: string
+  region?: string
+  useSSL?: boolean
+}
+
+// Route types
+export interface RouteConfig {
+  path: string
+  name: string
+  component: any
+  meta?: {
+    requiresAuth?: boolean
+    title?: string
+    description?: string
+  }
+}
+
+// Form validation types
+export interface ValidationRule {
+  required?: boolean
+  minLength?: number
+  maxLength?: number
+  pattern?: RegExp
+  custom?: (value: any) => boolean | string
+}
+
+export interface FormField {
+  name: string
+  label: string
+  type: 'text' | 'email' | 'password' | 'file' | 'textarea' | 'select'
+  rules?: ValidationRule[]
+  options?: { value: any; label: string }[]
+  placeholder?: string
+  hint?: string
+}
+
+// Theme types
+export interface ThemeConfig {
+  primary: string
+  secondary: string
+  accent: string
+  error: string
+  warning: string
+  info: string
+  success: string
+  background: string
+  surface: string
+}

@@ -1,0 +1,89 @@
+// Main SCSS file for LoveApp
+@import './variables.scss';
+@import './animations.scss';
+
+// Global styles
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  min-height: 100vh;
+}
+
+// Love-themed animations
+.love-bounce {
+  animation: bounce 2s infinite;
+}
+
+.love-pulse {
+  animation: pulse 2s infinite;
+}
+
+.love-fadeIn {
+  animation: fadeIn 1s ease-in;
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--v-primary-base);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--v-primary-darken-1);
+}
+
+// Utility classes
+.text-love {
+  color: #ff4081 !important;
+}
+
+.bg-love {
+  background-color: #ff4081 !important;
+}
+
+.text-secondary-love {
+  color: #e91e63 !important;
+}
+
+.bg-secondary-love {
+  background-color: #e91e63 !important;
+}
+
+// Card shadows with love theme
+.love-card {
+  box-shadow: 0 4px 8px rgba(255, 64, 129, 0.1);
+  border: 1px solid rgba(255, 64, 129, 0.1);
+}
+
+.love-card:hover {
+  box-shadow: 0 8px 16px rgba(255, 64, 129, 0.2);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+// Button hover effects
+.v-btn--elevated.love-button {
+  background: linear-gradient(45deg, #ff4081, #e91e63);
+  color: white;
+}
+
+.v-btn--elevated.love-button:hover {
+  background: linear-gradient(45deg, #e91e63, #d81b60);
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}

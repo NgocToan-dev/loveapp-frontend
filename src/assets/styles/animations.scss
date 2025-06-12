@@ -1,0 +1,222 @@
+// Love-themed animations
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.1);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Love-themed utility classes
+.love-bounce {
+  animation: bounce 2s infinite;
+}
+
+.love-pulse {
+  animation: pulse 2s infinite;
+}
+
+.love-heartbeat {
+  animation: heartBeat 1.5s ease-in-out infinite;
+}
+
+.love-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.love-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.love-slide-in-left {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.love-slide-in-right {
+  animation: slideInRight 0.8s ease-out;
+}
+
+.love-zoom-in {
+  animation: zoomIn 0.6s ease-out;
+}
+
+// Shimmer effect for loading states
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+// Hover animations
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(255, 64, 129, 0.2);
+}
+
+.hover-grow {
+  transition: transform 0.3s ease;
+}
+
+.hover-grow:hover {
+  transform: scale(1.05);
+}
+
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 64, 129, 0.4);
+}
+
+// Page transition animations
+.page-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.page-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+// Modal animations
+.modal-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.modal-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(1.1);
+}

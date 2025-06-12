@@ -1,0 +1,70 @@
+// Love Theme Colors
+$love-primary: #ff4081;
+$love-secondary: #e91e63;
+$love-accent: #ff80ab;
+$love-background: #fce4ec;
+$love-surface: #ffffff;
+$love-error: #f44336;
+$love-warning: #ff9800;
+$love-info: #2196f3;
+$love-success: #4caf50;
+
+// Dark theme colors
+$love-dark-primary: #ff4081;
+$love-dark-secondary: #e91e63;
+$love-dark-background: #121212;
+$love-dark-surface: #1e1e1e;
+
+// Typography
+$font-family-primary: 'Roboto', sans-serif;
+$font-family-secondary: 'Roboto Slab', serif;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// Border radius
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+
+// Shadows
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.1);
+
+// Love theme shadows
+$love-shadow-sm: 0 2px 4px rgba(255, 64, 129, 0.1);
+$love-shadow-md: 0 4px 8px rgba(255, 64, 129, 0.1);
+$love-shadow-lg: 0 8px 16px rgba(255, 64, 129, 0.2);
+$love-shadow-xl: 0 16px 32px rgba(255, 64, 129, 0.2);
+
+// Breakpoints
+$breakpoint-xs: 0;
+$breakpoint-sm: 600px;
+$breakpoint-md: 960px;
+$breakpoint-lg: 1280px;
+$breakpoint-xl: 1920px;
+
+// Z-index
+$z-index-drawer: 200;
+$z-index-app-bar: 300;
+$z-index-dialog: 400;
+$z-index-snackbar: 500;
+$z-index-tooltip: 600;
+
+// Transitions
+$transition-fast: 0.15s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Gradients
+$love-gradient-primary: linear-gradient(45deg, #{$love-primary}, #{$love-secondary});
+$love-gradient-accent: linear-gradient(45deg, #{$love-accent}, #{$love-primary});
+$love-gradient-background: linear-gradient(135deg, #{$love-background} 0%, #f8bbd9 100%);
