@@ -6,8 +6,7 @@
 - **Routing**: Vue Router 4
 - **UI Framework**: Vuetify 3
 - **HTTP Client**: Axios
-- **Authentication**: Firebase Auth
-- **Storage**: MinIO integration
+- **Authentication**: JWT Token-based
 - **Internationalization**: Vue I18n
 
 ## 📁 Cấu trúc dự án
@@ -47,14 +46,18 @@ src/
 - [x] Vue I18n setup với Vietnamese/English
 - [x] Basic routing structure
 - [x] Component architecture foundation
+- [x] JWT-based authentication system
+- [x] API service with Axios
+- [x] Pinia stores setup
+- [x] Docker configuration
 
 ### Next Steps 📋
-- [ ] Setup Pinia stores
-- [ ] Implement authentication pages
-- [ ] Create file management interface
-- [ ] Setup API services with Axios
-- [ ] Configure Firebase Auth integration
-- [ ] Setup MinIO client integration
+- [ ] Complete missing views implementation
+- [ ] Add comprehensive error handling
+- [ ] Implement file upload components
+- [ ] Add loading states for all operations
+- [ ] Setup unit tests
+- [ ] Add form validation
 
 ## 🛠️ Development Commands
 
@@ -73,6 +76,12 @@ npm run type-check
 
 # Linting
 npm run lint
+
+# Docker development
+docker-compose --profile dev up
+
+# Docker production
+docker-compose --profile production up
 ```
 
 ## 📦 Dependencies
@@ -85,13 +94,8 @@ npm run lint
 - Pinia
 - Vuetify 3
 - Vue I18n
-
-### To be added
-- Axios (HTTP client)
-- Firebase SDK
-- MinIO client
+- Axios
 - VueUse utilities
-- Form validation library
 
 ## 🔧 Configuration Files
 
@@ -100,17 +104,44 @@ npm run lint
 - `src/plugins/vuetify.ts` - Vuetify theme configuration
 - `src/plugins/i18n.ts` - Internationalization setup
 - `src/router/index.ts` - Vue Router configuration
+- `env.example` - Environment variables template
 
 ## 🎨 Design System
 
-Current project includes a custom "love theme" with pink color palette. This will be adapted for the main project requirements.
+Current project includes a custom "love theme" with pink color palette optimized for a romantic couple app.
 
-## 📝 Next Development Phase
+## 📝 API Integration
 
-Following the 6-week plan, the next steps involve:
-1. Setting up backend repository
-2. Firebase project configuration
-3. MinIO setup with Docker
-4. Authentication system implementation
-5. File management system
-6. Testing and deployment
+The frontend is designed to work with a REST API backend:
+- JWT token-based authentication
+- Automatic token refresh
+- Request/response interceptors
+- Error handling
+- File upload support
+
+## 🔐 Authentication Flow
+
+1. User logs in with email/password
+2. Backend returns JWT token
+3. Token stored in localStorage
+4. Token sent with all API requests
+5. Automatic logout on token expiration
+
+## 📱 Features
+
+- ✅ Responsive design
+- ✅ Multi-language support (Vietnamese/English)
+- ✅ Dark/Light theme toggle
+- ✅ PWA ready
+- ✅ Authentication system
+- ✅ File upload preparation
+- ✅ Dashboard with statistics
+- ✅ Profile management
+
+## 🚀 Ready for Backend Integration
+
+The frontend is fully prepared to integrate with any REST API backend that provides:
+- Authentication endpoints (`/auth/login`, `/auth/register`, etc.)
+- User management endpoints
+- File upload endpoints
+- Application-specific endpoints

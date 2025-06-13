@@ -8,6 +8,83 @@ export interface User {
   emailVerified: boolean
   createdAt: Date
   updatedAt: Date
+  name?: string
+  bio?: string
+  dateOfBirth?: string
+  gender?: 'male' | 'female' | 'other'
+  preferences?: UserPreferences
+}
+
+export interface UserPreferences {
+  language: 'en' | 'vi'
+  timezone: string
+  dateFormat: string
+  timeFormat: '12h' | '24h'
+  notifications: {
+    email: {
+      enabled: boolean
+      reminders: boolean
+      anniversaries: boolean
+    }
+    push: {
+      enabled: boolean
+      reminders: boolean
+    }
+  }
+}
+
+export interface Memory {
+  id: string
+  title: string
+  description: string
+  memoryDate: string
+  location?: string
+  tags: string[]
+  isPrivate: boolean
+  isFavorite: boolean
+  isShared: boolean
+  files: FileItem[]
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Note {
+  id: string
+  title: string
+  content: string
+  category: string
+  tags: string[]
+  isPrivate: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Reminder {
+  id: string
+  title: string
+  description?: string
+  reminderDate: Date
+  priority: 'low' | 'medium' | 'high'
+  repeat?: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  isCompleted: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Anniversary {
+  id: string
+  title: string
+  description?: string
+  date: string
+  type: 'relationship' | 'milestone' | 'birthday' | 'other'
+  isRecurring: boolean
+  frequency?: 'yearly' | 'monthly'
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface AuthState {
@@ -32,10 +109,13 @@ export interface FileItem {
 }
 
 export interface FileUploadProgress {
-  fileId: string
+  name: string
   progress: number
-  status: 'uploading' | 'completed' | 'error' | 'cancelled'
+  loaded: number
+  total: number
+  status?: 'uploading' | 'completed' | 'error' | 'cancelled'
   error?: string
+  fileId?: string
 }
 
 export interface FilesState {

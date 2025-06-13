@@ -73,6 +73,78 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/memories',
+    name: 'memories',
+    component: () => import('@views/memories/MemoriesView.vue'),
+    meta: {
+      title: 'Memories',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/memories/create',
+    name: 'create-memory',
+    component: () => import('@views/memories/CreateMemoryView.vue'),
+    meta: {
+      title: 'Create Memory',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/memories/:id',
+    name: 'memory-detail',
+    component: () => import('@views/memories/MemoryDetailView.vue'),
+    meta: {
+      title: 'Memory Detail',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/notes',
+    name: 'notes',
+    component: () => import('@views/notes/NotesView.vue'),
+    meta: {
+      title: 'Notes',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/notes/create',
+    name: 'create-note',
+    component: () => import('@views/notes/CreateNoteView.vue'),
+    meta: {
+      title: 'Create Note',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/notes/:id',
+    name: 'note-detail',
+    component: () => import('@views/notes/NoteDetailView.vue'),
+    meta: {
+      title: 'Note Detail',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/reminders',
+    name: 'reminders',
+    component: () => import('@views/reminders/RemindersView.vue'),
+    meta: {
+      title: 'Reminders',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/anniversaries',
+    name: 'anniversaries',
+    component: () => import('@views/anniversaries/AnniversariesView.vue'),
+    meta: {
+      title: 'Anniversaries',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: () => import('@views/auth/ProfileView.vue'),

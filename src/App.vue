@@ -2,9 +2,11 @@
 import { ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/auth'
 
 const { t, locale } = useI18n()
 const theme = useTheme()
+const authStore = useAuthStore()
 const drawer = ref(false)
 
 const toggleTheme = () => {
@@ -13,6 +15,14 @@ const toggleTheme = () => {
 
 const toggleLanguage = () => {
   locale.value = locale.value === 'vi' ? 'en' : 'vi'
+}
+
+const logout = async () => {
+  try {
+    await authStore.logout()
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
 }
 </script>
 
@@ -29,7 +39,7 @@ const toggleLanguage = () => {
         <v-list-item
           prepend-avatar="https://via.placeholder.com/40x40/ff4081/ffffff?text=💕"
           title="LoveApp"
-          :subtitle="t('nav.home')"
+          :subtitle="authStore.isAuthenticated ? authStore.user?.displayName : t('nav.home')"
         />
       </v-list>
 
@@ -42,24 +52,47 @@ const toggleLanguage = () => {
           value="home"
           to="/"
         />
-        <v-list-item
-          prepend-icon="mdi-heart-multiple"
-          :title="t('nav.memories')"
-          value="memories"
-          disabled
-        />
-        <v-list-item
-          prepend-icon="mdi-message-heart"
-          :title="t('nav.messages')"
-          value="messages"
-          disabled
-        />
-        <v-list-item
-          prepend-icon="mdi-camera-account"
-          :title="t('nav.photos')"
-          value="photos"
-          disabled
-        />
+        
+        <!-- Protected Routes -->
+        <template v-if="authStore.isAuthenticated">
+          <v-list-item
+            prepend-icon="mdi-view-dashboard"
+            :title="t('nav.dashboard') || 'Dashboard'"
+            value="dashboard"
+            to="/dashboard"
+          />
+          <v-list-item
+            prepend-icon="mdi-heart"
+            :title="t('nav.memories') || 'Memories'"
+            value="memories"
+            to="/memories"
+          />
+          <v-list-item
+            prepend-icon="mdi-note-text"
+            :title="t('nav.notes') || 'Notes'"
+            value="notes"
+            to="/notes"
+          />
+          <v-list-item
+            prepend-icon="mdi-bell"
+            :title="t('nav.reminders') || 'Reminders'"
+            value="reminders"
+            to="/reminders"
+          />
+          <v-list-item
+            prepend-icon="mdi-calendar-heart"
+            :title="t('nav.anniversaries') || 'Anniversaries'"
+            value="anniversaries"
+            to="/anniversaries"
+          />
+          <v-list-item
+            prepend-icon="mdi-file-multiple"
+            :title="t('nav.files') || 'Files'"
+            value="files"
+            to="/files"
+          />
+        </template>
+        
         <v-list-item
           prepend-icon="mdi-information"
           :title="t('nav.about')"
@@ -67,6 +100,33 @@ const toggleLanguage = () => {
           to="/about"
         />
       </v-list>
+
+      <!-- Auth Section -->
+      <template #append>
+        <div class="pa-2">
+          <v-divider class="mb-2" />
+          <v-list density="compact">
+            <v-list-item
+              v-if="authStore.isAuthenticated"
+              prepend-icon="mdi-account"
+              :title="t('nav.profile')"
+              to="/profile"
+            />
+            <v-list-item
+              v-if="authStore.isAuthenticated"
+              prepend-icon="mdi-logout"
+              :title="t('nav.logout')"
+              @click="logout"
+            />
+            <v-list-item
+              v-else
+              prepend-icon="mdi-login"
+              :title="t('nav.login')"
+              to="/login"
+            />
+          </v-list>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <!-- App Bar -->
@@ -108,11 +168,20 @@ const toggleLanguage = () => {
         </v-icon>
       </v-btn>
 
-      <!-- Login Button (placeholder for future auth) -->
+      <!-- Auth Button -->
       <v-btn
+        v-if="authStore.isAuthenticated"
         variant="outlined"
         color="white"
-        disabled
+        @click="logout"
+      >
+        {{ t('nav.logout') }}
+      </v-btn>
+      <v-btn
+        v-else
+        variant="outlined"
+        color="white"
+        to="/login"
       >
         {{ t('nav.login') }}
       </v-btn>

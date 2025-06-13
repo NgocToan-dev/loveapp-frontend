@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
-import type { DashboardStats } from '@/types'
+import dayjs from 'dayjs'
 
-useI18n()
+const { t } = useI18n()
+const router = useRouter()
 const authStore = useAuthStore()
 
-const stats = ref<DashboardStats>({
+// Enhanced stats for Love App
+const stats = ref({
+  memories: 0,
+  notes: 0,
+  reminders: 0,
+  anniversaries: 0,
   totalFiles: 0,
   totalSize: 0,
   recentUploads: 0,
@@ -15,18 +22,105 @@ const stats = ref<DashboardStats>({
   storageLimit: 1024 * 1024 * 1024 * 5 // 5GB
 })
 
+interface RecentItem {
+  id: string
+  title: string
+  type: 'memory' | 'note' | 'reminder' | 'anniversary'
+  updatedAt: Date
+}
+
+interface UpcomingEvent {
+  id: string
+  title: string
+  type: 'reminder' | 'anniversary'
+  date: Date
+}
+
+const recentItems = ref<RecentItem[]>([])
+const upcomingEvents = ref<UpcomingEvent[]>([])
 const isLoading = ref(true)
+
+// Navigation methods
+const navigateTo = (route: string) => {
+  router.push({ name: route })
+}
+
+const createReminder = () => {
+  // TODO: Open reminder creation dialog
+  console.log('Create reminder')
+}
+
+const createAnniversary = () => {
+  // TODO: Open anniversary creation dialog
+  console.log('Create anniversary')
+}
+
+const openItem = (item: any) => {
+  // Navigate to item detail page based on type
+  switch (item.type) {
+    case 'memory':
+      router.push({ name: 'memory-detail', params: { id: item.id } })
+      break
+    case 'note':
+      router.push({ name: 'note-detail', params: { id: item.id } })
+      break
+    default:
+      console.log('Open item:', item)
+  }
+}
+
+const getItemColor = (type: string) => {
+  const colors: Record<string, string> = {
+    memory: 'pink',
+    note: 'primary',
+    reminder: 'orange',
+    anniversary: 'success'
+  }
+  return colors[type] || 'grey'
+}
+
+const getItemIcon = (type: string) => {
+  const icons: Record<string, string> = {
+    memory: 'mdi-heart',
+    note: 'mdi-note-text',
+    reminder: 'mdi-bell',
+    anniversary: 'mdi-calendar-heart'
+  }
+  return icons[type] || 'mdi-file'
+}
+
+const formatDate = (date: Date) => {
+  return dayjs(date).format('MMM D, YYYY')
+}
 
 onMounted(async () => {
   // TODO: Load dashboard data from API
   setTimeout(() => {
     stats.value = {
+      memories: 15,
+      notes: 8,
+      reminders: 3,
+      anniversaries: 2,
       totalFiles: 42,
       totalSize: 1024 * 1024 * 150, // 150MB
       recentUploads: 8,
       storageUsed: 1024 * 1024 * 150,
       storageLimit: 1024 * 1024 * 1024 * 5
     }
+    
+    // Mock recent items
+    recentItems.value = [
+      { id: '1', title: 'Our First Date', type: 'memory', updatedAt: new Date('2024-01-15') },
+      { id: '2', title: 'Love Notes', type: 'note', updatedAt: new Date('2024-01-14') },
+      { id: '3', title: 'Anniversary Plans', type: 'note', updatedAt: new Date('2024-01-13') }
+    ]
+    
+    // Mock upcoming events
+    upcomingEvents.value = [
+      { id: '1', title: 'Valentine\'s Day', type: 'anniversary', date: new Date('2024-02-14') },
+      { id: '2', title: 'Plan Date Night', type: 'reminder', date: new Date('2024-01-20') }
+    ]
+    
     isLoading.value = false
   }, 1000)
 })
@@ -56,60 +150,60 @@ function getStoragePercentage(): number {
       </p>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Love App Stats Cards -->
     <v-row class="mb-6">
       <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4" elevation="2">
+        <v-card class="text-center pa-4 hover-card" elevation="2" @click="navigateTo('memories')">
+          <v-icon size="48" color="pink" class="mb-3">
+            mdi-heart
+          </v-icon>
+          <div class="text-h4 font-weight-bold text-pink mb-1">
+            {{ isLoading ? '...' : stats.memories }}
+          </div>
+          <div class="text-body-1 text-medium-emphasis">
+            {{ $t('dashboard.memories') || 'Memories' }}
+          </div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="text-center pa-4 hover-card" elevation="2" @click="navigateTo('notes')">
           <v-icon size="48" color="primary" class="mb-3">
-            mdi-file-multiple
+            mdi-note-text
           </v-icon>
           <div class="text-h4 font-weight-bold text-primary mb-1">
-            {{ isLoading ? '...' : stats.totalFiles }}
+            {{ isLoading ? '...' : stats.notes }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
-            Total Files
+            {{ $t('dashboard.notes') || 'Notes' }}
           </div>
         </v-card>
       </v-col>
 
       <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4" elevation="2">
+        <v-card class="text-center pa-4 hover-card" elevation="2" @click="navigateTo('reminders')">
+          <v-icon size="48" color="orange" class="mb-3">
+            mdi-bell
+          </v-icon>
+          <div class="text-h4 font-weight-bold text-orange mb-1">
+            {{ isLoading ? '...' : stats.reminders }}
+          </div>
+          <div class="text-body-1 text-medium-emphasis">
+            {{ $t('dashboard.reminders') || 'Reminders' }}
+          </div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" sm="6" md="3">
+        <v-card class="text-center pa-4 hover-card" elevation="2" @click="navigateTo('anniversaries')">
           <v-icon size="48" color="success" class="mb-3">
-            mdi-harddisk
+            mdi-calendar-heart
           </v-icon>
           <div class="text-h4 font-weight-bold text-success mb-1">
-            {{ isLoading ? '...' : formatFileSize(stats.totalSize) }}
+            {{ isLoading ? '...' : stats.anniversaries }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
-            Total Size
-          </div>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4" elevation="2">
-          <v-icon size="48" color="info" class="mb-3">
-            mdi-upload
-          </v-icon>
-          <div class="text-h4 font-weight-bold text-info mb-1">
-            {{ isLoading ? '...' : stats.recentUploads }}
-          </div>
-          <div class="text-body-1 text-medium-emphasis">
-            Recent Uploads
-          </div>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4" elevation="2">
-          <v-icon size="48" color="warning" class="mb-3">
-            mdi-chart-pie
-          </v-icon>
-          <div class="text-h4 font-weight-bold text-warning mb-1">
-            {{ isLoading ? '...' : getStoragePercentage() }}%
-          </div>
-          <div class="text-body-1 text-medium-emphasis">
-            Storage Used
+            {{ $t('dashboard.anniversaries') || 'Anniversaries' }}
           </div>
         </v-card>
       </v-col>
@@ -145,76 +239,136 @@ function getStoragePercentage(): number {
       <v-col cols="12" md="6">
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
-            Quick Actions
+            <v-icon icon="mdi-lightning-bolt" class="mr-2"></v-icon>
+            {{ $t('dashboard.quickActions') || 'Quick Actions' }}
           </v-card-title>
           
-          <div class="d-flex flex-column gap-3">
-            <v-btn
-              color="primary"
-              variant="elevated"
-              size="large"
-              prepend-icon="mdi-upload"
-              to="/files"
-            >
-              Upload Files
-            </v-btn>
+          <v-row>
+            <v-col cols="6">
+              <v-btn
+                block
+                color="pink"
+                variant="tonal"
+                size="large"
+                @click="navigateTo('create-memory')"
+                prepend-icon="mdi-heart-plus"
+              >
+                {{ $t('dashboard.createMemory') || 'Create Memory' }}
+              </v-btn>
+            </v-col>
             
-            <v-btn
-              color="secondary"
-              variant="outlined"
-              size="large"
-              prepend-icon="mdi-folder-open"
-              to="/files"
-            >
-              Browse Files
-            </v-btn>
+            <v-col cols="6">
+              <v-btn
+                block
+                color="primary"
+                variant="tonal"
+                size="large"
+                @click="navigateTo('create-note')"
+                prepend-icon="mdi-note-plus"
+              >
+                {{ $t('dashboard.createNote') || 'Create Note' }}
+              </v-btn>
+            </v-col>
             
-            <v-btn
-              color="info"
-              variant="outlined"
-              size="large"
-              prepend-icon="mdi-account-cog"
-              to="/profile"
-            >
-              Manage Profile
-            </v-btn>
-          </div>
+            <v-col cols="6">
+              <v-btn
+                block
+                color="orange"
+                variant="tonal"
+                size="large"
+                @click="createReminder"
+                prepend-icon="mdi-bell-plus"
+              >
+                {{ $t('dashboard.createReminder') || 'Create Reminder' }}
+              </v-btn>
+            </v-col>
+            
+            <v-col cols="6">
+              <v-btn
+                block
+                color="success"
+                variant="tonal"
+                size="large"
+                @click="createAnniversary"
+                prepend-icon="mdi-calendar-plus"
+              >
+                {{ $t('dashboard.createAnniversary') || 'Create Anniversary' }}
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Recent Activity (Placeholder) -->
+    <!-- Recent Activity and Upcoming Events -->
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" lg="8">
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
-            Recent Activity
+            <v-icon icon="mdi-clock-outline" class="mr-2"></v-icon>
+            {{ $t('dashboard.recentActivity') || 'Recent Activity' }}
           </v-card-title>
           
-          <v-list class="bg-transparent">
+          <v-list v-if="recentItems.length > 0" class="bg-transparent">
             <v-list-item
-              v-for="i in 5"
-              :key="i"
-              class="px-0"
+              v-for="item in recentItems"
+              :key="item.id"
+              @click="openItem(item)"
+              class="px-0 hover-item"
             >
               <template #prepend>
-                <v-icon color="primary">mdi-file-upload</v-icon>
+                <v-avatar :color="getItemColor(item.type)" class="mr-3">
+                  <v-icon :icon="getItemIcon(item.type)"></v-icon>
+                </v-avatar>
               </template>
               
-              <v-list-item-title>
-                Uploaded file {{ i }}.pdf
-              </v-list-item-title>
-              
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
               <v-list-item-subtitle>
-                {{ Math.floor(Math.random() * 24) }} hours ago
+                {{ item.type }} • {{ formatDate(item.updatedAt) }}
               </v-list-item-subtitle>
             </v-list-item>
           </v-list>
           
-          <div class="text-center mt-4">
-            <v-btn variant="outlined" color="primary">
-              View All Activity
-            </v-btn>
+          <div v-else class="text-center py-8">
+            <v-icon icon="mdi-inbox" size="48" color="grey-lighten-2" class="mb-3"></v-icon>
+            <p class="text-body-1 text-medium-emphasis">
+              {{ $t('dashboard.noRecentActivity') || 'No recent activity' }}
+            </p>
+          </div>
+        </v-card>
+      </v-col>
+      
+      <v-col cols="12" lg="4">
+        <v-card class="pa-6" elevation="2">
+          <v-card-title class="text-h5 font-weight-bold mb-4">
+            <v-icon icon="mdi-calendar-today" class="mr-2"></v-icon>
+            {{ $t('dashboard.upcomingEvents') || 'Upcoming Events' }}
+          </v-card-title>
+          
+          <v-list v-if="upcomingEvents.length > 0" class="bg-transparent">
+            <v-list-item
+              v-for="event in upcomingEvents"
+              :key="event.id"
+              class="px-0"
+            >
+              <template #prepend>
+                <v-avatar size="small" :color="event.type === 'reminder' ? 'orange' : 'success'">
+                  <v-icon :icon="event.type === 'reminder' ? 'mdi-bell' : 'mdi-calendar-heart'" size="small"></v-icon>
+                </v-avatar>
+              </template>
+              
+              <v-list-item-title class="text-body-2">{{ event.title }}</v-list-item-title>
+              <v-list-item-subtitle class="text-caption">
+                {{ formatDate(event.date) }}
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+          
+          <div v-else class="text-center py-4">
+            <v-icon icon="mdi-calendar-blank" size="32" color="grey-lighten-2" class="mb-2"></v-icon>
+            <p class="text-caption text-medium-emphasis">
+              {{ $t('dashboard.noUpcomingEvents') || 'No upcoming events' }}
+            </p>
           </div>
         </v-card>
       </v-col>
@@ -223,7 +377,30 @@ function getStoragePercentage(): number {
 </template>
 
 <style scoped>
-.gap-3 {
-  gap: 12px;
+.hover-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.hover-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hover-item {
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.hover-item:hover {
+  background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
+.text-pink {
+  color: rgb(233, 30, 99) !important;
+}
+
+.text-orange {
+  color: rgb(255, 152, 0) !important;
 }
 </style>
