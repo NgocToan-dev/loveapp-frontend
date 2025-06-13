@@ -21,8 +21,8 @@ async function handleSubmit() {
   try {
     await AuthService.resetPassword(email.value)
     success.value = true
-  } catch (err: any) {
-    error.value = err.message
+  } catch (err: unknown) {
+    error.value = err instanceof Error ? err.message : 'An error occurred'
   } finally {
     isLoading.value = false
   }

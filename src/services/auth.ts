@@ -1,99 +1,83 @@
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  updatePassword,
-  sendPasswordResetEmail,
-  sendEmailVerification,
-  onAuthStateChanged,
-} from 'firebase/auth'
-import type { User as FirebaseUser } from 'firebase/auth'
 import type { User } from '@/types'
 import ApiService from './api'
 
-export class AuthService {
-  private auth = getAuth()
-
-  // Convert Firebase User to our User type
-  private mapFirebaseUser(firebaseUser: FirebaseUser): User {
-    return {
-      id: firebaseUser.uid,
-      email: firebaseUser.email || '',
-      displayName: firebaseUser.displayName || '',
-      photoURL: firebaseUser.photoURL || undefined,
-      emailVerified: firebaseUser.emailVerified,
-      createdAt: new Date(firebaseUser.metadata.creationTime || Date.now()),
-      updatedAt: new Date(firebaseUser.metadata.lastSignInTime || Date.now()),
-    }
+interface AuthResponse {
+  data: {
+    user: User
+    token: string
   }
+}
 
+interface UserResponse {
+  data: {
+    user: User
+  }
+}
+
+export class AuthService {
   // Register new user
   async register(email: string, password: string, displayName: string): Promise<User> {
     try {
-      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password)
+      const response = await ApiService.post<AuthResponse>('/auth/register', {
+        email,
+        password,
+        displayName
+      })
       
-      // Update profile with display name
-      await updateProfile(userCredential.user, { displayName })
+      if ((response as AuthResponse).data?.token) {
+        localStorage.setItem('authToken', (response as AuthResponse).data.token)
+      }
       
-      // Send email verification
-      await sendEmailVerification(userCredential.user)
-      
-      // Create user profile in backend
-      const userData = this.mapFirebaseUser(userCredential.user)
-      await ApiService.post('/auth/register', userData)
-      
-      return userData
-    } catch (error: any) {
-      throw new Error(error.message || 'Registration failed')
+      return (response as AuthResponse).data.user
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      throw new Error(err.response?.data?.message || 'Registration failed')
     }
   }
 
   // Login user
   async login(email: string, password: string): Promise<User> {
     try {
-      const userCredential = await signInWithEmailAndPassword(this.auth, email, password)
+      const response = await ApiService.post<AuthResponse>('/auth/login', {
+        email,
+        password
+      })
       
-      // Get Firebase ID token
-      const idToken = await userCredential.user.getIdToken()
+      if ((response as AuthResponse).data?.token) {
+        localStorage.setItem('authToken', (response as AuthResponse).data.token)
+      }
       
-      // Store token for API requests
-      localStorage.setItem('authToken', idToken)
-      
-      // Sync with backend
-      const userData = this.mapFirebaseUser(userCredential.user)
-      await ApiService.post('/auth/login', { idToken })
-      
-      return userData
-    } catch (error: any) {
-      throw new Error(error.message || 'Login failed')
+      return (response as AuthResponse).data.user
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      throw new Error(err.response?.data?.message || 'Login failed')
     }
   }
 
   // Logout user
   async logout(): Promise<void> {
     try {
-      await signOut(this.auth)
-      localStorage.removeItem('authToken')
       await ApiService.post('/auth/logout')
-    } catch (error: any) {
-      throw new Error(error.message || 'Logout failed')
+      localStorage.removeItem('authToken')
+    } catch (error: unknown) {
+      localStorage.removeItem('authToken')
+      const err = error as { response?: { data?: { message?: string } } }
+      throw new Error(err.response?.data?.message || 'Logout failed')
     }
   }
 
   // Get current user
-  getCurrentUser(): Promise<User | null> {
-    return new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(this.auth, (firebaseUser) => {
-        unsubscribe()
-        if (firebaseUser) {
-          resolve(this.mapFirebaseUser(firebaseUser))
-        } else {
-          resolve(null)
-        }
-      })
-    })
+  async getCurrentUser(): Promise<User | null> {
+    try {
+      const token = localStorage.getItem('authToken')
+      if (!token) return null
+      
+      const response = await ApiService.get<UserResponse>('/auth/me')
+      return (response as UserResponse).data.user
+    } catch {
+      localStorage.removeItem('authToken')
+      return null
+    }
   }
 
   // Update user profile
@@ -102,73 +86,51 @@ export class AuthService {
     photoURL?: string
   }): Promise<void> {
     try {
-      const user = this.auth.currentUser
-      if (!user) throw new Error('No authenticated user')
-      
-      await updateProfile(user, updates)
-      
-      // Sync with backend
       await ApiService.put('/auth/profile', updates)
-    } catch (error: any) {
-      throw new Error(error.message || 'Profile update failed')
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      throw new Error(err.response?.data?.message || 'Profile update failed')
     }
   }
 
   // Change password
   async changePassword(newPassword: string): Promise<void> {
     try {
-      const user = this.auth.currentUser
-      if (!user) throw new Error('No authenticated user')
-      
-      await updatePassword(user, newPassword)
-    } catch (error: any) {
-      throw new Error(error.message || 'Password change failed')
+      await ApiService.put('/auth/password', { newPassword })
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      throw new Error(err.response?.data?.message || 'Password change failed')
     }
   }
 
   // Reset password
   async resetPassword(email: string): Promise<void> {
     try {
-      await sendPasswordResetEmail(this.auth, email)
-    } catch (error: any) {
-      throw new Error(error.message || 'Password reset failed')
+      await ApiService.post('/auth/reset-password', { email })
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      throw new Error(err.response?.data?.message || 'Password reset failed')
     }
   }
 
   // Resend email verification
   async resendEmailVerification(): Promise<void> {
     try {
-      const user = this.auth.currentUser
-      if (!user) throw new Error('No authenticated user')
-      
-      await sendEmailVerification(user)
-    } catch (error: any) {
-      throw new Error(error.message || 'Email verification failed')
+      await ApiService.post('/auth/resend-verification')
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      throw new Error(err.response?.data?.message || 'Email verification failed')
     }
   }
 
-  // Get fresh ID token
-  async getIdToken(forceRefresh = false): Promise<string | null> {
-    try {
-      const user = this.auth.currentUser
-      if (!user) return null
-      
-      return await user.getIdToken(forceRefresh)
-    } catch (error: any) {
-      console.error('Failed to get ID token:', error)
-      return null
-    }
+  // Get auth token
+  getAuthToken(): string | null {
+    return localStorage.getItem('authToken')
   }
 
-  // Listen to auth state changes
-  onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    return onAuthStateChanged(this.auth, (firebaseUser) => {
-      if (firebaseUser) {
-        callback(this.mapFirebaseUser(firebaseUser))
-      } else {
-        callback(null)
-      }
-    })
+  // Check if user is authenticated
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('authToken')
   }
 }
 

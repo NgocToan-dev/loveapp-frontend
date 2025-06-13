@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User, AuthState } from '@/types'
+import type { User } from '@/types'
 import AuthService from '@/services/auth'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -22,8 +22,9 @@ export const useAuthStore = defineStore('auth', () => {
       const userData = await AuthService.register(email, password, displayName)
       user.value = userData
       return userData
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed'
+      error.value = errorMessage
       throw err
     } finally {
       isLoading.value = false
@@ -38,8 +39,9 @@ export const useAuthStore = defineStore('auth', () => {
       const userData = await AuthService.login(email, password)
       user.value = userData
       return userData
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed'
+      error.value = errorMessage
       throw err
     } finally {
       isLoading.value = false
@@ -53,8 +55,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await AuthService.logout()
       user.value = null
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Logout failed'
+      error.value = errorMessage
       throw err
     } finally {
       isLoading.value = false
@@ -74,8 +77,9 @@ export const useAuthStore = defineStore('auth', () => {
           updatedAt: new Date()
         }
       }
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Profile update failed'
+      error.value = errorMessage
       throw err
     } finally {
       isLoading.value = false
@@ -88,8 +92,9 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       await AuthService.changePassword(newPassword)
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Password change failed'
+      error.value = errorMessage
       throw err
     } finally {
       isLoading.value = false
@@ -102,8 +107,9 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       await AuthService.resetPassword(email)
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Password reset failed'
+      error.value = errorMessage
       throw err
     } finally {
       isLoading.value = false
@@ -116,8 +122,9 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       await AuthService.resendEmailVerification()
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Email verification failed'
+      error.value = errorMessage
       throw err
     } finally {
       isLoading.value = false
@@ -130,8 +137,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const currentUser = await AuthService.getCurrentUser()
       user.value = currentUser
-    } catch (err: any) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to initialize auth'
+      error.value = errorMessage
       console.error('Failed to initialize auth:', err)
     } finally {
       isLoading.value = false
@@ -146,11 +154,13 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = userData
   }
 
-  // Setup auth state listener
-  function setupAuthListener() {
-    return AuthService.onAuthStateChanged((userData) => {
-      user.value = userData
-    })
+  // Check authentication status
+  function checkAuthStatus() {
+    if (AuthService.isAuthenticated() && !user.value) {
+      initializeAuth()
+    } else if (!AuthService.isAuthenticated() && user.value) {
+      user.value = null
+    }
   }
 
   return {
@@ -174,6 +184,6 @@ export const useAuthStore = defineStore('auth', () => {
     initializeAuth,
     clearError,
     setUser,
-    setupAuthListener,
+    checkAuthStatus,
   }
 })

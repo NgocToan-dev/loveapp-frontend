@@ -98,7 +98,7 @@ const router = createRouter({
 })
 
 // Navigation guards
-router.beforeEach(async (to: any, from: any, next: any) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
   // Set page title

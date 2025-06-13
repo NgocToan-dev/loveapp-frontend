@@ -48,7 +48,7 @@ export interface FilesState {
   totalFiles: number
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   message?: string
@@ -98,14 +98,9 @@ export interface DashboardStats {
 export interface ApiError {
   code: string
   message: string
-  details?: any
+  details?: unknown
 }
 
-// Firebase specific types
-export interface FirebaseAuthError {
-  code: string
-  message: string
-}
 
 // MinIO specific types
 export interface MinIOConfig {
@@ -121,7 +116,7 @@ export interface MinIOConfig {
 export interface RouteConfig {
   path: string
   name: string
-  component: any
+  component: unknown
   meta?: {
     requiresAuth?: boolean
     title?: string
@@ -135,7 +130,7 @@ export interface ValidationRule {
   minLength?: number
   maxLength?: number
   pattern?: RegExp
-  custom?: (value: any) => boolean | string
+  custom?: (value: unknown) => boolean | string
 }
 
 export interface FormField {
@@ -143,7 +138,7 @@ export interface FormField {
   label: string
   type: 'text' | 'email' | 'password' | 'file' | 'textarea' | 'select'
   rules?: ValidationRule[]
-  options?: { value: any; label: string }[]
+  options?: { value: unknown; label: string }[]
   placeholder?: string
   hint?: string
 }

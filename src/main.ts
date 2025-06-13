@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import vuetify from './plugins/vuetify'
 import i18n from './plugins/i18n'
-import './plugins/firebase' // Initialize Firebase
 import App from './App.vue'
 import router from './router'
 
@@ -28,8 +27,8 @@ async function initializeApp() {
   // Initialize auth store
   const authStore = useAuthStore()
   
-  // Setup auth state listener
-  authStore.setupAuthListener()
+  // Check auth status and initialize if needed
+  authStore.checkAuthStatus()
   
   // Initialize auth state
   await authStore.initializeAuth()

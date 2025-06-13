@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import type { DashboardStats } from '@/types'
 
-const { t } = useI18n()
+useI18n()
 const authStore = useAuthStore()
 
 const stats = ref<DashboardStats>({

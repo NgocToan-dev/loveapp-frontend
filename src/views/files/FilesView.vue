@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+// import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+useI18n()
 
-const files = ref([])
-const isLoading = ref(false)
+// const files = ref([])
+// const isLoading = ref(false)
 </script>
 
 <template>

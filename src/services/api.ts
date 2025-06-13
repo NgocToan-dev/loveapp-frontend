@@ -50,33 +50,33 @@ api.interceptors.response.use(
 
 // Generic API methods
 export class ApiService {
-  static async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  static async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.get<ApiResponse<T>>(url, config)
     return response.data.data as T
   }
 
-  static async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  static async post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.post<ApiResponse<T>>(url, data, config)
     return response.data.data as T
   }
 
-  static async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  static async put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.put<ApiResponse<T>>(url, data, config)
     return response.data.data as T
   }
 
-  static async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  static async patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.patch<ApiResponse<T>>(url, data, config)
     return response.data.data as T
   }
 
-  static async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  static async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.delete<ApiResponse<T>>(url, config)
     return response.data.data as T
   }
 
   // File upload with progress
-  static async uploadFile<T = any>(
+  static async uploadFile<T = unknown>(
     url: string,
     file: File,
     onProgress?: (progress: number) => void,

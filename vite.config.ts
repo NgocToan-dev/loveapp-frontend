@@ -93,8 +93,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['vue', 'vue-router', 'pinia'],
-          vuetify: ['vuetify'],
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
+          vuetify: ['vuetify']
         }
       }
     }
