@@ -1,34 +1,106 @@
-import type { User } from '@/types'
+import type { User, AuthResponse, AuthTokens } from '@/types'
 import ApiService from './api'
 
-interface AuthResponse {
-  data: {
-    user: User
-    token: string
-  }
-}
-
-interface UserResponse {
-  data: {
-    user: User
-  }
-}
+// Token management
+const TOKEN_KEYS = {
+  ACCESS_TOKEN: 'accessToken',
+  REFRESH_TOKEN: 'refreshToken',
+  TOKEN_EXPIRY: 'tokenExpiry',
+  AUTH_TOKEN: 'authToken', // Keep for backward compatibility
+} as const
 
 export class AuthService {
+  // Token management methods
+  private setTokens(tokens: AuthTokens): void {
+    localStorage.setItem(TOKEN_KEYS.ACCESS_TOKEN, tokens.accessToken)
+    localStorage.setItem(TOKEN_KEYS.REFRESH_TOKEN, tokens.refreshToken)
+
+    // Calculate expiry time (current time + expiresIn seconds)
+    const expiryTime = new Date(Date.now() + tokens.expiresIn * 1000).getTime()
+    localStorage.setItem(TOKEN_KEYS.TOKEN_EXPIRY, expiryTime.toString())
+
+    // Keep backward compatibility
+    localStorage.setItem(TOKEN_KEYS.AUTH_TOKEN, tokens.accessToken)
+  }
+
+  private clearTokens(): void {
+    localStorage.removeItem(TOKEN_KEYS.ACCESS_TOKEN)
+    localStorage.removeItem(TOKEN_KEYS.REFRESH_TOKEN)
+    localStorage.removeItem(TOKEN_KEYS.TOKEN_EXPIRY)
+    localStorage.removeItem(TOKEN_KEYS.AUTH_TOKEN)
+  }
+
+  private getAccessToken(): string | null {
+    return localStorage.getItem(TOKEN_KEYS.ACCESS_TOKEN)
+  }
+
+  private getRefreshToken(): string | null {
+    return localStorage.getItem(TOKEN_KEYS.REFRESH_TOKEN)
+  }
+
+  private isTokenExpired(): boolean {
+    const expiry = localStorage.getItem(TOKEN_KEYS.TOKEN_EXPIRY)
+    if (!expiry) return true
+
+    return Date.now() > parseInt(expiry)
+  }
+
+  // Process user data to handle date conversions and field mapping
+  private processUserData(userData: User): User {
+    return {
+      ...userData,
+      emailVerified: userData.isEmailVerified, // Map for backward compatibility
+      displayName: userData.displayName || userData.name,
+      createdAt:
+        typeof userData.createdAt === 'string' ? new Date(userData.createdAt) : userData.createdAt,
+      updatedAt:
+        typeof userData.updatedAt === 'string' ? new Date(userData.updatedAt) : userData.updatedAt,
+      lastLoginAt: userData.lastLoginAt
+        ? typeof userData.lastLoginAt === 'string'
+          ? new Date(userData.lastLoginAt)
+          : userData.lastLoginAt
+        : undefined,
+    }
+  }
+
+  // Refresh access token
+  async refreshAccessToken(): Promise<boolean> {
+    try {
+      const refreshToken = this.getRefreshToken()
+      if (!refreshToken) return false
+
+      const response = await ApiService.post<AuthResponse['data']>('/auth/refresh-token', {
+        refreshToken,
+      })
+
+      // ApiService already extracts .data, so response is the clean data
+      if (response.tokens) {
+        this.setTokens(response.tokens)
+        return true
+      }
+
+      return false
+    } catch (error) {
+      console.error('Token refresh failed:', error)
+      this.clearTokens()
+      return false
+    }
+  }
+
   // Register new user
   async register(email: string, password: string, displayName: string): Promise<User> {
     try {
-      const response = await ApiService.post<AuthResponse>('/auth/register', {
+      const response = await ApiService.post<AuthResponse['data']>('/auth/register', {
         email,
         password,
-        displayName
+        displayName,
       })
-      
-      if ((response as AuthResponse).data?.token) {
-        localStorage.setItem('authToken', (response as AuthResponse).data.token)
+
+      if (response.tokens) {
+        this.setTokens(response.tokens)
       }
-      
-      return (response as AuthResponse).data.user
+
+      return this.processUserData(response.user)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Registration failed')
@@ -38,16 +110,16 @@ export class AuthService {
   // Login user
   async login(email: string, password: string): Promise<User> {
     try {
-      const response = await ApiService.post<AuthResponse>('/auth/login', {
+      const response = await ApiService.post<AuthResponse['data']>('/auth/login', {
         email,
-        password
+        password,
       })
-      
-      if ((response as AuthResponse).data?.token) {
-        localStorage.setItem('authToken', (response as AuthResponse).data.token)
+
+      if (response.tokens) {
+        this.setTokens(response.tokens)
       }
-      
-      return (response as AuthResponse).data.user
+
+      return this.processUserData(response.user)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Login failed')
@@ -57,10 +129,13 @@ export class AuthService {
   // Logout user
   async logout(): Promise<void> {
     try {
-      await ApiService.post('/auth/logout')
-      localStorage.removeItem('authToken')
+      const refreshToken = this.getRefreshToken()
+      if (refreshToken) {
+        await ApiService.post('/auth/logout', { refreshToken })
+      }
+      this.clearTokens()
     } catch (error: unknown) {
-      localStorage.removeItem('authToken')
+      this.clearTokens()
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Logout failed')
     }
@@ -69,22 +144,30 @@ export class AuthService {
   // Get current user
   async getCurrentUser(): Promise<User | null> {
     try {
-      const token = localStorage.getItem('authToken')
+      const token = this.getAccessToken()
       if (!token) return null
+
+      // Check if token is expired and try to refresh
+      if (this.isTokenExpired()) {
+        const refreshed = await this.refreshAccessToken()
+        if (!refreshed) return null
+      }
+
+      const response = await ApiService.get<User>('/auth/profile')
       
-      const response = await ApiService.get<UserResponse>('/auth/me')
-      return (response as UserResponse).data.user
-    } catch {
-      localStorage.removeItem('authToken')
+      return this.processUserData(response)
+    } catch (error: any) {
+      // Only clear tokens on 401 auth errors, not on network errors
+      if (error.code === 'UNAUTHORIZED' || error.response?.status === 401) {
+        this.clearTokens()
+      }
+      // For other errors (network, server), return null but keep tokens
       return null
     }
   }
 
   // Update user profile
-  async updateUserProfile(updates: {
-    displayName?: string
-    photoURL?: string
-  }): Promise<void> {
+  async updateUserProfile(updates: { displayName?: string; photoURL?: string }): Promise<void> {
     try {
       await ApiService.put('/auth/profile', updates)
     } catch (error: unknown) {
@@ -123,14 +206,36 @@ export class AuthService {
     }
   }
 
-  // Get auth token
+  // Get auth token (for backward compatibility)
   getAuthToken(): string | null {
-    return localStorage.getItem('authToken')
+    return this.getAccessToken()
   }
 
   // Check if user is authenticated
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('authToken')
+    const token = this.getAccessToken()
+    if (!token) return false
+
+    // If token is expired, check if we can refresh
+    if (this.isTokenExpired()) {
+      // Return false for now, the app should call refreshAccessToken()
+      return false
+    }
+
+    return true
+  }
+
+  // Get tokens info
+  getTokensInfo(): { hasTokens: boolean; isExpired: boolean; expiresAt: Date | null } {
+    const accessToken = this.getAccessToken()
+    const refreshToken = this.getRefreshToken()
+    const expiry = localStorage.getItem(TOKEN_KEYS.TOKEN_EXPIRY)
+
+    return {
+      hasTokens: !!(accessToken && refreshToken),
+      isExpired: this.isTokenExpired(),
+      expiresAt: expiry ? new Date(parseInt(expiry)) : null,
+    }
   }
 }
 

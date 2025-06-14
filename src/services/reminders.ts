@@ -1,5 +1,5 @@
-import type { Reminder, ApiResponse, PaginationParams } from '@/types'
-import { api } from './api'
+import type { Reminder, PaginationParams } from '@/types'
+import ApiService from './api'
 
 export interface CreateReminderData {
   title: string
@@ -27,7 +27,7 @@ export interface ReminderFilters extends PaginationParams {
 class RemindersService {
   private readonly baseUrl = '/reminders'
 
-  async getReminders(filters?: ReminderFilters): Promise<ApiResponse<{ reminders: Reminder[], total: number }>> {
+  async getReminders(filters?: ReminderFilters): Promise<{ reminders: Reminder[], total: number }> {
     const params = new URLSearchParams()
     
     if (filters) {
@@ -38,48 +38,39 @@ class RemindersService {
       })
     }
 
-    const response = await api.get(`${this.baseUrl}?${params.toString()}`)
-    return response.data
+    return await ApiService.get<{ reminders: Reminder[], total: number }>(`${this.baseUrl}?${params.toString()}`)
   }
 
-  async getReminderById(id: string): Promise<ApiResponse<Reminder>> {
-    const response = await api.get(`${this.baseUrl}/${id}`)
-    return response.data
+  async getReminderById(id: string): Promise<Reminder> {
+    return await ApiService.get<Reminder>(`${this.baseUrl}/${id}`)
   }
 
-  async createReminder(data: CreateReminderData): Promise<ApiResponse<Reminder>> {
-    const response = await api.post(this.baseUrl, data)
-    return response.data
+  async createReminder(data: CreateReminderData): Promise<Reminder> {
+    return await ApiService.post<Reminder>(this.baseUrl, data)
   }
 
-  async updateReminder(id: string, data: UpdateReminderData): Promise<ApiResponse<Reminder>> {
-    const response = await api.put(`${this.baseUrl}/${id}`, data)
-    return response.data
+  async updateReminder(id: string, data: UpdateReminderData): Promise<Reminder> {
+    return await ApiService.put<Reminder>(`${this.baseUrl}/${id}`, data)
   }
 
-  async deleteReminder(id: string): Promise<ApiResponse<void>> {
-    const response = await api.delete(`${this.baseUrl}/${id}`)
-    return response.data
+  async deleteReminder(id: string): Promise<void> {
+    return await ApiService.delete<void>(`${this.baseUrl}/${id}`)
   }
 
-  async completeReminder(id: string): Promise<ApiResponse<Reminder>> {
-    const response = await api.patch(`${this.baseUrl}/${id}/complete`)
-    return response.data
+  async completeReminder(id: string): Promise<Reminder> {
+    return await ApiService.patch<Reminder>(`${this.baseUrl}/${id}/complete`)
   }
 
-  async getUpcomingReminders(): Promise<ApiResponse<Reminder[]>> {
-    const response = await api.get(`${this.baseUrl}/upcoming`)
-    return response.data
+  async getUpcomingReminders(): Promise<Reminder[]> {
+    return await ApiService.get<Reminder[]>(`${this.baseUrl}/upcoming`)
   }
 
-  async getOverdueReminders(): Promise<ApiResponse<Reminder[]>> {
-    const response = await api.get(`${this.baseUrl}/overdue`)
-    return response.data
+  async getOverdueReminders(): Promise<Reminder[]> {
+    return await ApiService.get<Reminder[]>(`${this.baseUrl}/overdue`)
   }
 
-  async getRemindersStats(): Promise<ApiResponse<any>> {
-    const response = await api.get(`${this.baseUrl}/stats`)
-    return response.data
+  async getRemindersStats(): Promise<any> {
+    return await ApiService.get<any>(`${this.baseUrl}/stats`)
   }
 }
 

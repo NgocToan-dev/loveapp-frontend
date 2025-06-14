@@ -1,5 +1,5 @@
-import type { Anniversary, ApiResponse, PaginationParams } from '@/types'
-import { api } from './api'
+import type { Anniversary, PaginationParams } from '@/types'
+import ApiService from './api'
 
 export interface CreateAnniversaryData {
   title: string
@@ -29,7 +29,7 @@ export interface AnniversaryFilters extends PaginationParams {
 class AnniversariesService {
   private readonly baseUrl = '/anniversaries'
 
-  async getAnniversaries(filters?: AnniversaryFilters): Promise<ApiResponse<{ anniversaries: Anniversary[], total: number }>> {
+  async getAnniversaries(filters?: AnniversaryFilters): Promise<{ anniversaries: Anniversary[], total: number }> {
     const params = new URLSearchParams()
     
     if (filters) {
@@ -40,43 +40,35 @@ class AnniversariesService {
       })
     }
 
-    const response = await api.get(`${this.baseUrl}?${params.toString()}`)
-    return response.data
+    return await ApiService.get<{ anniversaries: Anniversary[], total: number }>(`${this.baseUrl}?${params.toString()}`)
   }
 
-  async getAnniversaryById(id: string): Promise<ApiResponse<Anniversary>> {
-    const response = await api.get(`${this.baseUrl}/${id}`)
-    return response.data
+  async getAnniversaryById(id: string): Promise<Anniversary> {
+    return await ApiService.get<Anniversary>(`${this.baseUrl}/${id}`)
   }
 
-  async createAnniversary(data: CreateAnniversaryData): Promise<ApiResponse<Anniversary>> {
-    const response = await api.post(this.baseUrl, data)
-    return response.data
+  async createAnniversary(data: CreateAnniversaryData): Promise<Anniversary> {
+    return await ApiService.post<Anniversary>(this.baseUrl, data)
   }
 
-  async updateAnniversary(id: string, data: UpdateAnniversaryData): Promise<ApiResponse<Anniversary>> {
-    const response = await api.put(`${this.baseUrl}/${id}`, data)
-    return response.data
+  async updateAnniversary(id: string, data: UpdateAnniversaryData): Promise<Anniversary> {
+    return await ApiService.put<Anniversary>(`${this.baseUrl}/${id}`, data)
   }
 
-  async deleteAnniversary(id: string): Promise<ApiResponse<void>> {
-    const response = await api.delete(`${this.baseUrl}/${id}`)
-    return response.data
+  async deleteAnniversary(id: string): Promise<void> {
+    return await ApiService.delete<void>(`${this.baseUrl}/${id}`)
   }
 
-  async getUpcomingAnniversaries(): Promise<ApiResponse<Anniversary[]>> {
-    const response = await api.get(`${this.baseUrl}/upcoming`)
-    return response.data
+  async getUpcomingAnniversaries(): Promise<Anniversary[]> {
+    return await ApiService.get<Anniversary[]>(`${this.baseUrl}/upcoming`)
   }
 
-  async getAnniversariesByType(type: string): Promise<ApiResponse<Anniversary[]>> {
-    const response = await api.get(`${this.baseUrl}/type/${type}`)
-    return response.data
+  async getAnniversariesByType(type: string): Promise<Anniversary[]> {
+    return await ApiService.get<Anniversary[]>(`${this.baseUrl}/type/${type}`)
   }
 
-  async getAnniversariesStats(): Promise<ApiResponse<any>> {
-    const response = await api.get(`${this.baseUrl}/stats`)
-    return response.data
+  async getAnniversariesStats(): Promise<any> {
+    return await ApiService.get<any>(`${this.baseUrl}/stats`)
   }
 }
 

@@ -28,10 +28,7 @@ async function initializeApp() {
   const authStore = useAuthStore()
   
   // Check auth status and initialize if needed
-  authStore.checkAuthStatus()
-  
-  // Initialize auth state
-  await authStore.initializeAuth()
+  await authStore.checkAuthStatus()
   
   // Mount the app
   app.mount('#app')

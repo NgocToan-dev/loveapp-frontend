@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
 import FilesService from '@/services/files'
@@ -11,18 +11,25 @@ const filesStore = useFilesStore()
 // Local state
 const uploadDialog = ref(false)
 
-// Computed from store
-const {
-  files,
-  filteredFiles,
-  fileStats,
-  isLoading,
-  uploadProgress,
-  isUploading,
-  searchQuery,
-  selectedType,
-  sortBy
-} = filesStore
+// Use store directly to maintain reactivity
+const files = computed(() => filesStore.files)
+const filteredFiles = computed(() => filesStore.filteredFiles)
+const fileStats = computed(() => filesStore.fileStats)
+const isLoading = computed(() => filesStore.isLoading)
+const uploadProgress = computed(() => filesStore.uploadProgress)
+const isUploading = computed(() => filesStore.isUploading)
+const searchQuery = computed({
+  get: () => filesStore.searchQuery,
+  set: (value: string) => filesStore.setSearchQuery(value)
+})
+const selectedType = computed({
+  get: () => filesStore.selectedType,
+  set: (value: string) => filesStore.setSelectedType(value)
+})
+const sortBy = computed({
+  get: () => filesStore.sortBy,
+  set: (value: string) => filesStore.setSortBy(value)
+})
 
 // File type options
 const fileTypes = [
@@ -68,13 +75,72 @@ const uploadFiles = async (filesToUpload: File[]) => {
   }
 }
 
-const viewFile = (file: any) => {
-  window.open(file.url, '_blank')
+const getBaseURL = () => {
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'
+}
+
+const getFileName = (file: any) => {
+  return file.name || file.fileName || file.originalName || 'Untitled'
+}
+
+const getFileSize = (file: any) => {
+  return file.size || file.metadata?.size || 0
+}
+
+const getFileType = (file: any) => {
+  return file.type || file.metadata?.mimeType || 'unknown'
+}
+
+const getFileDate = (file: any) => {
+  return file.uploadedAt || file.createdAt || new Date()
+}
+
+const getFileUrl = (file: any) => {
+  return file.url || `${getBaseURL()}/files/view/${file.id}`
+}
+
+const getFileThumbnailSrc = (file: any) => {
+  return file.thumbnailUrl || getFileUrl(file)
+}
+
+const viewFile = async (file: any) => {
+  try {
+    // For images, videos, and PDFs, try to fetch and create blob URL
+    const fileType = getFileType(file)
+    if (fileType.startsWith('image/') || fileType.startsWith('video/') || fileType.includes('pdf')) {
+      const response = await fetch(getFileUrl(file), {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('authToken')}`
+        }
+      })
+      
+      if (response.ok) {
+        const blob = await response.blob()
+        const blobUrl = URL.createObjectURL(blob)
+        window.open(blobUrl, '_blank')
+        
+        // Clean up blob URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl)
+        }, 1000)
+      } else {
+        throw new Error('Failed to fetch file')
+      }
+    } else {
+      // For other file types, trigger download instead
+      await downloadFile(file)
+    }
+  } catch (error) {
+    console.error('Failed to view file:', error)
+    // Fallback to download
+    await downloadFile(file)
+  }
 }
 
 const downloadFile = async (file: any) => {
   try {
-    await filesStore.downloadFile(file.id, file.name)
+    const fileName = getFileName(file)
+    await filesStore.downloadFile(file.id, fileName)
   } catch (error) {
     console.error('Download failed:', error)
   }
@@ -83,9 +149,10 @@ const downloadFile = async (file: any) => {
 const shareFile = async (file: any) => {
   try {
     const shareUrl = await filesStore.shareFile(file.id)
+    const fileName = getFileName(file)
     if (navigator.share) {
       await navigator.share({
-        title: file.name,
+        title: fileName,
         url: shareUrl
       })
     } else {
@@ -99,7 +166,8 @@ const shareFile = async (file: any) => {
 }
 
 const deleteFile = async (file: any) => {
-  if (confirm(t('files.confirmDelete', { name: file.name }))) {
+  const fileName = getFileName(file)
+  if (confirm(t('files.confirmDelete', { name: fileName }))) {
     try {
       await filesStore.deleteFile(file.id)
     } catch (error) {
@@ -278,8 +346,8 @@ onMounted(() => {
         <v-card hover @click="viewFile(file)">
           <div class="file-preview">
             <v-img
-              v-if="isImage(file.type)"
-              :src="file.thumbnailUrl || file.url"
+              v-if="isImage(getFileType(file))"
+              :src="getFileThumbnailSrc(file)"
               height="200"
               cover
             />
@@ -288,25 +356,25 @@ onMounted(() => {
               class="d-flex align-center justify-center"
               style="height: 200px; background-color: #f5f5f5;"
             >
-              <v-icon :color="getFileTypeColor(file.type)" size="80">
-                {{ getFileTypeIcon(file.type) }}
+              <v-icon :color="getFileTypeColor(getFileType(file))" size="80">
+                {{ getFileTypeIcon(getFileType(file)) }}
               </v-icon>
             </div>
           </div>
           
           <v-card-text>
             <div class="text-subtitle-2 font-weight-medium mb-1">
-              {{ file.name }}
+              {{ getFileName(file) }}
             </div>
             <div class="text-caption text-medium-emphasis mb-2">
-              {{ formatFileSize(file.size) }} • {{ formatDate(file.uploadedAt) }}
+              {{ formatFileSize(getFileSize(file)) }} • {{ formatDate(getFileDate(file)) }}
             </div>
             <v-chip
-              :color="getFileTypeColor(file.type)"
+              :color="getFileTypeColor(getFileType(file))"
               size="small"
               variant="tonal"
             >
-              {{ file.type.split('/')[0] }}
+              {{ getFileType(file).split('/')[0] }}
             </v-chip>
           </v-card-text>
 
@@ -359,7 +427,6 @@ onMounted(() => {
         <p class="text-body-1 mt-4">{{ $t('files.loading') }}</p>
       </v-col>
     </v-row>
-
     <!-- Upload Dialog -->
     <v-dialog v-model="uploadDialog" max-width="600">
       <v-card>

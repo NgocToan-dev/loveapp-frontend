@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import type { FileItem, FileUploadProgress } from '@/types'
 import FilesService from '@/services/files'
 
@@ -19,18 +19,18 @@ export const useFilesStore = defineStore('files', () => {
   // Getters
   const filteredFiles = computed(() => {
     let filtered = [...files.value]
-
+    
     // Filter by search query
     if (searchQuery.value) {
       filtered = filtered.filter(file =>
-        file.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+        (file.name || file.fileName || file.originalName || '').toLowerCase().includes(searchQuery.value.toLowerCase())
       )
     }
 
     // Filter by type
     if (selectedType.value) {
       filtered = filtered.filter(file =>
-        file.type.startsWith(selectedType.value)
+        (file.type || file.metadata?.mimeType || '').startsWith(selectedType.value)
       )
     }
 
@@ -38,17 +38,29 @@ export const useFilesStore = defineStore('files', () => {
     filtered.sort((a, b) => {
       switch (sortBy.value) {
         case 'date-desc':
-          return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+          const bDate = new Date(b.uploadedAt || b.createdAt || 0).getTime()
+          const aDate = new Date(a.uploadedAt || a.createdAt || 0).getTime()
+          return bDate - aDate
         case 'date-asc':
-          return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
+          const aDateAsc = new Date(a.uploadedAt || a.createdAt || 0).getTime()
+          const bDateAsc = new Date(b.uploadedAt || b.createdAt || 0).getTime()
+          return aDateAsc - bDateAsc
         case 'name-asc':
-          return a.name.localeCompare(b.name)
+          const aName = a.name || a.fileName || a.originalName || ''
+          const bName = b.name || b.fileName || b.originalName || ''
+          return aName.localeCompare(bName)
         case 'name-desc':
-          return b.name.localeCompare(a.name)
+          const aNameDesc = a.name || a.fileName || a.originalName || ''
+          const bNameDesc = b.name || b.fileName || b.originalName || ''
+          return bNameDesc.localeCompare(aNameDesc)
         case 'size-desc':
-          return b.size - a.size
+          const bSize = b.size || b.metadata?.size || 0
+          const aSize = a.size || a.metadata?.size || 0
+          return bSize - aSize
         case 'size-asc':
-          return a.size - b.size
+          const aSizeAsc = a.size || a.metadata?.size || 0
+          const bSizeAsc = b.size || b.metadata?.size || 0
+          return aSizeAsc - bSizeAsc
         default:
           return 0
       }
@@ -60,16 +72,17 @@ export const useFilesStore = defineStore('files', () => {
   const fileStats = computed(() => {
     const stats = {
       totalFiles: files.value.length,
-      totalSize: files.value.reduce((sum, file) => sum + file.size, 0),
-      imageFiles: files.value.filter(f => f.type.startsWith('image/')).length,
-      videoFiles: files.value.filter(f => f.type.startsWith('video/')).length,
-      audioFiles: files.value.filter(f => f.type.startsWith('audio/')).length,
-      documentFiles: files.value.filter(f => 
-        f.type.includes('pdf') || 
-        f.type.includes('word') || 
-        f.type.includes('excel') || 
-        f.type.includes('powerpoint')
-      ).length
+      totalSize: files.value.reduce((sum, file) => sum + (file.size || file.metadata?.size || 0), 0),
+      imageFiles: files.value.filter(f => (f.type || f.metadata?.mimeType || '').startsWith('image/')).length,
+      videoFiles: files.value.filter(f => (f.type || f.metadata?.mimeType || '').startsWith('video/')).length,
+      audioFiles: files.value.filter(f => (f.type || f.metadata?.mimeType || '').startsWith('audio/')).length,
+      documentFiles: files.value.filter(f => {
+        const type = f.type || f.metadata?.mimeType || ''
+        return type.includes('pdf') ||
+               type.includes('word') ||
+               type.includes('excel') ||
+               type.includes('powerpoint')
+      }).length
     }
     return stats
   })
@@ -97,7 +110,18 @@ export const useFilesStore = defineStore('files', () => {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch files'
       error.value = errorMessage
-      throw err
+      
+      // If it's a 404 or connection error, set empty state instead of throwing
+      if (errorMessage.includes('404') || errorMessage.includes('Failed to fetch')) {
+        console.warn('Backend not available, setting empty files state:', errorMessage)
+        files.value = []
+        totalFiles.value = 0
+        currentPage.value = 1
+        totalPages.value = 1
+        error.value = 'Backend service is not available. Files functionality is temporarily disabled.'
+      } else {
+        throw err
+      }
     } finally {
       isLoading.value = false
     }
@@ -277,7 +301,10 @@ export const useFilesStore = defineStore('files', () => {
 
   // Initialize store
   function initialize() {
-    fetchFiles()
+    fetchFiles().catch(error => {
+      console.warn('Files initialization failed:', error)
+      // Don't re-throw error during initialization to prevent app crash
+    })
   }
 
   return {

@@ -2,25 +2,22 @@ import type { FileItem, FileUploadProgress } from '@/types'
 import ApiService from './api'
 
 interface FileListResponse {
-  data: {
-    files: FileItem[]
+  files: FileItem[]
+  pagination: {
     total: number
-    page: number
     limit: number
+    offset: number
+    hasMore: boolean
   }
 }
 
 interface FileResponse {
-  data: {
-    file: FileItem
-  }
+  file: FileItem
 }
 
 interface FileUploadResponse {
-  data: {
-    file: FileItem
-    uploadUrl?: string
-  }
+  file: FileItem
+  uploadUrl?: string
 }
 
 export class FilesService {
@@ -35,7 +32,13 @@ export class FilesService {
   }): Promise<{ files: FileItem[]; total: number; page: number; limit: number }> {
     try {
       const response = await ApiService.get<FileListResponse>('/files', { params })
-      return (response as FileListResponse).data
+      // Transform the response to match expected format
+      return {
+        files: response.files.map(file => this.transformFileItem(file)),
+        total: response.pagination.total,
+        page: Math.floor(response.pagination.offset / response.pagination.limit) + 1,
+        limit: response.pagination.limit
+      }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to fetch files')
@@ -46,7 +49,7 @@ export class FilesService {
   async getFile(id: string): Promise<FileItem> {
     try {
       const response = await ApiService.get<FileResponse>(`/files/${id}`)
-      return (response as FileResponse).data.file
+      return this.transformFileItem(response.file)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to fetch file')
@@ -79,7 +82,7 @@ export class FilesService {
         }
       })
 
-      return (response as FileUploadResponse).data.file
+      return this.transformFileItem(response.file)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to upload file')
@@ -131,7 +134,7 @@ export class FilesService {
   }): Promise<FileItem> {
     try {
       const response = await ApiService.put<FileResponse>(`/files/${id}`, updates)
-      return (response as FileResponse).data.file
+      return this.transformFileItem(response.file)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to update file')
@@ -141,8 +144,8 @@ export class FilesService {
   // Get file download URL
   async getDownloadUrl(id: string): Promise<string> {
     try {
-      const response = await ApiService.get<{ data: { downloadUrl: string } }>(`/files/${id}/download`)
-      return response.data.downloadUrl
+      const response = await ApiService.get<{ downloadUrl: string }>(`/files/${id}/download`)
+      return response.downloadUrl
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to get download URL')
@@ -170,10 +173,10 @@ export class FilesService {
   // Get file share URL
   async getShareUrl(id: string, expiresIn?: number): Promise<string> {
     try {
-      const response = await ApiService.post<{ data: { shareUrl: string } }>(`/files/${id}/share`, {
+      const response = await ApiService.post<{ shareUrl: string }>(`/files/${id}/share`, {
         expiresIn
       })
-      return response.data.shareUrl
+      return response.shareUrl
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to get share URL')
@@ -189,14 +192,12 @@ export class FilesService {
   }> {
     try {
       const response = await ApiService.get<{
-        data: {
-          totalFiles: number
-          totalSize: number
-          filesByType: Record<string, number>
-          recentFiles: FileItem[]
-        }
+        totalFiles: number
+        totalSize: number
+        filesByType: Record<string, number>
+        recentFiles: FileItem[]
       }>('/files/stats')
-      return response.data
+      return response
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to fetch file statistics')
@@ -218,7 +219,7 @@ export class FilesService {
           ...filters
         }
       })
-      return (response as FileListResponse).data.files
+      return response.files.map(file => this.transformFileItem(file))
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Failed to search files')
@@ -228,13 +229,13 @@ export class FilesService {
   // Get file thumbnail
   async getThumbnailUrl(id: string, size: 'small' | 'medium' | 'large' = 'medium'): Promise<string> {
     try {
-      const response = await ApiService.get<{ data: { thumbnailUrl: string } }>(`/files/${id}/thumbnail`, {
+      const response = await ApiService.get<{ thumbnailUrl: string }>(`/files/${id}/thumbnail`, {
         params: { size }
       })
-      return response.data.thumbnailUrl
+      return response.thumbnailUrl
     } catch (error: unknown) {
       // If thumbnail generation fails, return a placeholder or the original file URL
-      return `/api/files/${id}`
+      return `/api/v1/files/${id}`
     }
   }
 
@@ -290,6 +291,24 @@ export class FilesService {
            mimeType.includes('powerpoint') ||
            mimeType.includes('text')
   }
+
+  // Transform backend file structure to frontend-compatible structure
+  private transformFileItem(file: FileItem): FileItem {
+    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'
+    return {
+      ...file,
+      // Add computed properties for backward compatibility
+      name: file.fileName || file.originalName,
+      size: file.metadata.size,
+      type: file.metadata.mimeType,
+      url: `${baseURL}/files/view/${file.id}`, // File view URL using backend base URL
+      thumbnailUrl: file.processing.thumbnailGenerated ? `${baseURL}/files/${file.id}/thumbnail` : undefined,
+      uploadedBy: file.userId,
+      uploadedAt: new Date(file.createdAt),
+      lastModified: new Date(file.updatedAt),
+      description: file.tags.join(', ') // Use tags as description for now
+    }
+  }
 }
 
-export default new FilesService() 
+export default new FilesService()

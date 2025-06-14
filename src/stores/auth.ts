@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { User } from '@/types'
 import AuthService from '@/services/auth'
+import { tokenRefreshEmitter } from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -10,8 +11,20 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null)
 
   // Getters
-  const isAuthenticated = computed(() => !!user.value)
-  const isEmailVerified = computed(() => user.value?.emailVerified || false)
+  const isAuthenticated = computed(() => {
+    // Check if user exists and tokens are valid
+    if (!user.value) return false
+    
+    // Check if we have valid tokens
+    const tokensInfo = AuthService.getTokensInfo()
+    if (!tokensInfo.hasTokens) return false
+    
+    // If tokens are expired, we're not authenticated
+    if (tokensInfo.isExpired) return false
+    
+    return true
+  })
+  const isEmailVerified = computed(() => user.value?.isEmailVerified || user.value?.emailVerified || false)
 
   // Actions
   async function register(email: string, password: string, displayName: string) {
@@ -154,14 +167,88 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = userData
   }
 
-  // Check authentication status
-  function checkAuthStatus() {
-    if (AuthService.isAuthenticated() && !user.value) {
-      initializeAuth()
-    } else if (!AuthService.isAuthenticated() && user.value) {
+  // Refresh tokens
+  async function refreshTokens(): Promise<boolean> {
+    try {
+      const success = await AuthService.refreshAccessToken()
+      if (!success && user.value) {
+        user.value = null
+      }
+      return success
+    } catch (error) {
+      console.error('Token refresh failed:', error)
       user.value = null
+      return false
     }
   }
+
+  // Check authentication status
+  async function checkAuthStatus() {
+    const tokensInfo = AuthService.getTokensInfo()
+    
+    // If we have tokens but they're expired, try to refresh
+    if (tokensInfo.hasTokens && tokensInfo.isExpired) {
+      try {
+        const refreshed = await refreshTokens()
+        if (!refreshed) {
+          user.value = null
+          return false
+        }
+      } catch (error) {
+        console.warn('Token refresh failed, keeping current auth state:', error)
+        // Don't clear user on network errors, only on 401 auth errors
+        return AuthService.isAuthenticated()
+      }
+    }
+    
+    // If we have valid tokens but no user data, try to initialize
+    if (AuthService.isAuthenticated() && !user.value) {
+      try {
+        await initializeAuth()
+      } catch (error) {
+        console.warn('Failed to initialize auth, keeping current state:', error)
+        // Don't fail completely on network errors
+      }
+    }
+    // If we don't have valid tokens but have user data, clear it
+    else if (!AuthService.isAuthenticated() && user.value) {
+      user.value = null
+    }
+    
+    return AuthService.isAuthenticated()
+  }
+
+  // Get token information
+  function getTokensInfo() {
+    return AuthService.getTokensInfo()
+  }
+
+  // Listen for token refresh events
+  function setupTokenRefreshListener() {
+    const handleTokenRefresh = async () => {
+      console.log('Token refreshed detected, updating auth state...')
+      // Re-check auth status after token refresh
+      try {
+        const currentUser = await AuthService.getCurrentUser()
+        if (currentUser) {
+          user.value = currentUser
+          console.log('Auth state updated after token refresh')
+        }
+      } catch (error) {
+        console.warn('Failed to update user after token refresh:', error)
+      }
+    }
+
+    tokenRefreshEmitter.on(handleTokenRefresh)
+    
+    // Return cleanup function
+    return () => {
+      tokenRefreshEmitter.off(handleTokenRefresh)
+    }
+  }
+
+  // Initialize token refresh listener
+  const cleanupTokenListener = setupTokenRefreshListener()
 
   return {
     // State
@@ -185,5 +272,8 @@ export const useAuthStore = defineStore('auth', () => {
     clearError,
     setUser,
     checkAuthStatus,
+    refreshTokens,
+    getTokensInfo,
+    setupTokenRefreshListener,
   }
 })

@@ -1,5 +1,5 @@
-import type { Note, ApiResponse, PaginationParams } from '@/types'
-import { api } from './api'
+import type { Note, PaginationParams } from '@/types'
+import ApiService from './api'
 
 export interface CreateNoteData {
   title: string
@@ -26,7 +26,7 @@ export interface NoteFilters extends PaginationParams {
 class NotesService {
   private readonly baseUrl = '/notes'
 
-  async getNotes(filters?: NoteFilters): Promise<ApiResponse<{ notes: Note[], total: number }>> {
+  async getNotes(filters?: NoteFilters): Promise<{ notes: Note[], total: number }> {
     const params = new URLSearchParams()
     
     if (filters) {
@@ -37,46 +37,38 @@ class NotesService {
       })
     }
 
-    const response = await api.get(`${this.baseUrl}?${params.toString()}`)
-    return response.data
+    return await ApiService.get<{ notes: Note[], total: number }>(`${this.baseUrl}?${params.toString()}`)
   }
 
-  async getNoteById(id: string): Promise<ApiResponse<Note>> {
-    const response = await api.get(`${this.baseUrl}/${id}`)
-    return response.data
+  async getNoteById(id: string): Promise<Note> {
+    return await ApiService.get<Note>(`${this.baseUrl}/${id}`)
   }
 
-  async createNote(data: CreateNoteData): Promise<ApiResponse<Note>> {
-    const response = await api.post(this.baseUrl, data)
-    return response.data
+  async createNote(data: CreateNoteData): Promise<Note> {
+    return await ApiService.post<Note>(this.baseUrl, data)
   }
 
-  async updateNote(id: string, data: UpdateNoteData): Promise<ApiResponse<Note>> {
-    const response = await api.put(`${this.baseUrl}/${id}`, data)
-    return response.data
+  async updateNote(id: string, data: UpdateNoteData): Promise<Note> {
+    return await ApiService.put<Note>(`${this.baseUrl}/${id}`, data)
   }
 
-  async deleteNote(id: string): Promise<ApiResponse<void>> {
-    const response = await api.delete(`${this.baseUrl}/${id}`)
-    return response.data
+  async deleteNote(id: string): Promise<void> {
+    return await ApiService.delete<void>(`${this.baseUrl}/${id}`)
   }
 
-  async searchNotes(query: string, category?: string): Promise<ApiResponse<Note[]>> {
+  async searchNotes(query: string, category?: string): Promise<Note[]> {
     const params = new URLSearchParams({ q: query })
     if (category) params.append('category', category)
     
-    const response = await api.get(`${this.baseUrl}/search?${params.toString()}`)
-    return response.data
+    return await ApiService.get<Note[]>(`${this.baseUrl}/search?${params.toString()}`)
   }
 
-  async getNotesByCategory(category: string): Promise<ApiResponse<Note[]>> {
-    const response = await api.get(`${this.baseUrl}/category/${category}`)
-    return response.data
+  async getNotesByCategory(category: string): Promise<Note[]> {
+    return await ApiService.get<Note[]>(`${this.baseUrl}/category/${category}`)
   }
 
-  async getNotesStats(): Promise<ApiResponse<any>> {
-    const response = await api.get(`${this.baseUrl}/stats`)
-    return response.data
+  async getNotesStats(): Promise<any> {
+    return await ApiService.get<any>(`${this.baseUrl}/stats`)
   }
 }
 

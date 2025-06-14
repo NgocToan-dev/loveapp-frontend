@@ -3,12 +3,15 @@
 export interface User {
   id: string
   email: string
-  displayName: string
+  name: string
+  displayName?: string
   photoURL?: string
-  emailVerified: boolean
-  createdAt: Date
-  updatedAt: Date
-  name?: string
+  isEmailVerified: boolean
+  emailVerified?: boolean // Keep for backward compatibility
+  role: string
+  createdAt: string | Date
+  updatedAt: string | Date
+  lastLoginAt?: string | Date
   bio?: string
   dateOfBirth?: string
   gender?: 'male' | 'female' | 'other'
@@ -87,6 +90,23 @@ export interface Anniversary {
   updatedAt: Date
 }
 
+export interface AuthTokens {
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
+  tokenType: string
+}
+
+export interface AuthResponse {
+  success: boolean
+  message: string
+  data: {
+    user: User
+    tokens: AuthTokens
+    isNewUser: boolean
+  }
+}
+
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
@@ -96,15 +116,48 @@ export interface AuthState {
 
 export interface FileItem {
   id: string
-  name: string
-  size: number
-  type: string
-  url: string
+  userId: string
+  fileName: string
+  originalName: string
+  tags: string[]
+  category: string
+  bucketName: string
+  objectName: string
+  checksum: string
+  metadata: {
+    size: number
+    mimeType: string
+  }
+  processing: {
+    status: string
+    thumbnailGenerated: boolean
+    compressionApplied: boolean
+    virusScanned: boolean
+  }
+  versions: unknown[]
+  currentVersion: number
+  shares: unknown[]
+  isPublic: boolean
+  usage: {
+    downloadCount: number
+    viewCount: number
+    shareCount: number
+    totalBandwidthUsed: number
+    popularityScore: number
+  }
+  backups: unknown[]
+  createdAt: string | Date
+  updatedAt: string | Date
+  
+  // Computed properties for backward compatibility
+  name?: string
+  size?: number
+  type?: string
+  url?: string
   thumbnailUrl?: string
-  uploadedBy: string
-  uploadedAt: Date
-  lastModified: Date
-  tags?: string[]
+  uploadedBy?: string
+  uploadedAt?: Date
+  lastModified?: Date
   description?: string
 }
 

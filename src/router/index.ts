@@ -16,7 +16,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/about',
     name: 'about',
-    component: () => import('../views/AboutView.vue'),
+    component: () => import('@views/AboutView.vue'),
     meta: {
       title: 'About',
       requiresAuth: false
@@ -178,13 +178,62 @@ router.beforeEach(async (to, from, next) => {
     document.title = `${to.meta.title} - ${import.meta.env.VITE_APP_NAME || 'Project Frontend'}`
   }
   
-  // Check if route requires authentication
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({
-      name: 'login',
-      query: { redirect: to.fullPath }
-    })
-    return
+  // Wait for auth initialization if still loading
+  if (authStore.isLoading) {
+    // Wait for auth to finish initializing
+    const maxWait = 3000 // 3 seconds max wait
+    const startTime = Date.now()
+    
+    while (authStore.isLoading && (Date.now() - startTime) < maxWait) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+  }
+  
+  // For protected routes, check auth status more carefully
+  if (to.meta.requiresAuth) {
+    const tokensInfo = authStore.getTokensInfo()
+    
+    // If we have no tokens at all, redirect to login immediately
+    if (!tokensInfo.hasTokens) {
+      next({
+        name: 'login',
+        query: { redirect: to.fullPath }
+      })
+      return
+    }
+    
+    // If tokens are expired, try to refresh first
+    if (tokensInfo.isExpired) {
+      try {
+        console.log('Tokens expired, attempting refresh before navigation...')
+        const refreshed = await authStore.refreshTokens()
+        if (!refreshed) {
+          console.log('Token refresh failed, redirecting to login')
+          next({
+            name: 'login',
+            query: { redirect: to.fullPath }
+          })
+          return
+        }
+        console.log('Token refresh successful, continuing navigation')
+      } catch (error) {
+        console.warn('Token refresh failed during navigation:', error)
+        next({
+          name: 'login',
+          query: { redirect: to.fullPath }
+        })
+        return
+      }
+    }
+    
+    // Final auth check after potential refresh
+    if (!authStore.isAuthenticated) {
+      next({
+        name: 'login',
+        query: { redirect: to.fullPath }
+      })
+      return
+    }
   }
   
   // Redirect authenticated users away from auth pages

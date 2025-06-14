@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AuthDebug from '@/components/AuthDebug.vue'
 
 const { t } = useI18n()
 
@@ -219,6 +220,9 @@ const stats = ref([
         </v-col>
       </v-row>
     </v-container>
+
+    <!-- Auth Debug Section (Development Only) -->
+    <AuthDebug />
   </div>
 </template>
 

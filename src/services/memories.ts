@@ -1,5 +1,5 @@
-import type { Memory, ApiResponse, PaginationParams } from '@/types'
-import { api } from './api'
+import type { Memory, PaginationParams } from '@/types'
+import ApiService from './api'
 
 export interface CreateMemoryData {
   title: string
@@ -34,7 +34,7 @@ export interface ShareMemoryData {
 class MemoriesService {
   private readonly baseUrl = '/memories'
 
-  async getMemories(filters?: MemoryFilters): Promise<ApiResponse<{ memories: Memory[], total: number }>> {
+  async getMemories(filters?: MemoryFilters): Promise<{ memories: Memory[], total: number }> {
     const params = new URLSearchParams()
     
     if (filters) {
@@ -45,56 +45,46 @@ class MemoriesService {
       })
     }
 
-    const response = await api.get(`${this.baseUrl}?${params.toString()}`)
-    return response.data
+    return await ApiService.get<{ memories: Memory[], total: number }>(`${this.baseUrl}?${params.toString()}`)
   }
 
-  async getMemoryById(id: string): Promise<ApiResponse<Memory>> {
-    const response = await api.get(`${this.baseUrl}/${id}`)
-    return response.data
+  async getMemoryById(id: string): Promise<Memory> {
+    return await ApiService.get<Memory>(`${this.baseUrl}/${id}`)
   }
 
-  async createMemory(data: CreateMemoryData): Promise<ApiResponse<Memory>> {
-    const response = await api.post(this.baseUrl, data)
-    return response.data
+  async createMemory(data: CreateMemoryData): Promise<Memory> {
+    return await ApiService.post<Memory>(this.baseUrl, data)
   }
 
-  async updateMemory(id: string, data: UpdateMemoryData): Promise<ApiResponse<Memory>> {
-    const response = await api.put(`${this.baseUrl}/${id}`, data)
-    return response.data
+  async updateMemory(id: string, data: UpdateMemoryData): Promise<Memory> {
+    return await ApiService.put<Memory>(`${this.baseUrl}/${id}`, data)
   }
 
-  async deleteMemory(id: string): Promise<ApiResponse<void>> {
-    const response = await api.delete(`${this.baseUrl}/${id}`)
-    return response.data
+  async deleteMemory(id: string): Promise<void> {
+    return await ApiService.delete<void>(`${this.baseUrl}/${id}`)
   }
 
-  async shareMemory(id: string, data: ShareMemoryData): Promise<ApiResponse<void>> {
-    const response = await api.post(`${this.baseUrl}/${id}/share`, data)
-    return response.data
+  async shareMemory(id: string, data: ShareMemoryData): Promise<void> {
+    return await ApiService.post<void>(`${this.baseUrl}/${id}/share`, data)
   }
 
-  async toggleFavorite(id: string): Promise<ApiResponse<Memory>> {
-    const response = await api.post(`${this.baseUrl}/${id}/favorite`)
-    return response.data
+  async toggleFavorite(id: string): Promise<Memory> {
+    return await ApiService.post<Memory>(`${this.baseUrl}/${id}/favorite`)
   }
 
-  async addFileToMemory(memoryId: string, fileId: string, description?: string): Promise<ApiResponse<void>> {
-    const response = await api.post(`${this.baseUrl}/${memoryId}/files`, { 
-      fileId, 
-      description 
+  async addFileToMemory(memoryId: string, fileId: string, description?: string): Promise<void> {
+    return await ApiService.post<void>(`${this.baseUrl}/${memoryId}/files`, {
+      fileId,
+      description
     })
-    return response.data
   }
 
-  async getSharedMemories(): Promise<ApiResponse<Memory[]>> {
-    const response = await api.get(`${this.baseUrl}/shared`)
-    return response.data
+  async getSharedMemories(): Promise<Memory[]> {
+    return await ApiService.get<Memory[]>(`${this.baseUrl}/shared`)
   }
 
-  async getMemoryStats(): Promise<ApiResponse<any>> {
-    const response = await api.get(`${this.baseUrl}/stats`)
-    return response.data
+  async getMemoryStats(): Promise<any> {
+    return await ApiService.get<any>(`${this.baseUrl}/stats`)
   }
 }
 
