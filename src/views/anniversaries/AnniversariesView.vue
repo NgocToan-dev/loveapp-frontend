@@ -4,10 +4,10 @@
       <div>
         <h1 class="text-h4 font-weight-bold text-success mb-2">
           <v-icon icon="mdi-calendar-heart" class="mr-2"></v-icon>
-          Anniversaries
+          {{ $t('anniversaries.title') }}
         </h1>
         <p class="text-body-1 text-medium-emphasis">
-          Celebrate your special moments and milestones
+          {{ $t('anniversaries.subtitle') }}
         </p>
       </div>
       <v-btn
@@ -16,19 +16,19 @@
         variant="elevated"
         prepend-icon="mdi-calendar-plus"
       >
-        Create Anniversary
+        {{ $t('anniversaries.create') }}
       </v-btn>
     </div>
 
     <v-card>
       <v-card-text class="text-center py-12">
         <v-icon icon="mdi-calendar-heart-outline" size="64" color="success" class="mb-4"></v-icon>
-        <h2 class="text-h5 mb-2">Anniversaries Feature</h2>
+        <h2 class="text-h5 mb-2">{{ $t('anniversaries.feature') }}</h2>
         <p class="text-body-1 text-medium-emphasis mb-4">
-          This view will display and manage all your special anniversaries.
+          {{ $t('anniversaries.featureDescription') }}
         </p>
-        <v-chip color="success" variant="tonal">Coming Soon</v-chip>
+        <v-chip color="success" variant="tonal">{{ $t('common.comingSoon') }}</v-chip>
       </v-card-text>
     </v-card>
   </v-container>
-</template> 
+</template>

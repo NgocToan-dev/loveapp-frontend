@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 
 function goHome() {
   router.push('/')
@@ -26,11 +28,11 @@ function goBack() {
           </h1>
           
           <h2 class="text-h4 font-weight-medium mb-4">
-            Page Not Found
+            {{ t('notFound.title') }}
           </h2>
           
           <p class="text-h6 text-medium-emphasis mb-8">
-            The page you're looking for doesn't exist or has been moved.
+            {{ t('notFound.description') }}
           </p>
           
           <div class="d-flex flex-column flex-sm-row justify-center gap-4">
@@ -41,7 +43,7 @@ function goBack() {
               prepend-icon="mdi-home"
               @click="goHome"
             >
-              Go Home
+              {{ t('notFound.goHome') }}
             </v-btn>
             
             <v-btn
@@ -51,7 +53,7 @@ function goBack() {
               prepend-icon="mdi-arrow-left"
               @click="goBack"
             >
-              Go Back
+              {{ t('notFound.goBack') }}
             </v-btn>
           </div>
         </div>

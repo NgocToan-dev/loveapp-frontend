@@ -33,10 +33,10 @@ async function handleLogout() {
   <v-container class="pa-6">
     <div class="mb-6">
       <h1 class="text-h3 font-weight-bold text-primary mb-2">
-        Profile
+        {{ t('auth.profile.title') }}
       </h1>
       <p class="text-h6 text-medium-emphasis">
-        Manage your account settings
+        {{ t('auth.profile.subtitle') }}
       </p>
     </div>
 
@@ -44,7 +44,7 @@ async function handleLogout() {
       <v-col cols="12" md="6">
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
-            Account Information
+            {{ t('auth.profile.accountInfo') }}
           </v-card-title>
 
           <v-form @submit.prevent="handleUpdateProfile">
@@ -72,7 +72,7 @@ async function handleLogout() {
               :loading="isLoading"
               class="mb-4"
             >
-              Update Profile
+              {{ t('auth.profile.updateProfile') }}
             </v-btn>
           </v-form>
         </v-card>
@@ -81,7 +81,7 @@ async function handleLogout() {
       <v-col cols="12" md="6">
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
-            Account Actions
+            {{ t('auth.profile.accountActions') }}
           </v-card-title>
 
           <div class="d-flex flex-column gap-3">
@@ -91,7 +91,7 @@ async function handleLogout() {
               prepend-icon="mdi-logout"
               @click="handleLogout"
             >
-              Logout
+              {{ t('nav.logout') }}
             </v-btn>
           </div>
         </v-card>

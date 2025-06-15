@@ -149,6 +149,11 @@ const vi = {
     subtitle: 'Những suy nghĩ và cảm xúc',
     create: 'Tạo ghi chú',
     totalNotes: 'Tổng ghi chú',
+    total: 'Tổng cộng',
+    categories: 'Danh mục',
+    private: 'Riêng tư',
+    public: 'Công khai',
+    privacy: 'Quyền riêng tư',
     search: 'Tìm kiếm ghi chú...',
     category: 'Danh mục',
     sortBy: 'Sắp xếp theo',
@@ -158,6 +163,9 @@ const vi = {
     favorites: 'Yêu thích',
     noNotes: 'Chưa có ghi chú nào',
     noNotesDescription: 'Hãy tạo ghi chú đầu tiên',
+    noSearchResults: 'Không tìm thấy kết quả',
+    tryDifferentSearch: 'Hãy thử từ khóa khác',
+    createFirstNote: 'Tạo ghi chú đầu tiên của bạn',
     createFirst: 'Tạo ghi chú đầu tiên',
     loading: 'Đang tải...',
     editNote: 'Chỉnh sửa ghi chú',
@@ -165,11 +173,15 @@ const vi = {
     noteTitle: 'Tiêu đề ghi chú',
     content: 'Nội dung',
     markAsFavorite: 'Đánh dấu yêu thích',
-    confirmDelete: 'Bạn có chắc muốn xóa ghi chú "{title}"?'
+    confirmDelete: 'Bạn có chắc muốn xóa ghi chú "{title}"?',
+    deleteConfirm: 'Xác nhận xóa',
+    deleteWarning: 'Hành động này không thể hoàn tác.'
   },
   reminders: {
     title: 'Nhắc nhở của chúng ta',
     subtitle: 'Những điều quan trọng cần nhớ',
+    feature: 'Tính năng nhắc nhở',
+    featureDescription: 'Chế độ xem này sẽ hiển thị và quản lý tất cả nhắc nhở của bạn.',
     create: 'Tạo nhắc nhở',
     totalReminders: 'Tổng nhắc nhở',
     upcoming: 'Sắp tới',
@@ -197,6 +209,8 @@ const vi = {
   anniversaries: {
     title: 'Ngày kỷ niệm của chúng ta',
     subtitle: 'Những ngày đặc biệt cần nhớ',
+    feature: 'Tính năng ngày kỷ niệm',
+    featureDescription: 'Chế độ xem này sẽ hiển thị và quản lý tất cả các ngày kỷ niệm đặc biệt của bạn.',
     create: 'Tạo ngày kỷ niệm',
     totalAnniversaries: 'Tổng kỷ niệm',
     thisMonth: 'Tháng này',
@@ -223,6 +237,8 @@ const vi = {
     title: 'Kỷ niệm của chúng ta',
     subtitle: 'Lưu giữ những khoảnh khắc đẹp nhất',
     create: 'Tạo kỷ niệm',
+    createNew: 'Tạo kỷ niệm mới',
+    createSubtitle: 'Ghi lại và lưu giữ những khoảnh khắc quý giá',
     totalMemories: 'Tổng kỷ niệm',
     daysTogether: 'Ngày bên nhau',
     photos: 'Hình ảnh',
@@ -243,6 +259,14 @@ const vi = {
     memoryTitle: 'Tiêu đề kỷ niệm',
     description: 'Mô tả',
     date: 'Ngày',
+    location: 'Địa điểm',
+    tags: 'Thẻ tag',
+    addTag: 'Thêm thẻ',
+    tagHint: 'Nhấn Enter hoặc dấu phẩy để thêm',
+    privacy: 'Quyền riêng tư',
+    public: 'Công khai',
+    private: 'Riêng tư',
+    save: 'Lưu kỷ niệm',
     markAsFavorite: 'Đánh dấu yêu thích',
     confirmDelete: 'Bạn có chắc muốn xóa kỷ niệm "{title}"?'
   },
@@ -258,7 +282,10 @@ const vi = {
     edit: 'Chỉnh sửa',
     view: 'Xem',
     download: 'Tải xuống',
-    share: 'Chia sẻ'
+    share: 'Chia sẻ',
+    search: 'Tìm kiếm',
+    all: 'Tất cả',
+    updated: 'Cập nhật'
   },
   theme: {
     toggleDark: 'Chuyển sang chế độ tối',
@@ -282,13 +309,49 @@ const vi = {
     noAccount: 'Chưa có tài khoản?',
     hasAccount: 'Đã có tài khoản?',
     emailVerification: 'Xác thực email',
-    resendVerification: 'Gửi lại email xác thực'
+    resendVerification: 'Gửi lại email xác thực',
+    resetPassword: {
+      title: 'Quên mật khẩu',
+      success: 'Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư.',
+      submit: 'Gửi email đặt lại',
+      backToLogin: 'Quay lại đăng nhập'
+    },
+    profile: {
+      title: 'Hồ sơ',
+      subtitle: 'Quản lý cài đặt tài khoản của bạn',
+      accountInfo: 'Thông tin tài khoản',
+      updateProfile: 'Cập nhật hồ sơ',
+      accountActions: 'Hành động tài khoản'
+    }
   },
   validation: {
     required: 'Trường này là bắt buộc',
     emailInvalid: 'Email không hợp lệ',
     passwordMinLength: 'Mật khẩu phải có ít nhất 6 ký tự',
-    passwordMismatch: 'Mật khẩu không khớp'
+    passwordMismatch: 'Mật khẩu không khớp',
+    maxLength: 'Tối đa {max} ký tự',
+    minLength: 'Tối thiểu {min} ký tự'
+  },
+  notFound: {
+    title: 'Không tìm thấy trang',
+    description: 'Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.',
+    goHome: 'Về trang chủ',
+    goBack: 'Quay lại'
+  },
+  dashboard: {
+    title: 'Bảng điều khiển',
+    welcome: 'Chào mừng trở lại, {name}!',
+    storageUsage: 'Sử dụng bộ nhớ',
+    storageUsageText: '{percentage}% dung lượng lưu trữ của bạn đang được sử dụng.',
+    quickActions: 'Hành động nhanh',
+    createMemory: 'Tạo kỷ niệm',
+    createNote: 'Tạo ghi chú',
+    createReminder: 'Tạo nhắc nhở',
+    createAnniversary: 'Tạo ngày kỷ niệm',
+    recentActivity: 'Hoạt động gần đây',
+    noRecentActivity: 'Không có hoạt động gần đây',
+    upcomingEvents: 'Sự kiện sắp tới',
+    noUpcomingEvents: 'Không có sự kiện sắp tới'
   }
 }
 
@@ -441,6 +504,11 @@ const en = {
     subtitle: 'Thoughts and feelings',
     create: 'Create Note',
     totalNotes: 'Total Notes',
+    total: 'Total',
+    categories: 'Categories',
+    private: 'Private',
+    public: 'Public',
+    privacy: 'Privacy',
     search: 'Search notes...',
     category: 'Category',
     sortBy: 'Sort by',
@@ -450,6 +518,9 @@ const en = {
     favorites: 'Favorites',
     noNotes: 'No notes yet',
     noNotesDescription: 'Create your first note',
+    noSearchResults: 'No search results found',
+    tryDifferentSearch: 'Try a different search term',
+    createFirstNote: 'Create your first note',
     createFirst: 'Create first note',
     loading: 'Loading...',
     editNote: 'Edit Note',
@@ -457,11 +528,15 @@ const en = {
     noteTitle: 'Note Title',
     content: 'Content',
     markAsFavorite: 'Mark as favorite',
-    confirmDelete: 'Are you sure you want to delete note "{title}"?'
+    confirmDelete: 'Are you sure you want to delete note "{title}"?',
+    deleteConfirm: 'Confirm Delete',
+    deleteWarning: 'This action cannot be undone.'
   },
   reminders: {
     title: 'Our Reminders',
     subtitle: 'Important things to remember',
+    feature: 'Reminders Feature',
+    featureDescription: 'This view will display and manage all your reminders.',
     create: 'Create Reminder',
     totalReminders: 'Total Reminders',
     upcoming: 'Upcoming',
@@ -489,6 +564,8 @@ const en = {
   anniversaries: {
     title: 'Our Anniversaries',
     subtitle: 'Special dates to remember',
+    feature: 'Anniversaries Feature',
+    featureDescription: 'This view will display and manage all your special anniversaries.',
     create: 'Create Anniversary',
     totalAnniversaries: 'Total Anniversaries',
     thisMonth: 'This Month',
@@ -515,6 +592,8 @@ const en = {
       title: 'Our Memories',
       subtitle: 'Preserving our most beautiful moments',
       create: 'Create Memory',
+      createNew: 'Create New Memory',
+      createSubtitle: 'Capture and preserve your precious moments',
       totalMemories: 'Total Memories',
       daysTogether: 'Days Together',
       photos: 'Photos',
@@ -535,6 +614,14 @@ const en = {
       memoryTitle: 'Memory Title',
       description: 'Description',
       date: 'Date',
+      location: 'Location',
+      tags: 'Tags',
+      addTag: 'Add Tag',
+      tagHint: 'Press Enter or comma to add',
+      privacy: 'Privacy',
+      public: 'Public',
+      private: 'Private',
+      save: 'Save Memory',
       markAsFavorite: 'Mark as favorite',
       confirmDelete: 'Are you sure you want to delete memory "{title}"?'
     },
@@ -550,7 +637,10 @@ const en = {
     edit: 'Edit',
     view: 'View',
     download: 'Download',
-    share: 'Share'
+    share: 'Share',
+    search: 'Search',
+    all: 'All',
+    updated: 'Updated'
   },
   theme: {
     toggleDark: 'Switch to dark mode',
@@ -574,13 +664,49 @@ const en = {
     noAccount: "Don't have an account?",
     hasAccount: 'Already have an account?',
     emailVerification: 'Email Verification',
-    resendVerification: 'Resend verification email'
+    resendVerification: 'Resend verification email',
+    resetPassword: {
+      title: 'Forgot Password',
+      success: 'Password reset email sent! Check your inbox.',
+      submit: 'Send Reset Email',
+      backToLogin: 'Back to Login'
+    },
+    profile: {
+      title: 'Profile',
+      subtitle: 'Manage your account settings',
+      accountInfo: 'Account Information',
+      updateProfile: 'Update Profile',
+      accountActions: 'Account Actions'
+    }
   },
   validation: {
     required: 'This field is required',
     emailInvalid: 'Invalid email format',
     passwordMinLength: 'Password must be at least 6 characters',
-    passwordMismatch: 'Passwords do not match'
+    passwordMismatch: 'Passwords do not match',
+    maxLength: 'Maximum {max} characters',
+    minLength: 'Minimum {min} characters'
+  },
+  notFound: {
+    title: 'Page Not Found',
+    description: 'The page you\'re looking for doesn\'t exist or has been moved.',
+    goHome: 'Go Home',
+    goBack: 'Go Back'
+  },
+  dashboard: {
+    title: 'Dashboard',
+    welcome: 'Welcome back, {name}!',
+    storageUsage: 'Storage Usage',
+    storageUsageText: '{percentage}% of your storage quota is being used.',
+    quickActions: 'Quick Actions',
+    createMemory: 'Create Memory',
+    createNote: 'Create Note',
+    createReminder: 'Create Reminder',
+    createAnniversary: 'Create Anniversary',
+    recentActivity: 'Recent Activity',
+    noRecentActivity: 'No recent activity',
+    upcomingEvents: 'Upcoming Events',
+    noUpcomingEvents: 'No upcoming events'
   }
 }
 

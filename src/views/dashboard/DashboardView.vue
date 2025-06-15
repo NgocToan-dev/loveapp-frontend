@@ -143,10 +143,10 @@ function getStoragePercentage(): number {
     <!-- Page Header -->
     <div class="mb-6">
       <h1 class="text-h3 font-weight-bold text-primary mb-2">
-        Dashboard
+        {{ t('dashboard.title') }}
       </h1>
       <p class="text-h6 text-medium-emphasis">
-        Welcome back, {{ authStore.user?.displayName || authStore.user?.email }}!
+        {{ t('dashboard.welcome', { name: authStore.user?.displayName || authStore.user?.email }) }}
       </p>
     </div>
 
@@ -161,7 +161,7 @@ function getStoragePercentage(): number {
             {{ isLoading ? '...' : stats.memories }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
-            {{ $t('dashboard.memories') || 'Memories' }}
+            {{ t('nav.memories') }}
           </div>
         </v-card>
       </v-col>
@@ -175,7 +175,7 @@ function getStoragePercentage(): number {
             {{ isLoading ? '...' : stats.notes }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
-            {{ $t('dashboard.notes') || 'Notes' }}
+            {{ t('nav.notes') }}
           </div>
         </v-card>
       </v-col>
@@ -189,7 +189,7 @@ function getStoragePercentage(): number {
             {{ isLoading ? '...' : stats.reminders }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
-            {{ $t('dashboard.reminders') || 'Reminders' }}
+            {{ t('nav.reminders') }}
           </div>
         </v-card>
       </v-col>
@@ -203,7 +203,7 @@ function getStoragePercentage(): number {
             {{ isLoading ? '...' : stats.anniversaries }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
-            {{ $t('dashboard.anniversaries') || 'Anniversaries' }}
+            {{ t('nav.anniversaries') }}
           </div>
         </v-card>
       </v-col>
@@ -214,7 +214,7 @@ function getStoragePercentage(): number {
       <v-col cols="12" md="6">
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
-            Storage Usage
+            {{ t('dashboard.storageUsage') }}
           </v-card-title>
           
           <div class="mb-4">
@@ -231,7 +231,7 @@ function getStoragePercentage(): number {
           </div>
           
           <div class="text-body-2 text-medium-emphasis">
-            {{ getStoragePercentage() }}% of your storage quota is being used.
+            {{ t('dashboard.storageUsageText', { percentage: getStoragePercentage() }) }}
           </div>
         </v-card>
       </v-col>
@@ -240,7 +240,7 @@ function getStoragePercentage(): number {
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
             <v-icon icon="mdi-lightning-bolt" class="mr-2"></v-icon>
-            {{ $t('dashboard.quickActions') || 'Quick Actions' }}
+            {{ t('dashboard.quickActions') }}
           </v-card-title>
           
           <v-row>
@@ -253,7 +253,7 @@ function getStoragePercentage(): number {
                 @click="navigateTo('create-memory')"
                 prepend-icon="mdi-heart-plus"
               >
-                {{ $t('dashboard.createMemory') || 'Create Memory' }}
+                {{ t('dashboard.createMemory') }}
               </v-btn>
             </v-col>
             
@@ -266,7 +266,7 @@ function getStoragePercentage(): number {
                 @click="navigateTo('create-note')"
                 prepend-icon="mdi-note-plus"
               >
-                {{ $t('dashboard.createNote') || 'Create Note' }}
+                {{ t('dashboard.createNote') }}
               </v-btn>
             </v-col>
             
@@ -279,7 +279,7 @@ function getStoragePercentage(): number {
                 @click="createReminder"
                 prepend-icon="mdi-bell-plus"
               >
-                {{ $t('dashboard.createReminder') || 'Create Reminder' }}
+                {{ t('dashboard.createReminder') }}
               </v-btn>
             </v-col>
             
@@ -292,7 +292,7 @@ function getStoragePercentage(): number {
                 @click="createAnniversary"
                 prepend-icon="mdi-calendar-plus"
               >
-                {{ $t('dashboard.createAnniversary') || 'Create Anniversary' }}
+                {{ t('dashboard.createAnniversary') }}
               </v-btn>
             </v-col>
           </v-row>
@@ -306,7 +306,7 @@ function getStoragePercentage(): number {
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
             <v-icon icon="mdi-clock-outline" class="mr-2"></v-icon>
-            {{ $t('dashboard.recentActivity') || 'Recent Activity' }}
+            {{ t('dashboard.recentActivity') }}
           </v-card-title>
           
           <v-list v-if="recentItems.length > 0" class="bg-transparent">
@@ -332,7 +332,7 @@ function getStoragePercentage(): number {
           <div v-else class="text-center py-8">
             <v-icon icon="mdi-inbox" size="48" color="grey-lighten-2" class="mb-3"></v-icon>
             <p class="text-body-1 text-medium-emphasis">
-              {{ $t('dashboard.noRecentActivity') || 'No recent activity' }}
+              {{ t('dashboard.noRecentActivity') }}
             </p>
           </div>
         </v-card>
@@ -342,7 +342,7 @@ function getStoragePercentage(): number {
         <v-card class="pa-6" elevation="2">
           <v-card-title class="text-h5 font-weight-bold mb-4">
             <v-icon icon="mdi-calendar-today" class="mr-2"></v-icon>
-            {{ $t('dashboard.upcomingEvents') || 'Upcoming Events' }}
+            {{ t('dashboard.upcomingEvents') }}
           </v-card-title>
           
           <v-list v-if="upcomingEvents.length > 0" class="bg-transparent">
@@ -367,7 +367,7 @@ function getStoragePercentage(): number {
           <div v-else class="text-center py-4">
             <v-icon icon="mdi-calendar-blank" size="32" color="grey-lighten-2" class="mb-2"></v-icon>
             <p class="text-caption text-medium-emphasis">
-              {{ $t('dashboard.noUpcomingEvents') || 'No upcoming events' }}
+              {{ t('dashboard.noUpcomingEvents') }}
             </p>
           </div>
         </v-card>

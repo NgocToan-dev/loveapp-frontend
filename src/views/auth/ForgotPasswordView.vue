@@ -38,12 +38,12 @@ async function handleSubmit() {
             <v-icon size="48" color="primary" class="mb-4">
               mdi-lock-reset
             </v-icon>
-            <div>{{ t('auth.forgotPassword') }}</div>
+            <div>{{ t('auth.resetPassword.title') }}</div>
           </v-card-title>
 
           <v-card-text class="px-6 pb-6">
             <v-alert v-if="success" type="success" variant="tonal" class="mb-4">
-              Password reset email sent! Check your inbox.
+              {{ t('auth.resetPassword.success') }}
             </v-alert>
             
             <v-alert v-if="error" type="error" variant="tonal" class="mb-4">
@@ -70,13 +70,13 @@ async function handleSubmit() {
                 :loading="isLoading"
                 class="mb-4"
               >
-                Send Reset Email
+                {{ t('auth.resetPassword.submit') }}
               </v-btn>
             </v-form>
 
             <div class="text-center">
               <v-btn variant="text" color="primary" @click="router.push('/login')">
-                Back to Login
+                {{ t('auth.resetPassword.backToLogin') }}
               </v-btn>
             </div>
           </v-card-text>

@@ -4,10 +4,10 @@
       <div>
         <h1 class="text-h4 font-weight-bold text-orange mb-2">
           <v-icon icon="mdi-bell" class="mr-2"></v-icon>
-          Reminders
+          {{ $t('reminders.title') }}
         </h1>
         <p class="text-body-1 text-medium-emphasis">
-          Manage your important reminders and never miss a moment
+          {{ $t('reminders.subtitle') }}
         </p>
       </div>
       <v-btn
@@ -16,18 +16,18 @@
         variant="elevated"
         prepend-icon="mdi-bell-plus"
       >
-        Create Reminder
+        {{ $t('reminders.create') }}
       </v-btn>
     </div>
 
     <v-card>
       <v-card-text class="text-center py-12">
         <v-icon icon="mdi-bell-outline" size="64" color="orange" class="mb-4"></v-icon>
-        <h2 class="text-h5 mb-2">Reminders Feature</h2>
+        <h2 class="text-h5 mb-2">{{ $t('reminders.feature') }}</h2>
         <p class="text-body-1 text-medium-emphasis mb-4">
-          This view will display and manage all your reminders.
+          {{ $t('reminders.featureDescription') }}
         </p>
-        <v-chip color="orange" variant="tonal">Coming Soon</v-chip>
+        <v-chip color="orange" variant="tonal">{{ $t('common.comingSoon') }}</v-chip>
       </v-card-text>
     </v-card>
   </v-container>
