@@ -77,19 +77,21 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function updateProfile(updates: { displayName?: string; photoURL?: string }) {
+  async function updateProfile(updates: { 
+    displayName?: string; 
+    photoURL?: string;
+    bio?: string;
+    dateOfBirth?: string;
+    gender?: 'male' | 'female' | 'other';
+    relationshipStartDate?: string;
+  }): Promise<void> {
     isLoading.value = true
     error.value = null
     
     try {
       await AuthService.updateUserProfile(updates)
-      if (user.value) {
-        user.value = {
-          ...user.value,
-          ...updates,
-          updatedAt: new Date()
-        }
-      }
+      // Refresh user data after successful update
+      await initializeAuth()
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Profile update failed'
       error.value = errorMessage

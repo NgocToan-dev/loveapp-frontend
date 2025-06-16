@@ -46,25 +46,29 @@ interface UpcomingEvent {
 const recentItems = computed(() => {
   const items: RecentItem[] = []
   
-  // Add recent memories
-  memoriesStore.memories.slice(0, 3).forEach(memory => {
-    items.push({
-      id: memory.id,
-      title: memory.title,
-      type: 'memory',
-      updatedAt: new Date(memory.updatedAt)
+  // Add recent memories (with null check)
+  if (memoriesStore.memories && Array.isArray(memoriesStore.memories)) {
+    memoriesStore.memories.slice(0, 3).forEach(memory => {
+      items.push({
+        id: memory.id,
+        title: memory.title,
+        type: 'memory',
+        updatedAt: new Date(memory.updatedAt)
+      })
     })
-  })
+  }
   
-  // Add recent notes
-  notesStore.notes.slice(0, 3).forEach(note => {
-    items.push({
-      id: note.id,
-      title: note.title,
-      type: 'note',
-      updatedAt: new Date(note.updatedAt)
+  // Add recent notes (with null check)
+  if (notesStore.notes && Array.isArray(notesStore.notes)) {
+    notesStore.notes.slice(0, 3).forEach(note => {
+      items.push({
+        id: note.id,
+        title: note.title,
+        type: 'note',
+        updatedAt: new Date(note.updatedAt)
+      })
     })
-  })
+  }
   
   // Sort by updated date
   return items.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 5)

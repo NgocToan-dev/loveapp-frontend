@@ -1,16 +1,43 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
+import ServerOfflineNotice from '@/components/ServerOfflineNotice.vue'
 
 const { t, locale } = useI18n()
 const theme = useTheme()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const drawer = ref(false)
 
-const toggleTheme = () => {
-  theme.global.name.value = theme.global.current.value.dark ? 'loveTheme' : 'darkLoveTheme'
+// Initialize theme on app start
+onMounted(() => {
+  themeStore.initializeTheme()
+})
+
+// Watch for theme changes and apply to Vuetify
+watch(
+  () => themeStore.currentTheme,
+  (newTheme) => {
+    const themeName = themeStore.isDarkMode ? `dark${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)}` : newTheme
+    theme.global.name.value = themeName
+  },
+  { immediate: true }
+)
+
+watch(
+  () => themeStore.isDarkMode,
+  (isDark) => {
+    const currentTheme = themeStore.currentTheme
+    const themeName = isDark ? `dark${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}` : currentTheme
+    theme.global.name.value = themeName
+  }
+)
+
+const toggleDarkMode = () => {
+  themeStore.toggleDarkMode()
 }
 
 const toggleLanguage = () => {
@@ -27,7 +54,7 @@ const logout = async () => {
 </script>
 
 <template>
-  <v-app>
+  <v-app :theme="theme.global.name.value">
     <!-- Navigation Drawer -->
     <v-navigation-drawer
       v-model="drawer"
@@ -39,20 +66,13 @@ const logout = async () => {
         <v-list-item
           prepend-avatar="https://via.placeholder.com/40x40/ff4081/ffffff?text=💕"
           title="LoveApp"
-          :subtitle="authStore.isAuthenticated ? authStore.user?.displayName : t('nav.home')"
+          :subtitle="authStore.isAuthenticated ? authStore.user?.displayName : 'Ứng dụng quản lý tình yêu'"
         />
       </v-list>
 
       <v-divider />
 
       <v-list density="compact" nav>
-        <v-list-item
-          prepend-icon="mdi-home"
-          :title="t('nav.home')"
-          value="home"
-          to="/"
-        />
-        
         <!-- Protected Routes -->
         <template v-if="authStore.isAuthenticated">
           <v-list-item
@@ -99,6 +119,12 @@ const logout = async () => {
           value="about"
           to="/about"
         />
+        <v-list-item
+          prepend-icon="mdi-palette"
+          title="Cài Đặt Giao Diện"
+          value="settings"
+          to="/settings"
+        />
       </v-list>
 
       <!-- Auth Section -->
@@ -133,12 +159,18 @@ const logout = async () => {
     <v-app-bar
       elevation="2"
       color="primary"
-      dark
+      style="background-color: rgb(var(--v-theme-primary)) !important;"
     >
-      <v-app-bar-nav-icon @click="drawer = !drawer" />
+      <v-app-bar-nav-icon 
+        color="on-primary"
+        @click="drawer = !drawer" 
+      />
       
-      <v-toolbar-title class="text-h5 font-weight-bold">
-        <v-icon class="mr-2">mdi-heart</v-icon>
+      <v-toolbar-title 
+        class="text-h5 font-weight-bold"
+        style="color: rgb(var(--v-theme-on-primary)) !important;"
+      >
+        <v-icon class="mr-2" color="on-primary">mdi-heart</v-icon>
         LoveApp
       </v-toolbar-title>
 
@@ -146,46 +178,60 @@ const logout = async () => {
 
       <!-- Language Toggle -->
       <v-btn
-        icon
-        @click="toggleLanguage"
+        variant="text"
+        size="small"
+        color="on-primary"
         class="mr-2"
+        @click="toggleLanguage"
         :title="locale === 'vi' ? 'Switch to English' : 'Chuyển sang tiếng Việt'"
-      >
-        <v-icon>
-          {{ locale === 'vi' ? 'mdi-translate' : 'mdi-translate-variant' }}
-        </v-icon>
-      </v-btn>
+        :icon="locale === 'vi' ? 'mdi-translate' : 'mdi-translate-variant'"
+      />
 
       <!-- Theme Toggle -->
       <v-btn
-        icon
-        @click="toggleTheme"
+        variant="text"
+        size="small"
+        color="on-primary"
         class="mr-2"
-        :title="theme.global.current.value.dark ? t('theme.toggleLight') : t('theme.toggleDark')"
-      >
-        <v-icon>
-          {{ theme.global.current.value.dark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}
-        </v-icon>
-      </v-btn>
+        @click="toggleDarkMode"
+        :title="themeStore.isDarkMode ? t('theme.toggleLight') : t('theme.toggleDark')"
+        :icon="themeStore.isDarkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+      />
+
+      <!-- Settings Button -->
+      <v-btn
+        variant="text"
+        size="small"
+        color="on-primary"
+        class="mr-2"
+        title="Cài đặt giao diện"
+        icon="mdi-palette"
+        to="/settings"
+      />
 
       <!-- Auth Button -->
       <v-btn
         v-if="authStore.isAuthenticated"
-        variant="outlined"
-        color="white"
+        variant="text"
+        size="small"
+        color="on-primary"
         @click="logout"
       >
         {{ t('nav.logout') }}
       </v-btn>
       <v-btn
         v-else
-        variant="outlined"
-        color="white"
+        variant="text"
+        size="small"
+        color="on-primary"
         to="/login"
       >
         {{ t('nav.login') }}
       </v-btn>
     </v-app-bar>
+
+    <!-- Server Offline Notice -->
+    <ServerOfflineNotice v-if="!authStore.isAuthenticated && authStore.error && authStore.error.includes('Backend server not available')" />
 
     <!-- Main Content -->
     <v-main class="bg-background">

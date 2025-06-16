@@ -20,16 +20,16 @@ export const useNotesStore = defineStore('notes', () => {
 
   // Getters
   const privateNotes = computed(() => 
-    notes.value.filter(note => note.isPrivate)
+    (notes.value || []).filter(note => note.isPrivate)
   )
 
   const publicNotes = computed(() => 
-    notes.value.filter(note => !note.isPrivate)
+    (notes.value || []).filter(note => !note.isPrivate)
   )
 
   const notesByCategory = computed(() => {
     const categories: Record<string, Note[]> = {}
-    notes.value.forEach(note => {
+    ;(notes.value || []).forEach(note => {
       if (!categories[note.category]) {
         categories[note.category] = []
       }
@@ -39,7 +39,7 @@ export const useNotesStore = defineStore('notes', () => {
   })
 
   const allCategories = computed(() => 
-    [...new Set(notes.value.map(note => note.category))]
+    [...new Set((notes.value || []).map(note => note.category))]
   )
 
   const totalPages = computed(() => 
@@ -60,6 +60,13 @@ export const useNotesStore = defineStore('notes', () => {
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch notes'
       console.error('Error fetching notes:', err)
+      
+      // Set fallback empty data if backend is not available
+      if (err.code === 'ERR_NETWORK' || err.code === 'ERR_NAME_NOT_RESOLVED') {
+        notes.value = []
+        totalNotes.value = 0
+        error.value = 'Backend server not available. Please check if the server is running.'
+      }
     } finally {
       isLoading.value = false
     }
@@ -90,6 +97,9 @@ export const useNotesStore = defineStore('notes', () => {
       
       const response = await notesService.createNote(data)
       
+      if (!notes.value) {
+        notes.value = []
+      }
       notes.value.unshift(response)
       totalNotes.value += 1
       return response
@@ -109,8 +119,8 @@ export const useNotesStore = defineStore('notes', () => {
       
       const response = await notesService.updateNote(id, data)
       
-      const index = notes.value.findIndex(note => note.id === id)
-      if (index !== -1) {
+      const index = (notes.value || []).findIndex(note => note.id === id)
+      if (index !== -1 && notes.value) {
         notes.value[index] = response
       }
       if (currentNote.value?.id === id) {
@@ -133,7 +143,7 @@ export const useNotesStore = defineStore('notes', () => {
       
       await notesService.deleteNote(id)
       
-      notes.value = notes.value.filter(note => note.id !== id)
+      notes.value = (notes.value || []).filter(note => note.id !== id)
       totalNotes.value -= 1
       if (currentNote.value?.id === id) {
         currentNote.value = null

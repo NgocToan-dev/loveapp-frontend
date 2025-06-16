@@ -1,17 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import HomeView from '../views/HomeView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView,
-    meta: {
-      title: 'Home',
-      requiresAuth: false
-    }
+    redirect: '/login'
   },
   {
     path: '/about',
@@ -151,6 +145,15 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Profile',
       requiresAuth: true
+    }
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@views/SettingsView.vue'),
+    meta: {
+      title: 'Settings',
+      requiresAuth: false
     }
   },
   // Catch all route - 404

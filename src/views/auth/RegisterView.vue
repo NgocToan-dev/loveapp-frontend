@@ -45,7 +45,7 @@ async function handleSubmit() {
             <v-icon size="48" color="primary" class="mb-4">
               mdi-account-plus
             </v-icon>
-            <div>{{ t('auth.register.title') }}</div>
+            <div class="text-high-emphasis">{{ t('auth.register.title') }}</div>
           </v-card-title>
 
           <v-card-text class="px-6 pb-6">
@@ -72,7 +72,7 @@ async function handleSubmit() {
                 @click:append-inner="showConfirmPassword = !showConfirmPassword" class="mb-4" required />
 
               <v-btn type="submit" color="primary" size="large" variant="elevated" block
-                :loading="isLoading || authStore.isLoading" class="mb-4">
+                :loading="isLoading || authStore.isLoading" class="mb-4 text-white">
                 {{ t('auth.register.submit') }}
               </v-btn>
             </v-form>
@@ -82,7 +82,7 @@ async function handleSubmit() {
               <p class="text-body-2 text-medium-emphasis mb-2">
                 {{ t('auth.hasAccount') }}
               </p>
-              <v-btn variant="outlined" color="secondary" @click="router.push('/login')">
+              <v-btn variant="outlined" color="primary" @click="router.push('/login')" class="text-primary">
                 {{ t('auth.login.title') }}
               </v-btn>
             </div>
@@ -96,5 +96,22 @@ async function handleSubmit() {
 <style scoped>
 .fill-height {
   min-height: 100vh;
+}
+
+/* Ensure proper contrast for register form */
+.v-card-title {
+  color: rgb(var(--v-theme-on-surface)) !important;
+}
+
+.v-btn.text-white {
+  color: #ffffff !important;
+}
+
+.v-btn.text-primary {
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+.v-btn.text-primary .v-icon {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 </style>

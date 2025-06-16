@@ -15,6 +15,7 @@ export interface User {
   bio?: string
   dateOfBirth?: string
   gender?: 'male' | 'female' | 'other'
+  relationshipStartDate?: string // Ngày bắt đầu mối quan hệ
   preferences?: UserPreferences
 }
 

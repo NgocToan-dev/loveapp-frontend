@@ -69,7 +69,7 @@ function goToForgotPassword() {
             <v-icon size="48" color="primary" class="mb-4">
               mdi-account-circle
             </v-icon>
-            <div>{{ t('auth.login.title') }}</div>
+            <div class="text-high-emphasis">{{ t('auth.login.title') }}</div>
           </v-card-title>
 
           <v-card-text class="px-6 pb-6">
@@ -114,6 +114,7 @@ function goToForgotPassword() {
               <v-checkbox
                 v-model="form.rememberMe"
                 :label="t('auth.rememberMe')"
+                color="primary"
                 class="mb-4"
               />
 
@@ -125,7 +126,7 @@ function goToForgotPassword() {
                 block
                 :loading="isLoading || authStore.isLoading"
                 :disabled="!form.email || !form.password"
-                class="mb-4"
+                class="mb-4 text-white"
               >
                 {{ t('auth.login.submit') }}
               </v-btn>
@@ -137,7 +138,7 @@ function goToForgotPassword() {
                 variant="text"
                 color="primary"
                 @click="goToForgotPassword"
-                class="mb-2"
+                class="mb-2 text-primary"
               >
                 {{ t('auth.forgotPassword') }}
               </v-btn>
@@ -150,8 +151,9 @@ function goToForgotPassword() {
               
               <v-btn
                 variant="outlined"
-                color="secondary"
+                color="primary"
                 @click="goToRegister"
+                class="text-primary"
               >
                 {{ t('auth.register.title') }}
               </v-btn>
@@ -166,5 +168,22 @@ function goToForgotPassword() {
 <style scoped>
 .fill-height {
   min-height: 100vh;
+}
+
+/* Ensure proper contrast for login form */
+.v-card-title {
+  color: rgb(var(--v-theme-on-surface)) !important;
+}
+
+.v-btn.text-white {
+  color: #ffffff !important;
+}
+
+.v-btn.text-primary {
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+.v-btn.text-primary .v-icon {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 </style>

@@ -21,15 +21,15 @@ export const useMemoriesStore = defineStore('memories', () => {
 
   // Getters
   const favoriteMemories = computed(() => 
-    memories.value.filter(memory => memory.isFavorite)
+    (memories.value || []).filter(memory => memory.isFavorite)
   )
 
   const privateMemories = computed(() => 
-    memories.value.filter(memory => memory.isPrivate)
+    (memories.value || []).filter(memory => memory.isPrivate)
   )
 
   const sharedMemories = computed(() => 
-    memories.value.filter(memory => memory.isShared)
+    (memories.value || []).filter(memory => memory.isShared)
   )
 
   const totalPages = computed(() => 
@@ -50,6 +50,13 @@ export const useMemoriesStore = defineStore('memories', () => {
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch memories'
       console.error('Error fetching memories:', err)
+      
+      // Set fallback empty data if backend is not available
+      if (err.code === 'ERR_NETWORK' || err.code === 'ERR_NAME_NOT_RESOLVED') {
+        memories.value = []
+        totalMemories.value = 0
+        error.value = 'Backend server not available. Please check if the server is running.'
+      }
     } finally {
       isLoading.value = false
     }
@@ -80,6 +87,9 @@ export const useMemoriesStore = defineStore('memories', () => {
       
       const response = await memoriesService.createMemory(data)
       
+      if (!memories.value) {
+        memories.value = []
+      }
       memories.value.unshift(response)
       totalMemories.value += 1
       return response
@@ -92,15 +102,15 @@ export const useMemoriesStore = defineStore('memories', () => {
     }
   }
 
-  const updateMemory = async (id: string, data: UpdateMemoryData) => {
+    const updateMemory = async (id: string, data: UpdateMemoryData) => {
     try {
       isLoading.value = true
       error.value = null
       
       const response = await memoriesService.updateMemory(id, data)
       
-      const index = memories.value.findIndex(memory => memory.id === id)
-      if (index !== -1) {
+      const index = (memories.value || []).findIndex(memory => memory.id === id)
+      if (index !== -1 && memories.value) {
         memories.value[index] = response
       }
       if (currentMemory.value?.id === id) {
@@ -123,7 +133,7 @@ export const useMemoriesStore = defineStore('memories', () => {
       
       await memoriesService.deleteMemory(id)
       
-      memories.value = memories.value.filter(memory => memory.id !== id)
+      memories.value = (memories.value || []).filter(memory => memory.id !== id)
       totalMemories.value -= 1
       if (currentMemory.value?.id === id) {
         currentMemory.value = null
@@ -141,8 +151,8 @@ export const useMemoriesStore = defineStore('memories', () => {
     try {
       const response = await memoriesService.toggleFavorite(id)
       
-      const index = memories.value.findIndex(memory => memory.id === id)
-      if (index !== -1) {
+      const index = (memories.value || []).findIndex(memory => memory.id === id)
+      if (index !== -1 && memories.value) {
         memories.value[index] = response
       }
       if (currentMemory.value?.id === id) {
@@ -161,8 +171,8 @@ export const useMemoriesStore = defineStore('memories', () => {
       await memoriesService.shareMemory(id, { partnerId, message })
       
       // Update the memory as shared
-      const index = memories.value.findIndex(memory => memory.id === id)
-      if (index !== -1) {
+      const index = (memories.value || []).findIndex(memory => memory.id === id)
+      if (index !== -1 && memories.value) {
         memories.value[index] = { ...memories.value[index], isShared: true }
       }
     } catch (err: any) {

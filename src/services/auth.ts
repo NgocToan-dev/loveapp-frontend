@@ -167,7 +167,14 @@ export class AuthService {
   }
 
   // Update user profile
-  async updateUserProfile(updates: { displayName?: string; photoURL?: string }): Promise<void> {
+  async updateUserProfile(updates: { 
+    displayName?: string; 
+    photoURL?: string;
+    bio?: string;
+    dateOfBirth?: string;
+    gender?: 'male' | 'female' | 'other';
+    relationshipStartDate?: string;
+  }): Promise<void> {
     try {
       await ApiService.put('/auth/profile', updates)
     } catch (error: unknown) {

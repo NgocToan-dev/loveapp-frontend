@@ -114,6 +114,13 @@ api.interceptors.response.use(
         } catch (refreshError: any) {
           console.error('Token refresh failed:', refreshError)
           
+          // Check if it's a network error
+          if (refreshError.code === 'ERR_NETWORK' || refreshError.code === 'ERR_NAME_NOT_RESOLVED') {
+            console.warn('Backend server not available, keeping tokens for retry later')
+            // Don't clear tokens on network errors, just return original error
+            return Promise.reject(error)
+          }
+          
           // Only clear tokens if refresh explicitly failed due to invalid refresh token
           if (refreshError.response?.status === 401) {
             console.log('Refresh token invalid, clearing all tokens')
@@ -141,7 +148,6 @@ api.interceptors.response.use(
         if (typeof window !== 'undefined' &&
             !window.location.pathname.includes('/login') &&
             !window.location.pathname.includes('/register') &&
-            !window.location.pathname.includes('/') && // Allow home page
             !window.location.pathname.includes('/about')) { // Allow about page
           console.log('Redirecting to login - no refresh token')
           window.location.href = '/login'

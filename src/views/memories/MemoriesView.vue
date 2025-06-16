@@ -39,8 +39,17 @@
             <div class="d-flex align-center">
               <v-icon color="purple" size="40" class="me-3">mdi-calendar-heart</v-icon>
               <div>
-                <div class="text-h6">{{ daysTogether }}</div>
-                <div class="text-caption text-medium-emphasis">{{ $t('memories.daysTogether') }}</div>
+                <div class="text-h6">
+                  {{ daysTogether > 0 ? daysTogether : '--' }}
+                </div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ $t('memories.daysTogether') }}
+                </div>
+                <div v-if="daysTogether === 0" class="text-caption text-warning">
+                  <router-link to="/profile" class="text-decoration-none">
+                    Chưa thiết lập ngày bắt đầu
+                  </router-link>
+                </div>
               </div>
             </div>
           </v-card-text>
@@ -369,11 +378,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMemoriesStore } from '@/stores/memories'
+import { useAuthStore } from '@/stores/auth'
 import type { Memory } from '@/types'
 import dayjs from 'dayjs'
 
 const { t } = useI18n()
 const memoriesStore = useMemoriesStore()
+const authStore = useAuthStore()
 
 // State
 const createDialog = ref(false)
@@ -403,7 +414,11 @@ const memoryForm = ref({
 // Computed
 const totalMemories = computed(() => memories.value.length)
 const daysTogether = computed(() => {
-  const firstDate = new Date('2023-01-15') // Replace with actual relationship start date
+  const startDate = authStore.user?.relationshipStartDate
+  if (!startDate) {
+    return 0 // Return 0 if no start date is set
+  }
+  const firstDate = new Date(startDate)
   const today = new Date()
   const diffTime = Math.abs(today.getTime() - firstDate.getTime())
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24))

@@ -269,9 +269,9 @@ const {
 
 const displayedNotes = computed(() => {
   if (searchQuery.value) {
-    return searchResults
+    return searchResults || []
   }
-  return notes
+  return notes || []
 })
 
 const categoryItems = computed(() => [
