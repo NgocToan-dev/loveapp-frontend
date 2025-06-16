@@ -45,10 +45,8 @@ export const useMemoriesStore = defineStore('memories', () => {
       const mergedFilters = { ...filters.value, ...customFilters }
       const response = await memoriesService.getMemories(mergedFilters)
       
-      if (response.success && response.data) {
-        memories.value = response.data.memories
-        totalMemories.value = response.data.total
-      }
+      memories.value = response.memories
+      totalMemories.value = response.total
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch memories'
       console.error('Error fetching memories:', err)
@@ -64,10 +62,8 @@ export const useMemoriesStore = defineStore('memories', () => {
       
       const response = await memoriesService.getMemoryById(id)
       
-      if (response.success && response.data) {
-        currentMemory.value = response.data
-        return response.data
-      }
+      currentMemory.value = response
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch memory'
       console.error('Error fetching memory:', err)
@@ -84,11 +80,9 @@ export const useMemoriesStore = defineStore('memories', () => {
       
       const response = await memoriesService.createMemory(data)
       
-      if (response.success && response.data) {
-        memories.value.unshift(response.data)
-        totalMemories.value += 1
-        return response.data
-      }
+      memories.value.unshift(response)
+      totalMemories.value += 1
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to create memory'
       console.error('Error creating memory:', err)
@@ -105,16 +99,14 @@ export const useMemoriesStore = defineStore('memories', () => {
       
       const response = await memoriesService.updateMemory(id, data)
       
-      if (response.success && response.data) {
-        const index = memories.value.findIndex(memory => memory.id === id)
-        if (index !== -1) {
-          memories.value[index] = response.data
-        }
-        if (currentMemory.value?.id === id) {
-          currentMemory.value = response.data
-        }
-        return response.data
+      const index = memories.value.findIndex(memory => memory.id === id)
+      if (index !== -1) {
+        memories.value[index] = response
       }
+      if (currentMemory.value?.id === id) {
+        currentMemory.value = response
+      }
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to update memory'
       console.error('Error updating memory:', err)
@@ -129,14 +121,12 @@ export const useMemoriesStore = defineStore('memories', () => {
       isLoading.value = true
       error.value = null
       
-      const response = await memoriesService.deleteMemory(id)
+      await memoriesService.deleteMemory(id)
       
-      if (response.success) {
-        memories.value = memories.value.filter(memory => memory.id !== id)
-        totalMemories.value -= 1
-        if (currentMemory.value?.id === id) {
-          currentMemory.value = null
-        }
+      memories.value = memories.value.filter(memory => memory.id !== id)
+      totalMemories.value -= 1
+      if (currentMemory.value?.id === id) {
+        currentMemory.value = null
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to delete memory'
@@ -151,16 +141,14 @@ export const useMemoriesStore = defineStore('memories', () => {
     try {
       const response = await memoriesService.toggleFavorite(id)
       
-      if (response.success && response.data) {
-        const index = memories.value.findIndex(memory => memory.id === id)
-        if (index !== -1) {
-          memories.value[index] = response.data
-        }
-        if (currentMemory.value?.id === id) {
-          currentMemory.value = response.data
-        }
-        return response.data
+      const index = memories.value.findIndex(memory => memory.id === id)
+      if (index !== -1) {
+        memories.value[index] = response
       }
+      if (currentMemory.value?.id === id) {
+        currentMemory.value = response
+      }
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to toggle favorite'
       console.error('Error toggling favorite:', err)
@@ -170,14 +158,12 @@ export const useMemoriesStore = defineStore('memories', () => {
 
   const shareMemory = async (id: string, partnerId: string, message?: string) => {
     try {
-      const response = await memoriesService.shareMemory(id, { partnerId, message })
+      await memoriesService.shareMemory(id, { partnerId, message })
       
-      if (response.success) {
-        // Update the memory as shared
-        const index = memories.value.findIndex(memory => memory.id === id)
-        if (index !== -1) {
-          memories.value[index] = { ...memories.value[index], isShared: true }
-        }
+      // Update the memory as shared
+      const index = memories.value.findIndex(memory => memory.id === id)
+      if (index !== -1) {
+        memories.value[index] = { ...memories.value[index], isShared: true }
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to share memory'

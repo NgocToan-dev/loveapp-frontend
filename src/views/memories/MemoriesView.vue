@@ -126,28 +126,28 @@
       >
         <v-card hover @click="viewMemory(memory)" class="memory-card">
           <v-img
-            v-if="memory.coverImage"
-            :src="memory.coverImage"
+            v-if="memory.files && memory.files.length > 0"
+            :src="memory.files[0].url"
             height="200"
             cover
           >
             <div class="memory-overlay">
               <v-chip
-                :color="getCategoryColor(memory.category)"
+                :color="getCategoryColor(memory.location || 'Default')"
                 size="small"
                 class="ma-2"
               >
-                {{ memory.category }}
+                {{ memory.location || 'Memory' }}
               </v-chip>
             </div>
           </v-img>
           <div
             v-else
             class="d-flex align-center justify-center memory-placeholder"
-            :style="{ backgroundColor: getCategoryColor(memory.category) + '20' }"
+            :style="{ backgroundColor: getCategoryColor(memory.location || 'Default') + '20' }"
           >
-            <v-icon :color="getCategoryColor(memory.category)" size="60">
-              {{ getCategoryIcon(memory.category) }}
+            <v-icon :color="getCategoryColor(memory.location || 'Default')" size="60">
+              {{ getCategoryIcon(memory.location || 'Default') }}
             </v-icon>
           </div>
 
@@ -156,7 +156,7 @@
               {{ memory.title }}
             </div>
             <div class="text-caption text-medium-emphasis mb-2">
-              {{ formatDate(memory.date) }}
+              {{ formatDate(memory.memoryDate) }}
             </div>
             <p class="text-body-2 memory-description">
               {{ memory.description }}
@@ -207,14 +207,14 @@
               @click="viewMemory(memory)"
             >
               <template #prepend>
-                <v-avatar :color="getCategoryColor(memory.category)">
-                  <v-icon>{{ getCategoryIcon(memory.category) }}</v-icon>
+                <v-avatar :color="getCategoryColor(memory.location || 'Default')">
+                  <v-icon>{{ getCategoryIcon(memory.location || 'Default') }}</v-icon>
                 </v-avatar>
               </template>
 
               <v-list-item-title>{{ memory.title }}</v-list-item-title>
               <v-list-item-subtitle>
-                {{ formatDate(memory.date) }} • {{ memory.category }}
+                {{ formatDate(memory.memoryDate) }} • {{ memory.location || 'Memory' }}
               </v-list-item-subtitle>
 
               <template #append>
@@ -244,11 +244,11 @@
           <v-timeline-item
             v-for="memory in filteredMemories"
             :key="memory.id"
-            :dot-color="getCategoryColor(memory.category)"
+            :dot-color="getCategoryColor(memory.location || 'Default')"
             size="small"
           >
             <template #icon>
-              <v-icon>{{ getCategoryIcon(memory.category) }}</v-icon>
+              <v-icon>{{ getCategoryIcon(memory.location || 'Default') }}</v-icon>
             </template>
 
             <v-card @click="viewMemory(memory)">
@@ -256,7 +256,7 @@
                 {{ memory.title }}
               </v-card-title>
               <v-card-subtitle>
-                {{ formatDate(memory.date) }}
+                {{ formatDate(memory.memoryDate) }}
               </v-card-subtitle>
               <v-card-text>
                 {{ memory.description }}
@@ -368,30 +368,25 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useMemoriesStore } from '@/stores/memories'
+import type { Memory } from '@/types'
 import dayjs from 'dayjs'
 
 const { t } = useI18n()
-
-interface Memory {
-  id: string
-  title: string
-  description: string
-  date: Date
-  category: string
-  coverImage?: string
-  isFavorite: boolean
-  photos?: any[]
-}
+const memoriesStore = useMemoriesStore()
 
 // State
-const memories = ref<Memory[]>([])
-const loading = ref(false)
 const createDialog = ref(false)
 const editingMemory = ref<Memory | null>(null)
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('date-desc')
 const viewMode = ref('grid')
+
+// Get data from store
+const memories = computed(() => memoriesStore.memories)
+const loading = computed(() => memoriesStore.isLoading)
+const error = computed(() => memoriesStore.error)
 
 // Form
 const memoryForm = ref({
@@ -403,35 +398,7 @@ const memoryForm = ref({
   isFavorite: false
 })
 
-// Mock data
-const mockMemories = [
-  {
-    id: '1',
-    title: 'Ngày đầu tiên gặp nhau',
-    description: 'Khoảnh khắc đặc biệt khi chúng ta lần đầu gặp gỡ tại quán cà phê nhỏ.',
-    date: new Date('2023-01-15'),
-    category: 'Hẹn hò đầu tiên',
-    coverImage: '/api/memories/1/cover.jpg',
-    isFavorite: true
-  },
-  {
-    id: '2',
-    title: 'Chuyến du lịch Đà Lạt',
-    description: 'Chuyến đi đáng nhớ cùng nhau khám phá thành phố ngàn hoa.',
-    date: new Date('2023-06-20'),
-    category: 'Du lịch',
-    coverImage: '/api/memories/2/cover.jpg',
-    isFavorite: false
-  },
-  {
-    id: '3',
-    title: 'Sinh nhật của em',
-    description: 'Bữa tiệc sinh nhật bất ngờ mà anh chuẩn bị cho em.',
-    date: new Date('2023-09-10'),
-    category: 'Sinh nhật',
-    isFavorite: true
-  }
-]
+// No more mock data - using real data from store
 
 // Computed
 const totalMemories = computed(() => memories.value.length)
@@ -441,8 +408,8 @@ const daysTogether = computed(() => {
   const diffTime = Math.abs(today.getTime() - firstDate.getTime())
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 })
-const photosCount = computed(() => memories.value.reduce((sum, m) => sum + (m.photos?.length || 0), 0))
-const specialMoments = computed(() => memories.value.filter(m => m.isFavorite).length)
+const photosCount = computed(() => memories.value.reduce((sum: number, m: Memory) => sum + (m.files?.length || 0), 0))
+const specialMoments = computed(() => memories.value.filter((m: Memory) => m.isFavorite).length)
 
 const categories = [
   { title: 'Hẹn hò đầu tiên', value: 'Hẹn hò đầu tiên' },
@@ -471,18 +438,18 @@ const filteredMemories = computed(() => {
     )
   }
 
-  // Filter by category
+  // Filter by category (using location as category)
   if (selectedCategory.value) {
-    filtered = filtered.filter(memory => memory.category === selectedCategory.value)
+    filtered = filtered.filter(memory => (memory.location || '') === selectedCategory.value)
   }
 
   // Sort
   filtered.sort((a, b) => {
     switch (sortBy.value) {
       case 'date-desc':
-        return new Date(b.date).getTime() - new Date(a.date).getTime()
+        return new Date(b.memoryDate).getTime() - new Date(a.memoryDate).getTime()
       case 'date-asc':
-        return new Date(a.date).getTime() - new Date(b.date).getTime()
+        return new Date(a.memoryDate).getTime() - new Date(b.memoryDate).getTime()
       case 'title-asc':
         return a.title.localeCompare(b.title)
       case 'favorites':
@@ -502,50 +469,50 @@ const rules = {
 
 // Methods
 const loadMemories = async () => {
-  loading.value = true
   try {
-    // TODO: Replace with actual API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    memories.value = mockMemories
+    await memoriesStore.fetchMemories()
   } catch (error) {
     console.error('Failed to load memories:', error)
-  } finally {
-    loading.value = false
   }
 }
 
-const viewMemory = (memory: any) => {
+const viewMemory = (memory: Memory) => {
   // TODO: Navigate to memory detail view
   console.log('View memory:', memory)
 }
 
-const editMemory = (memory: any) => {
+const editMemory = (memory: Memory) => {
   editingMemory.value = memory
-  memoryForm.value = { ...memory }
+  memoryForm.value = {
+    title: memory.title,
+    description: memory.description,
+    date: dayjs(memory.memoryDate).format('YYYY-MM-DD'),
+    category: '', // Memory type doesn't have category, we'll handle this differently
+    photos: [],
+    isFavorite: memory.isFavorite || false
+  }
   createDialog.value = true
 }
 
-const deleteMemory = async (memory: any) => {
+const deleteMemory = async (memory: Memory) => {
   if (confirm(t('memories.confirmDelete', { title: memory.title }))) {
     try {
-      // TODO: API call to delete memory
-      memories.value = memories.value.filter(m => m.id !== memory.id)
+      await memoriesStore.deleteMemory(memory.id)
     } catch (error) {
       console.error('Delete failed:', error)
     }
   }
 }
 
-const toggleFavorite = async (memory: any) => {
+const toggleFavorite = async (memory: Memory) => {
   try {
-    // TODO: API call to toggle favorite
-    memory.isFavorite = !memory.isFavorite
+    await memoriesStore.toggleFavorite(memory.id)
   } catch (error) {
     console.error('Toggle favorite failed:', error)
   }
 }
 
-const shareMemory = async (memory: any) => {
+const shareMemory = async (memory: Memory) => {
   try {
     if (navigator.share) {
       await navigator.share({
@@ -561,26 +528,26 @@ const shareMemory = async (memory: any) => {
 
 const saveMemory = async () => {
   try {
-    // TODO: API call to save memory
     if (editingMemory.value) {
       // Update existing memory
-      const index = memories.value.findIndex(m => m.id === editingMemory.value!.id)
-      if (index >= 0) {
-        memories.value[index] = { 
-          ...memoryForm.value, 
-          id: editingMemory.value.id,
-          date: new Date(memoryForm.value.date),
-          coverImage: editingMemory.value.coverImage
-        }
-      }
+      await memoriesStore.updateMemory(editingMemory.value.id, {
+        title: memoryForm.value.title,
+        description: memoryForm.value.description,
+        memoryDate: memoryForm.value.date,
+        location: '',
+        tags: [],
+        isPrivate: false
+      })
     } else {
       // Create new memory
-      const newMemory = {
-        id: Date.now().toString(),
-        ...memoryForm.value,
-        date: new Date(memoryForm.value.date)
-      }
-      memories.value.unshift(newMemory)
+      await memoriesStore.createMemory({
+        title: memoryForm.value.title,
+        description: memoryForm.value.description,
+        memoryDate: memoryForm.value.date,
+        location: '',
+        tags: [],
+        isPrivate: false
+      })
     }
     
     createDialog.value = false
@@ -622,7 +589,7 @@ const getCategoryIcon = (category: string) => {
   return icons[category] || 'mdi-bookmark'
 }
 
-const formatDate = (date: Date) => {
+const formatDate = (date: string | Date) => {
   return dayjs(date).format('DD/MM/YYYY')
 }
 

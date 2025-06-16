@@ -1,26 +1,32 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useMemoriesStore } from '@/stores/memories'
+import { useNotesStore } from '@/stores/notes'
+import { useFilesStore } from '@/stores/files'
 import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
+const memoriesStore = useMemoriesStore()
+const notesStore = useNotesStore()
+const filesStore = useFilesStore()
 
-// Enhanced stats for Love App
-const stats = ref({
-  memories: 0,
-  notes: 0,
-  reminders: 0,
-  anniversaries: 0,
-  totalFiles: 0,
-  totalSize: 0,
+// Get real stats from stores
+const stats = computed(() => ({
+  memories: memoriesStore.totalMemories,
+  notes: notesStore.totalNotes,
+  reminders: 0, // No reminders store yet
+  anniversaries: 0, // No anniversaries store yet
+  totalFiles: filesStore.totalFiles,
+  totalSize: filesStore.fileStats.totalSize,
   recentUploads: 0,
-  storageUsed: 0,
+  storageUsed: filesStore.fileStats.totalSize,
   storageLimit: 1024 * 1024 * 1024 * 5 // 5GB
-})
+}))
 
 interface RecentItem {
   id: string
@@ -36,9 +42,36 @@ interface UpcomingEvent {
   date: Date
 }
 
-const recentItems = ref<RecentItem[]>([])
-const upcomingEvents = ref<UpcomingEvent[]>([])
-const isLoading = ref(true)
+// Get recent items from stores
+const recentItems = computed(() => {
+  const items: RecentItem[] = []
+  
+  // Add recent memories
+  memoriesStore.memories.slice(0, 3).forEach(memory => {
+    items.push({
+      id: memory.id,
+      title: memory.title,
+      type: 'memory',
+      updatedAt: new Date(memory.updatedAt)
+    })
+  })
+  
+  // Add recent notes
+  notesStore.notes.slice(0, 3).forEach(note => {
+    items.push({
+      id: note.id,
+      title: note.title,
+      type: 'note',
+      updatedAt: new Date(note.updatedAt)
+    })
+  })
+  
+  // Sort by updated date
+  return items.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 5)
+})
+
+const upcomingEvents = ref<UpcomingEvent[]>([]) // Will be populated when reminders/anniversaries are available
+const isLoading = computed(() => memoriesStore.isLoading || notesStore.isLoading || filesStore.isLoading)
 
 // Navigation methods
 const navigateTo = (route: string) => {
@@ -94,35 +127,16 @@ const formatDate = (date: Date) => {
 }
 
 onMounted(async () => {
-  // TODO: Load dashboard data from API
-  setTimeout(() => {
-    stats.value = {
-      memories: 15,
-      notes: 8,
-      reminders: 3,
-      anniversaries: 2,
-      totalFiles: 42,
-      totalSize: 1024 * 1024 * 150, // 150MB
-      recentUploads: 8,
-      storageUsed: 1024 * 1024 * 150,
-      storageLimit: 1024 * 1024 * 1024 * 5
-    }
-    
-    // Mock recent items
-    recentItems.value = [
-      { id: '1', title: 'Our First Date', type: 'memory', updatedAt: new Date('2024-01-15') },
-      { id: '2', title: 'Love Notes', type: 'note', updatedAt: new Date('2024-01-14') },
-      { id: '3', title: 'Anniversary Plans', type: 'note', updatedAt: new Date('2024-01-13') }
-    ]
-    
-    // Mock upcoming events
-    upcomingEvents.value = [
-      { id: '1', title: 'Valentine\'s Day', type: 'anniversary', date: new Date('2024-02-14') },
-      { id: '2', title: 'Plan Date Night', type: 'reminder', date: new Date('2024-01-20') }
-    ]
-    
-    isLoading.value = false
-  }, 1000)
+  // Load real data from APIs
+  try {
+    await Promise.all([
+      memoriesStore.fetchMemories({ limit: 10 }),
+      notesStore.fetchNotes({ limit: 10 }),
+      filesStore.fetchFiles({ limit: 10 })
+    ])
+  } catch (error) {
+    console.error('Failed to load dashboard data:', error)
+  }
 })
 
 function formatFileSize(bytes: number): string {

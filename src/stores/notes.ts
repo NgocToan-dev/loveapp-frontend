@@ -55,10 +55,8 @@ export const useNotesStore = defineStore('notes', () => {
       const mergedFilters = { ...filters.value, ...customFilters }
       const response = await notesService.getNotes(mergedFilters)
       
-      if (response.success && response.data) {
-        notes.value = response.data.notes
-        totalNotes.value = response.data.total
-      }
+      notes.value = response.notes
+      totalNotes.value = response.total
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch notes'
       console.error('Error fetching notes:', err)
@@ -74,10 +72,8 @@ export const useNotesStore = defineStore('notes', () => {
       
       const response = await notesService.getNoteById(id)
       
-      if (response.success && response.data) {
-        currentNote.value = response.data
-        return response.data
-      }
+      currentNote.value = response
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch note'
       console.error('Error fetching note:', err)
@@ -94,11 +90,9 @@ export const useNotesStore = defineStore('notes', () => {
       
       const response = await notesService.createNote(data)
       
-      if (response.success && response.data) {
-        notes.value.unshift(response.data)
-        totalNotes.value += 1
-        return response.data
-      }
+      notes.value.unshift(response)
+      totalNotes.value += 1
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to create note'
       console.error('Error creating note:', err)
@@ -115,16 +109,14 @@ export const useNotesStore = defineStore('notes', () => {
       
       const response = await notesService.updateNote(id, data)
       
-      if (response.success && response.data) {
-        const index = notes.value.findIndex(note => note.id === id)
-        if (index !== -1) {
-          notes.value[index] = response.data
-        }
-        if (currentNote.value?.id === id) {
-          currentNote.value = response.data
-        }
-        return response.data
+      const index = notes.value.findIndex(note => note.id === id)
+      if (index !== -1) {
+        notes.value[index] = response
       }
+      if (currentNote.value?.id === id) {
+        currentNote.value = response
+      }
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to update note'
       console.error('Error updating note:', err)
@@ -139,14 +131,12 @@ export const useNotesStore = defineStore('notes', () => {
       isLoading.value = true
       error.value = null
       
-      const response = await notesService.deleteNote(id)
+      await notesService.deleteNote(id)
       
-      if (response.success) {
-        notes.value = notes.value.filter(note => note.id !== id)
-        totalNotes.value -= 1
-        if (currentNote.value?.id === id) {
-          currentNote.value = null
-        }
+      notes.value = notes.value.filter(note => note.id !== id)
+      totalNotes.value -= 1
+      if (currentNote.value?.id === id) {
+        currentNote.value = null
       }
     } catch (err: any) {
       error.value = err.message || 'Failed to delete note'
@@ -164,10 +154,8 @@ export const useNotesStore = defineStore('notes', () => {
       
       const response = await notesService.searchNotes(query, category)
       
-      if (response.success && response.data) {
-        searchResults.value = response.data
-        return response.data
-      }
+      searchResults.value = response
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to search notes'
       console.error('Error searching notes:', err)
@@ -184,9 +172,7 @@ export const useNotesStore = defineStore('notes', () => {
       
       const response = await notesService.getNotesByCategory(category)
       
-      if (response.success && response.data) {
-        return response.data
-      }
+      return response
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch notes by category'
       console.error('Error fetching notes by category:', err)

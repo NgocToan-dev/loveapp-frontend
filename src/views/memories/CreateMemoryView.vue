@@ -155,9 +155,11 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useMemoriesStore } from '@/stores/memories'
 
 const { t } = useI18n()
 const router = useRouter()
+const memoriesStore = useMemoriesStore()
 
 // Form references
 const form = ref()
@@ -216,11 +218,15 @@ const saveMemory = async () => {
   try {
     isLoading.value = true
     
-    // TODO: Implement API call to create memory
-    console.log('Creating memory:', formData.value)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Create memory using store
+    await memoriesStore.createMemory({
+      title: formData.value.title,
+      description: formData.value.description,
+      memoryDate: formData.value.memoryDate,
+      location: formData.value.location || '',
+      tags: formData.value.tags,
+      isPrivate: formData.value.isPrivate
+    })
     
     // Show success message and redirect
     router.push({ name: 'memories' })
