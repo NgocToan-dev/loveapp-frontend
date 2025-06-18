@@ -11,11 +11,158 @@
         </p>
       </div>
 
-      <!-- Connection Section -->
-      <CoupleConnection v-if="!couplesStore.isConnected" />
+      <!-- Loading State -->
+      <div v-if="couplesStore.isLoading" class="text-center py-12">
+        <v-progress-circular indeterminate color="primary" size="60"></v-progress-circular>
+        <p class="text-body-1 mt-4">Đang tải thông tin cặp đôi...</p>
+      </div>
 
-      <!-- Connected Dashboard -->
-      <div v-if="couplesStore.isConnected">
+      <!-- Not Connected - Show Invitation System -->
+      <div v-else-if="!couplesStore.isConnected" class="max-width-800 mx-auto">
+        <!-- Connection Status Card -->
+        <v-card rounded="xl" elevation="2" class="mb-6">
+          <v-card-text class="pa-8 text-center">
+            <v-icon size="100" color="grey-lighten-2" class="mb-4">mdi-heart-broken-outline</v-icon>
+            <h3 class="text-h5 font-weight-medium mb-2">Chưa Kết Nối Với Người Yêu</h3>
+            <p class="text-body-1 text-medium-emphasis mb-6">
+              Kết nối với người yêu để bắt đầu chia sẻ những khoảnh khắc đẹp nhất
+            </p>
+          </v-card-text>
+        </v-card>
+
+        <!-- Invitation Actions -->
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-card rounded="xl" elevation="1" class="h-100">
+              <v-card-text class="pa-6 text-center">
+                <v-icon size="48" color="primary" class="mb-4">mdi-email-send-outline</v-icon>
+                <h4 class="text-h6 font-weight-medium mb-2">Gửi Lời Mời</h4>
+                <p class="text-body-2 text-medium-emphasis mb-4">
+                  Gửi lời mời kết nối đến người yêu của bạn
+                </p>
+                <v-btn
+                  color="primary"
+                  variant="elevated"
+                  size="large"
+                  rounded="xl"
+                  block
+                  @click="showSendInvitationDialog = true"
+                >
+                  <v-icon start>mdi-plus</v-icon>
+                  Gửi Lời Mời
+                </v-btn>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-card rounded="xl" elevation="1" class="h-100">
+              <v-card-text class="pa-6 text-center">
+                <v-icon size="48" color="green" class="mb-4">mdi-email-receive-outline</v-icon>
+                <h4 class="text-h6 font-weight-medium mb-2">Lời Mời Nhận Được</h4>
+                <p class="text-body-2 text-medium-emphasis mb-4">
+                  Xem các lời mời kết nối đã nhận
+                </p>
+                <v-btn
+                  color="green"
+                  variant="elevated"
+                  size="large"
+                  rounded="xl"
+                  block
+                  @click="showInvitationsDialog = true"
+                >
+                  <v-icon start>mdi-email-check</v-icon>
+                  Xem Lời Mời
+                  <v-badge 
+                    v-if="invitationsStore.pendingReceivedInvitations.length > 0"
+                    :content="invitationsStore.pendingReceivedInvitations.length"
+                    color="error"
+                    floating
+                  />
+                </v-btn>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <!-- Pending Invitations Summary -->
+        <v-card v-if="invitationsStore.totalPendingCount > 0" rounded="xl" elevation="1" class="mt-6">
+          <v-card-text class="pa-6">
+            <h4 class="text-h6 font-weight-medium mb-4">
+              <v-icon color="orange" class="mr-2">mdi-clock-outline</v-icon>
+              Lời Mời Đang Chờ
+            </h4>
+            <v-row>
+              <v-col cols="12" md="6" v-if="invitationsStore.pendingReceivedInvitations.length > 0">
+                <div class="text-center">
+                  <div class="text-h4 font-weight-bold text-green mb-1">
+                    {{ invitationsStore.pendingReceivedInvitations.length }}
+                  </div>
+                  <div class="text-body-2">Lời mời nhận được</div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="6" v-if="invitationsStore.pendingSentInvitations.length > 0">
+                <div class="text-center">
+                  <div class="text-h4 font-weight-bold text-blue mb-1">
+                    {{ invitationsStore.pendingSentInvitations.length }}
+                  </div>
+                  <div class="text-body-2">Lời mời đã gửi</div>
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </div>
+
+      <!-- Connected - Show Couple Dashboard -->
+      <div v-else>
+        <!-- Couple Info Header -->
+        <v-card rounded="xl" elevation="2" class="mb-6">
+          <v-card-text class="pa-6">
+            <div class="d-flex align-center justify-space-between">
+              <div class="d-flex align-center">
+                <v-avatar size="60" class="mr-4">
+                  <v-img v-if="couplesStore.partner?.photoURL" :src="couplesStore.partner.photoURL" />
+                  <v-icon v-else size="30">mdi-account</v-icon>
+                </v-avatar>
+                <div>
+                  <h3 class="text-h5 font-weight-medium">
+                    {{ couplesStore.partner?.name || 'Người Yêu' }}
+                  </h3>
+                  <p class="text-body-2 text-medium-emphasis">
+                    {{ couplesStore.daysTogether }} ngày bên nhau
+                  </p>
+                  <v-chip 
+                    :color="getStatusColor(couplesStore.coupleStatus?.status)"
+                    size="small"
+                    class="mt-1"
+                  >
+                    {{ getStatusText(couplesStore.coupleStatus?.status) }}
+                  </v-chip>
+                </div>
+              </div>
+              <v-menu>
+                <template v-slot:activator="{ props }">
+                  <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
+                </template>
+                <v-list>
+                  <v-list-item @click="showPreferencesDialog = true">
+                    <v-list-item-title>
+                      <v-icon start>mdi-cog</v-icon>
+                      Cài Đặt
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="showDisconnectDialog = true" class="text-error">
+                    <v-list-item-title>
+                      <v-icon start>mdi-link-off</v-icon>
+                      Ngắt Kết Nối
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </div>
+          </v-card-text>
+        </v-card>
+
         <!-- Stats Cards -->
         <v-row class="mb-8">
           <v-col cols="12" md="3" v-for="stat in statsCards" :key="stat.title">
@@ -40,222 +187,203 @@
           </v-col>
         </v-row>
 
-        <!-- Main Content Tabs -->
-        <v-card rounded="xl" elevation="0" class="love-main-card">
-          <v-tabs 
-            v-model="activeMainTab" 
-            color="primary"
-            grow
-            class="mb-4"
-          >
-            <v-tab value="love-days">
-              <v-icon start>mdi-calendar-heart</v-icon>
-              Ngày Đặc Biệt
-            </v-tab>
-            <v-tab value="partnerships">
-              <v-icon start>mdi-handshake</v-icon>
-              Mối Quan Hệ
-            </v-tab>
-            <v-tab value="timeline">
-              <v-icon start>mdi-timeline</v-icon>
-              Dòng Thời Gian
-            </v-tab>
-          </v-tabs>
-
+        <!-- Quick Actions -->
+        <v-card rounded="xl" elevation="1" class="mb-6">
           <v-card-text class="pa-6">
-            <v-tabs-window v-model="activeMainTab">
-              <!-- Love Days Tab -->
-              <v-tabs-window-item value="love-days">
-                <div class="d-flex justify-space-between align-center mb-6">
-                  <h3 class="text-h5 font-weight-medium">
-                    <v-icon color="pink" class="mr-2">mdi-calendar-heart</v-icon>
-                    Những Ngày Đặc Biệt
-                  </h3>
-                  <v-btn
-                    color="primary"
-                    variant="elevated"
-                    rounded="xl"
-                    @click="showCreateLoveDayDialog = true"
-                  >
-                    <v-icon start>mdi-plus</v-icon>
-                    Thêm Ngày Đặc Biệt
-                  </v-btn>
-                </div>
-
-                <!-- Upcoming Love Days -->
-                <div v-if="couplesStore.upcomingLoveDays.length > 0" class="mb-6">
-                  <h4 class="text-h6 font-weight-medium mb-4">Sắp Tới</h4>
-                  <v-row>
-                    <v-col 
-                      cols="12" 
-                      md="6" 
-                      lg="4"
-                      v-for="loveDay in couplesStore.upcomingLoveDays.slice(0, 3)" 
-                      :key="loveDay.id"
-                    >
-                      <LoveDayCard :love-day="loveDay" @edit="editLoveDay" @delete="deleteLoveDay" />
-                    </v-col>
-                  </v-row>
-                </div>
-
-                <!-- All Love Days -->
-                <div v-if="couplesStore.loveDays.length > 0">
-                  <h4 class="text-h6 font-weight-medium mb-4">Tất Cả Ngày Đặc Biệt</h4>
-                  <v-row>
-                    <v-col 
-                      cols="12" 
-                      md="6" 
-                      lg="4"
-                      v-for="loveDay in couplesStore.loveDays" 
-                      :key="loveDay.id"
-                    >
-                      <LoveDayCard :love-day="loveDay" @edit="editLoveDay" @delete="deleteLoveDay" />
-                    </v-col>
-                  </v-row>
-                </div>
-
-                <!-- No Love Days -->
-                <div v-if="couplesStore.loveDays.length === 0" class="text-center py-12">
-                  <v-icon size="100" color="grey-lighten-2" class="mb-4">mdi-calendar-heart-outline</v-icon>
-                  <h4 class="text-h6 font-weight-medium mb-2">Chưa có ngày đặc biệt nào</h4>
-                  <p class="text-body-1 text-medium-emphasis mb-6">
-                    Hãy thêm những ngày quan trọng trong mối quan hệ của bạn
-                  </p>
-                  <v-btn
-                    color="primary"
-                    variant="elevated"
-                    size="large"
-                    rounded="xl"
-                    @click="showCreateLoveDayDialog = true"
-                  >
-                    <v-icon start>mdi-plus</v-icon>
-                    Thêm Ngày Đầu Tiên
-                  </v-btn>
-                </div>
-              </v-tabs-window-item>
-
-              <!-- Partnerships Tab -->
-              <v-tabs-window-item value="partnerships">
-                <div class="d-flex justify-space-between align-center mb-6">
-                  <h3 class="text-h5 font-weight-medium">
-                    <v-icon color="purple" class="mr-2">mdi-handshake</v-icon>
-                    Mối Quan Hệ
-                  </h3>
-                  <v-btn
-                    color="purple"
-                    variant="elevated"
-                    rounded="xl"
-                    @click="showCreatePartnershipDialog = true"
-                  >
-                    <v-icon start>mdi-plus</v-icon>
-                    Thêm Mối Quan Hệ
-                  </v-btn>
-                </div>
-
-                <!-- Active Partnerships -->
-                <div v-if="couplesStore.activePartnerships.length > 0" class="mb-6">
-                  <v-row>
-                    <v-col 
-                      cols="12" 
-                      md="6"
-                      v-for="partnership in couplesStore.activePartnerships" 
-                      :key="partnership.id"
-                    >
-                      <PartnershipCard :partnership="partnership" @edit="editPartnership" @delete="deletePartnership" />
-                    </v-col>
-                  </v-row>
-                </div>
-
-                <!-- No Partnerships -->
-                <div v-if="couplesStore.partnerships.length === 0" class="text-center py-12">
-                  <v-icon size="100" color="grey-lighten-2" class="mb-4">mdi-handshake-outline</v-icon>
-                  <h4 class="text-h6 font-weight-medium mb-2">Chưa có mối quan hệ nào</h4>
-                  <p class="text-body-1 text-medium-emphasis mb-6">
-                    Đánh dấu các mốc quan trọng trong mối quan hệ
-                  </p>
-                  <v-btn
-                    color="purple"
-                    variant="elevated"
-                    size="large"
-                    rounded="xl"
-                    @click="showCreatePartnershipDialog = true"
-                  >
-                    <v-icon start>mdi-plus</v-icon>
-                    Tạo Mối Quan Hệ Đầu Tiên
-                  </v-btn>
-                </div>
-              </v-tabs-window-item>
-
-              <!-- Timeline Tab -->
-              <v-tabs-window-item value="timeline">
-                <div class="text-center py-12">
-                  <v-icon size="100" color="grey-lighten-2" class="mb-4">mdi-timeline-outline</v-icon>
-                  <h4 class="text-h6 font-weight-medium mb-2">Dòng Thời Gian</h4>
-                  <p class="text-body-1 text-medium-emphasis">
-                    Tính năng đang được phát triển...
-                  </p>
-                </div>
-              </v-tabs-window-item>
-            </v-tabs-window>
+            <h4 class="text-h6 font-weight-medium mb-4">
+              <v-icon color="primary" class="mr-2">mdi-lightning-bolt</v-icon>
+              Hành Động Nhanh
+            </h4>
+            <v-row>
+              <v-col cols="6" md="3">
+                <v-btn
+                  color="pink"
+                  variant="elevated"
+                  size="large"
+                  rounded="xl"
+                  block
+                  @click="goToMemories"
+                >
+                  <v-icon start>mdi-camera-outline</v-icon>
+                  Kỷ Niệm
+                </v-btn>
+              </v-col>
+              <v-col cols="6" md="3">
+                <v-btn
+                  color="orange"
+                  variant="elevated"
+                  size="large"
+                  rounded="xl"
+                  block
+                  @click="goToNotes"
+                >
+                  <v-icon start>mdi-note-text-outline</v-icon>
+                  Ghi Chú
+                </v-btn>
+              </v-col>
+              <v-col cols="6" md="3">
+                <v-btn
+                  color="green"
+                  variant="elevated"
+                  size="large"
+                  rounded="xl"
+                  block
+                  @click="goToAnniversaries"
+                >
+                  <v-icon start>mdi-calendar-heart</v-icon>
+                  Ngày Đặc Biệt
+                </v-btn>
+              </v-col>
+              <v-col cols="6" md="3">
+                <v-btn
+                  color="purple"
+                  variant="elevated"
+                  size="large"
+                  rounded="xl"
+                  block
+                  @click="goToReminders"
+                >
+                  <v-icon start>mdi-bell-outline</v-icon>
+                  Nhắc Nhở
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-card-text>
         </v-card>
       </div>
     </v-container>
 
-    <!-- Create Love Day Dialog -->
-    <CreateLoveDayDialog 
-      v-model="showCreateLoveDayDialog"
-      @created="handleLoveDayCreated"
+    <!-- Send Invitation Dialog -->
+    <v-dialog v-model="showSendInvitationDialog" max-width="500">
+      <v-card rounded="xl">
+        <v-card-title class="text-h5 font-weight-bold pa-6">
+          <v-icon color="primary" class="mr-2">mdi-email-send</v-icon>
+          Gửi Lời Mời Kết Nối
+        </v-card-title>
+        <v-card-text class="px-6">
+          <v-form ref="invitationForm" @submit.prevent="sendInvitation">
+            <v-text-field
+              v-model="invitationData.receiverEmail"
+              label="Email người yêu"
+              type="email"
+              variant="outlined"
+              :rules="emailRules"
+              required
+            />
+            <v-textarea
+              v-model="invitationData.message"
+              label="Lời nhắn (tùy chọn)"
+              variant="outlined"
+              rows="3"
+              placeholder="Hãy kết nối với em để chúng ta có thể chia sẻ những khoảnh khắc đẹp nhất..."
+            />
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="pa-6 pt-0">
+          <v-spacer />
+          <v-btn
+            variant="text"
+            @click="showSendInvitationDialog = false"
+          >
+            Hủy
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="elevated"
+            :loading="invitationsStore.isLoading"
+            @click="sendInvitation"
+          >
+            <v-icon start>mdi-send</v-icon>
+            Gửi Lời Mời
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Invitations Management Dialog -->
+    <InvitationsDialog 
+      v-model="showInvitationsDialog"
+      @invitation-accepted="handleInvitationAccepted"
     />
 
-    <!-- Edit Love Day Dialog -->
-    <EditLoveDayDialog 
-      v-model="showEditLoveDayDialog"
-      :love-day="selectedLoveDay"
-      @updated="handleLoveDayUpdated"
+    <!-- Couple Preferences Dialog -->
+    <CouplePreferencesDialog 
+      v-model="showPreferencesDialog"
+      :preferences="couplesStore.preferences"
+      @updated="handlePreferencesUpdated"
     />
 
-    <!-- Create Partnership Dialog -->
-    <CreatePartnershipDialog 
-      v-model="showCreatePartnershipDialog"
-      @created="handlePartnershipCreated"
-    />
-
-    <!-- Edit Partnership Dialog -->
-    <EditPartnershipDialog 
-      v-model="showEditPartnershipDialog"
-      :partnership="selectedPartnership"
-      @updated="handlePartnershipUpdated"
-    />
+    <!-- Disconnect Confirmation Dialog -->
+    <v-dialog v-model="showDisconnectDialog" max-width="400">
+      <v-card rounded="xl">
+        <v-card-title class="text-h6 font-weight-bold pa-6">
+          <v-icon color="error" class="mr-2">mdi-alert</v-icon>
+          Xác Nhận Ngắt Kết Nối
+        </v-card-title>
+        <v-card-text class="px-6">
+          <p>Bạn có chắc chắn muốn ngắt kết nối với người yêu không?</p>
+          <p class="text-error text-body-2 mt-2">
+            Lưu ý: Dữ liệu chung sẽ không bị xóa và có thể kết nối lại sau.
+          </p>
+        </v-card-text>
+        <v-card-actions class="pa-6 pt-0">
+          <v-spacer />
+          <v-btn
+            variant="text"
+            @click="showDisconnectDialog = false"
+          >
+            Hủy
+          </v-btn>
+          <v-btn
+            color="error"
+            variant="elevated"
+            :loading="couplesStore.isLoading"
+            @click="disconnectFromPartner"
+          >
+            Ngắt Kết Nối
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCouplesStore } from '@/stores/couples'
-import type { LoveDay, Partnership } from '@/services/couples'
-import CoupleConnection from '@/components/CoupleConnection.vue'
-import LoveDayCard from '@/components/LoveDayCard.vue'
-import PartnershipCard from '@/components/PartnershipCard.vue'
-import CreateLoveDayDialog from '@/components/CreateLoveDayDialog.vue'
-import EditLoveDayDialog from '@/components/EditLoveDayDialog.vue'
-import CreatePartnershipDialog from '@/components/CreatePartnershipDialog.vue'
-import EditPartnershipDialog from '@/components/EditPartnershipDialog.vue'
+import { useCoupleInvitationsStore } from '@/stores/coupleInvitations'
+import type { CreateInvitationData } from '@/services/coupleInvitations'
+import InvitationsDialog from '@/components/InvitationsDialog.vue'
+import CouplePreferencesDialog from '@/components/CouplePreferencesDialog.vue'
 
+const router = useRouter()
 const couplesStore = useCouplesStore()
+const invitationsStore = useCoupleInvitationsStore()
 
-const activeMainTab = ref('love-days')
-const showCreateLoveDayDialog = ref(false)
-const showEditLoveDayDialog = ref(false)
-const showCreatePartnershipDialog = ref(false)
-const showEditPartnershipDialog = ref(false)
-const selectedLoveDay = ref<LoveDay | null>(null)
-const selectedPartnership = ref<Partnership | null>(null)
+// Dialog states
+const showSendInvitationDialog = ref(false)
+const showInvitationsDialog = ref(false)
+const showPreferencesDialog = ref(false)
+const showDisconnectDialog = ref(false)
 
+// Form data
+const invitationData = ref<CreateInvitationData>({
+  receiverEmail: '',
+  message: ''
+})
+
+// Form validation
+const emailRules = [
+  (v: string) => !!v || 'Email là bắt buộc',
+  (v: string) => /.+@.+\..+/.test(v) || 'Email không hợp lệ'
+]
+
+// Computed
 const statsCards = computed(() => [
   {
     title: 'Ngày Bên Nhau',
-    value: couplesStore.coupleStats?.daysTogether || 0,
+    value: couplesStore.daysTogether || 0,
     icon: 'mdi-heart',
     color: 'pink'
   },
@@ -273,63 +401,71 @@ const statsCards = computed(() => [
   },
   {
     title: 'Ngày Đặc Biệt',
-    value: couplesStore.coupleStats?.loveDaysCount || 0,
+    value: couplesStore.coupleStats?.anniversariesCount || 0,
     icon: 'mdi-calendar-heart',
     color: 'green'
   }
 ])
 
-const editLoveDay = (loveDay: LoveDay) => {
-  selectedLoveDay.value = loveDay
-  showEditLoveDayDialog.value = true
-}
-
-const deleteLoveDay = async (loveDayId: string) => {
-  if (confirm('Bạn có chắc muốn xóa ngày đặc biệt này?')) {
-    await couplesStore.deleteLoveDay(loveDayId)
+// Methods
+const getStatusColor = (status?: string) => {
+  switch (status) {
+    case 'active': return 'success'
+    case 'pending': return 'warning'
+    case 'inactive': return 'error'
+    default: return 'grey'
   }
 }
 
-const editPartnership = (partnership: Partnership) => {
-  selectedPartnership.value = partnership
-  showEditPartnershipDialog.value = true
-}
-
-const deletePartnership = async (partnershipId: string) => {
-  if (confirm('Bạn có chắc muốn xóa mối quan hệ này?')) {
-    await couplesStore.deletePartnership(partnershipId)
+const getStatusText = (status?: string) => {
+  switch (status) {
+    case 'active': return 'Hoạt động'
+    case 'pending': return 'Đang chờ'
+    case 'inactive': return 'Không hoạt động'
+    default: return 'Không xác định'
   }
 }
 
-const handleLoveDayCreated = () => {
-  showCreateLoveDayDialog.value = false
-  couplesStore.fetchLoveDays()
-  couplesStore.fetchCoupleStats()
+const sendInvitation = async () => {
+  try {
+    await invitationsStore.sendInvitation(invitationData.value)
+    showSendInvitationDialog.value = false
+    invitationData.value = { receiverEmail: '', message: '' }
+    // Show success message
+  } catch (error) {
+    // Error is handled in the store
+  }
 }
 
-const handleLoveDayUpdated = () => {
-  showEditLoveDayDialog.value = false
-  selectedLoveDay.value = null
-  couplesStore.fetchLoveDays()
+const handleInvitationAccepted = async () => {
+  // Refresh couple data after accepting invitation
+  await couplesStore.fetchAll()
+  showInvitationsDialog.value = false
 }
 
-const handlePartnershipCreated = () => {
-  showCreatePartnershipDialog.value = false
-  couplesStore.fetchPartnerships()
+const handlePreferencesUpdated = () => {
+  showPreferencesDialog.value = false
 }
 
-const handlePartnershipUpdated = () => {
-  showEditPartnershipDialog.value = false
-  selectedPartnership.value = null
-  couplesStore.fetchPartnerships()
+const disconnectFromPartner = async () => {
+  try {
+    await couplesStore.disconnect()
+    showDisconnectDialog.value = false
+  } catch (error) {
+    // Error is handled in the store
+  }
 }
+
+// Navigation methods
+const goToMemories = () => router.push('/memories')
+const goToNotes = () => router.push('/notes')
+const goToAnniversaries = () => router.push('/anniversaries')
+const goToReminders = () => router.push('/reminders')
 
 onMounted(async () => {
   await Promise.all([
-    couplesStore.fetchCurrentCouple(),
-    couplesStore.fetchLoveDays(),
-    couplesStore.fetchPartnerships(),
-    couplesStore.fetchCoupleStats()
+    couplesStore.fetchAll(),
+    invitationsStore.fetchAllInvitations()
   ])
 })
 </script>
@@ -344,6 +480,10 @@ onMounted(async () => {
   );
 }
 
+.max-width-800 {
+  max-width: 800px;
+}
+
 .love-stat-card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -351,27 +491,6 @@ onMounted(async () => {
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.love-main-card {
-  border: 1px solid rgba(var(--v-theme-primary), 0.15);
-  background: rgba(var(--v-theme-surface), 0.95);
-  backdrop-filter: blur(10px);
-}
-
-.v-tabs {
-  border-radius: 12px;
-  background: rgba(var(--v-theme-surface), 0.8);
-}
-
-.v-tab {
-  border-radius: 8px;
-  margin: 4px;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: rgba(var(--v-theme-primary), 0.1);
   }
 }
 
@@ -385,10 +504,5 @@ onMounted(async () => {
   .love-stat-card:hover {
     transform: none;
   }
-  
-  .v-tab {
-    font-size: 0.875rem;
-    padding: 0 8px;
-  }
 }
-</style> 
+</style>

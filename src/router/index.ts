@@ -139,6 +139,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/notifications',
+    name: 'notifications',
+    component: () => import('@views/notifications/NotificationsView.vue'),
+    meta: {
+      title: 'Notifications',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: () => import('@views/auth/ProfileView.vue'),
@@ -154,6 +163,15 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Settings',
       requiresAuth: false
+    }
+  },
+  {
+    path: '/timeline',
+    name: 'timeline',
+    component: () => import('@views/timeline/TimelineView.vue'),
+    meta: {
+      title: 'Timeline',
+      requiresAuth: true
     }
   },
   // Catch all route - 404

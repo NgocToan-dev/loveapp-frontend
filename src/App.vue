@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import ServerOfflineNotice from '@/components/ServerOfflineNotice.vue'
+import NotificationBell from '@/components/NotificationBell.vue'
 
 const { t, locale } = useI18n()
 const theme = useTheme()
@@ -111,6 +112,12 @@ const logout = async () => {
             value="files"
             to="/files"
           />
+          <v-list-item
+            prepend-icon="mdi-bell"
+            :title="t('nav.notifications') || 'Notifications'"
+            value="notifications"
+            to="/notifications"
+          />
         </template>
         
         <v-list-item
@@ -175,6 +182,9 @@ const logout = async () => {
       </v-toolbar-title>
 
       <v-spacer />
+
+      <!-- Notification Bell for authenticated users -->
+      <NotificationBell v-if="authStore.isAuthenticated" />
 
       <!-- Language Toggle -->
       <v-btn

@@ -14,6 +14,7 @@ const vi = {
     login: 'Đăng nhập',
     dashboard: 'Bảng điều khiển',
     files: 'Tệp tin',
+    notifications: 'Thông báo',
     profile: 'Hồ sơ',
     logout: 'Đăng xuất'
   },
@@ -184,15 +185,19 @@ const vi = {
     featureDescription: 'Chế độ xem này sẽ hiển thị và quản lý tất cả nhắc nhở của bạn.',
     create: 'Tạo nhắc nhở',
     totalReminders: 'Tổng nhắc nhở',
+    pending: 'Đang chờ',
     upcoming: 'Sắp tới',
     overdue: 'Quá hạn',
     completed: 'Đã hoàn thành',
+    recurring: 'Lặp lại',
     search: 'Tìm kiếm nhắc nhở...',
     priority: 'Ưu tiên',
+    status: 'Trạng thái',
     sortBy: 'Sắp xếp theo',
     dueDateAsc: 'Hạn sớm nhất',
     dueDateDesc: 'Hạn muộn nhất',
     priorityHigh: 'Ưu tiên cao',
+    titleAZ: 'Tiêu đề A-Z',
     noReminders: 'Chưa có nhắc nhở nào',
     noRemindersDescription: 'Hãy tạo nhắc nhở đầu tiên',
     createFirst: 'Tạo nhắc nhở đầu tiên',
@@ -201,10 +206,36 @@ const vi = {
     createReminder: 'Tạo nhắc nhở mới',
     reminderTitle: 'Tiêu đề nhắc nhở',
     description: 'Mô tả',
-    dueDate: 'Ngày hết hạn',
-    dueTime: 'Giờ hết hạn',
+    reminderDate: 'Ngày nhắc nhở',
+    reminderTime: 'Giờ nhắc nhở',
+    repeat: 'Lặp lại',
     markAsCompleted: 'Đánh dấu hoàn thành',
-    confirmDelete: 'Bạn có chắc muốn xóa nhắc nhở "{title}"?'
+    confirmDelete: 'Bạn có chắc muốn xóa nhắc nhở "{title}"?',
+    priorities: {
+      low: 'Thấp',
+      medium: 'Trung bình',
+      high: 'Cao',
+      urgent: 'Khẩn cấp'
+    },
+    statuses: {
+      pending: 'Đang chờ',
+      completed: 'Đã hoàn thành',
+      overdue: 'Quá hạn'
+    },
+    repeats: {
+      daily: 'Hàng ngày',
+      weekly: 'Hàng tuần',
+      monthly: 'Hàng tháng',
+      yearly: 'Hàng năm'
+    },
+    sortOptions: {
+      dueDateAsc: 'Ngày hạn tăng dần',
+      dueDateDesc: 'Ngày hạn giảm dần',
+      priorityDesc: 'Ưu tiên cao trước',
+      priorityAsc: 'Ưu tiên thấp trước',
+      titleAsc: 'Tiêu đề A-Z',
+      createdDesc: 'Mới tạo trước'
+    }
   },
   anniversaries: {
     title: 'Ngày kỷ niệm của chúng ta',
@@ -215,23 +246,39 @@ const vi = {
     totalAnniversaries: 'Tổng kỷ niệm',
     thisMonth: 'Tháng này',
     upcoming: 'Sắp tới',
+    recurring: 'Lặp lại',
+    relationship: 'Tình yêu',
     search: 'Tìm kiếm ngày kỷ niệm...',
-    category: 'Loại kỷ niệm',
+    type: 'Loại kỷ niệm',
     sortBy: 'Sắp xếp theo',
-    dateAsc: 'Ngày tăng dần',
-    dateDesc: 'Ngày giảm dần',
-    nameAZ: 'Tên A-Z',
-    noAnniversaries: 'Chưa có ngày kỷ niệm nào',
-    noAnniversariesDescription: 'Hãy tạo ngày kỷ niệm đầu tiên',
-    createFirst: 'Tạo ngày kỷ niệm đầu tiên',
     loading: 'Đang tải...',
     editAnniversary: 'Chỉnh sửa ngày kỷ niệm',
     createAnniversary: 'Tạo ngày kỷ niệm mới',
     anniversaryTitle: 'Tên ngày kỷ niệm',
     description: 'Mô tả',
     date: 'Ngày',
-    recurring: 'Lặp lại hàng năm',
-    confirmDelete: 'Bạn có chắc muốn xóa ngày kỷ niệm "{title}"?'
+    isRecurring: 'Lặp lại',
+    frequency: 'Tần suất',
+    noAnniversaries: 'Chưa có ngày kỷ niệm nào',
+    noAnniversariesDescription: 'Hãy tạo ngày kỷ niệm đầu tiên',
+    createFirst: 'Tạo ngày kỷ niệm đầu tiên',
+    confirmDelete: 'Bạn có chắc muốn xóa ngày kỷ niệm "{title}"?',
+    types: {
+      relationship: 'Tình yêu',
+      milestone: 'Cột mốc',
+      birthday: 'Sinh nhật',
+      other: 'Khác'
+    },
+    frequencies: {
+      yearly: 'Hàng năm',
+      monthly: 'Hàng tháng'
+    },
+    sortOptions: {
+      dateAsc: 'Ngày tăng dần',
+      dateDesc: 'Ngày giảm dần',
+      title: 'Tên A-Z',
+      type: 'Loại A-Z'
+    }
   },
   memories: {
     title: 'Kỷ niệm của chúng ta',
@@ -244,7 +291,6 @@ const vi = {
     photos: 'Hình ảnh',
     specialMoments: 'Khoảnh khắc đặc biệt',
     search: 'Tìm kiếm kỷ niệm...',
-    category: 'Danh mục',
     sortBy: 'Sắp xếp theo',
     newestFirst: 'Mới nhất trước',
     oldestFirst: 'Cũ nhất trước',
@@ -260,6 +306,7 @@ const vi = {
     description: 'Mô tả',
     date: 'Ngày',
     location: 'Địa điểm',
+    category: 'Danh mục',
     tags: 'Thẻ tag',
     addTag: 'Thêm thẻ',
     tagHint: 'Nhấn Enter hoặc dấu phẩy để thêm',
@@ -352,6 +399,66 @@ const vi = {
     noRecentActivity: 'Không có hoạt động gần đây',
     upcomingEvents: 'Sự kiện sắp tới',
     noUpcomingEvents: 'Không có sự kiện sắp tới'
+  },
+  notifications: {
+    title: 'Thông báo',
+    subtitle: 'Quản lý tất cả thông báo của bạn',
+    markAllAsRead: 'Đánh dấu đã đọc tất cả',
+    noNotifications: 'Không có thông báo',
+    noNotificationsDescription: 'Bạn sẽ nhận được thông báo ở đây',
+    viewAll: 'Xem tất cả',
+    markAsRead: 'Đánh dấu đã đọc',
+    archive: 'Lưu trữ',
+    delete: 'Xóa',
+    confirmDelete: 'Bạn có chắc chắn muốn xóa thông báo này?',
+    deleteWarning: 'Hành động này không thể hoàn tác.',
+    loading: 'Đang tải thông báo...',
+    error: 'Lỗi khi tải thông báo',
+    unreadCount: '{count} thông báo chưa đọc',
+    newNotification: 'Thông báo mới',
+    stats: {
+      total: 'Tổng thông báo',
+      unread: 'Chưa đọc',
+      pending: 'Đang chờ',
+      memories: 'Kỷ niệm'
+    },
+    tabs: {
+      all: 'Tất cả',
+      unread: 'Chưa đọc',
+      anniversary: 'Kỷ niệm',
+      memory: 'Kỷ niệm',
+      reminder: 'Nhắc nhở',
+      couple: 'Đôi',
+      system: 'Hệ thống',
+      general: 'Chung'
+    },
+    types: {
+      anniversary: 'Kỷ niệm',
+      memory: 'Kỷ niệm',
+      reminder: 'Nhắc nhở',
+      couple: 'Đôi',
+      system: 'Hệ thống',
+      general: 'Chung'
+    },
+    deliveryStatus: {
+      pending: 'Đang chờ',
+      sent: 'Đã gửi',
+      delivered: 'Đã giao',
+      failed: 'Thất bại'
+    },
+    search: 'Tìm kiếm thông báo...',
+    filters: 'Bộ lọc',
+    sortBy: 'Sắp xếp theo',
+    viewModes: {
+      list: 'Danh sách',
+      grid: 'Lưới'
+    },
+    timeAgo: {
+      justNow: 'Vừa xong',
+      minutesAgo: '{count} phút trước',
+      hoursAgo: '{count} giờ trước',
+      daysAgo: '{count} ngày trước'
+    }
   }
 }
 
@@ -369,6 +476,7 @@ const en = {
     login: 'Login',
     dashboard: 'Dashboard',
     files: 'Files',
+    notifications: 'Notifications',
     profile: 'Profile',
     logout: 'Logout'
   },
@@ -539,15 +647,19 @@ const en = {
     featureDescription: 'This view will display and manage all your reminders.',
     create: 'Create Reminder',
     totalReminders: 'Total Reminders',
+    pending: 'Pending',
     upcoming: 'Upcoming',
     overdue: 'Overdue',
     completed: 'Completed',
+    recurring: 'Recurring',
     search: 'Search reminders...',
     priority: 'Priority',
+    status: 'Status',
     sortBy: 'Sort by',
     dueDateAsc: 'Due date earliest',
     dueDateDesc: 'Due date latest',
     priorityHigh: 'High priority',
+    titleAZ: 'Title A-Z',
     noReminders: 'No reminders yet',
     noRemindersDescription: 'Create your first reminder',
     createFirst: 'Create first reminder',
@@ -556,10 +668,36 @@ const en = {
     createReminder: 'Create New Reminder',
     reminderTitle: 'Reminder Title',
     description: 'Description',
-    dueDate: 'Due Date',
-    dueTime: 'Due Time',
+    reminderDate: 'Reminder Date',
+    reminderTime: 'Reminder Time',
+    repeat: 'Repeat',
     markAsCompleted: 'Mark as completed',
-    confirmDelete: 'Are you sure you want to delete reminder "{title}"?'
+    confirmDelete: 'Are you sure you want to delete reminder "{title}"?',
+    priorities: {
+      low: 'Low',
+      medium: 'Medium',
+      high: 'High',
+      urgent: 'Urgent'
+    },
+    statuses: {
+      pending: 'Pending',
+      completed: 'Completed',
+      overdue: 'Overdue'
+    },
+    repeats: {
+      daily: 'Daily',
+      weekly: 'Weekly',
+      monthly: 'Monthly',
+      yearly: 'Yearly'
+    },
+    sortOptions: {
+      dueDateAsc: 'Due date ascending',
+      dueDateDesc: 'Due date descending',
+      priorityDesc: 'High priority first',
+      priorityAsc: 'Low priority first',
+      titleAsc: 'Title A-Z',
+      createdDesc: 'Newest first'
+    }
   },
   anniversaries: {
     title: 'Our Anniversaries',
@@ -570,23 +708,39 @@ const en = {
     totalAnniversaries: 'Total Anniversaries',
     thisMonth: 'This Month',
     upcoming: 'Upcoming',
+    recurring: 'Recurring',
+    relationship: 'Relationship',
     search: 'Search anniversaries...',
-    category: 'Anniversary Type',
+    type: 'Anniversary Type',
     sortBy: 'Sort by',
-    dateAsc: 'Date ascending',
-    dateDesc: 'Date descending',
-    nameAZ: 'Name A-Z',
-    noAnniversaries: 'No anniversaries yet',
-    noAnniversariesDescription: 'Create your first anniversary',
-    createFirst: 'Create first anniversary',
     loading: 'Loading...',
     editAnniversary: 'Edit Anniversary',
     createAnniversary: 'Create New Anniversary',
     anniversaryTitle: 'Anniversary Name',
     description: 'Description',
     date: 'Date',
-    recurring: 'Recurring annually',
-    confirmDelete: 'Are you sure you want to delete anniversary "{title}"?'
+    isRecurring: 'Recurring',
+    frequency: 'Frequency',
+    noAnniversaries: 'No anniversaries yet',
+    noAnniversariesDescription: 'Create your first anniversary',
+    createFirst: 'Create first anniversary',
+    confirmDelete: 'Are you sure you want to delete anniversary "{title}"?',
+    types: {
+      relationship: 'Relationship',
+      milestone: 'Milestone',
+      birthday: 'Birthday',
+      other: 'Other'
+    },
+    frequencies: {
+      yearly: 'Yearly',
+      monthly: 'Monthly'
+    },
+    sortOptions: {
+      dateAsc: 'Date ascending',
+      dateDesc: 'Date descending',
+      title: 'Title A-Z',
+      type: 'Type A-Z'
+    }
   },
       memories: {
       title: 'Our Memories',
@@ -707,6 +861,66 @@ const en = {
     noRecentActivity: 'No recent activity',
     upcomingEvents: 'Upcoming Events',
     noUpcomingEvents: 'No upcoming events'
+  },
+  notifications: {
+    title: 'Notifications',
+    subtitle: 'Manage all your notifications',
+    markAllAsRead: 'Mark all as read',
+    noNotifications: 'No notifications',
+    noNotificationsDescription: 'You will receive notifications here',
+    viewAll: 'View all',
+    markAsRead: 'Mark as read',
+    archive: 'Archive',
+    delete: 'Delete',
+    confirmDelete: 'Are you sure you want to delete this notification?',
+    deleteWarning: 'This action cannot be undone.',
+    loading: 'Loading notifications...',
+    error: 'Error loading notifications',
+    unreadCount: '{count} unread notifications',
+    newNotification: 'New notification',
+    stats: {
+      total: 'Total notifications',
+      unread: 'Unread',
+      pending: 'Pending',
+      memories: 'Memories'
+    },
+    tabs: {
+      all: 'All',
+      unread: 'Unread',
+      anniversary: 'Anniversary',
+      memory: 'Memory',
+      reminder: 'Reminder',
+      couple: 'Couple',
+      system: 'System',
+      general: 'General'
+    },
+    types: {
+      anniversary: 'Anniversary',
+      memory: 'Memory',
+      reminder: 'Reminder',
+      couple: 'Couple',
+      system: 'System',
+      general: 'General'
+    },
+    deliveryStatus: {
+      pending: 'Pending',
+      sent: 'Sent',
+      delivered: 'Delivered',
+      failed: 'Failed'
+    },
+    search: 'Search notifications...',
+    filters: 'Filters',
+    sortBy: 'Sort by',
+    viewModes: {
+      list: 'List',
+      grid: 'Grid'
+    },
+    timeAgo: {
+      justNow: 'Just now',
+      minutesAgo: '{count} minutes ago',
+      hoursAgo: '{count} hours ago',
+      daysAgo: '{count} days ago'
+    }
   }
 }
 

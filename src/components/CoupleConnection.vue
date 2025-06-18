@@ -199,7 +199,7 @@
                         </v-avatar>
                         <div class="flex-grow-1">
                           <h5 class="text-h6 font-weight-medium">
-                            {{ invitation.sender?.displayName }}
+                            {{ invitation.sender?.name || invitation.sender?.email }}
                           </h5>
                           <p class="text-body-2 text-medium-emphasis mb-2">
                             {{ invitation.sender?.email }}

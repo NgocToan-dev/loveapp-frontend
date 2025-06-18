@@ -142,7 +142,7 @@
           >
             <div class="memory-overlay">
               <v-chip
-                :color="getCategoryColor(memory.location || 'Default')"
+                :color="getCategoryColor(getLocationString(memory.location))"
                 size="small"
                 class="ma-2"
               >
@@ -153,10 +153,10 @@
           <div
             v-else
             class="d-flex align-center justify-center memory-placeholder"
-            :style="{ backgroundColor: getCategoryColor(memory.location || 'Default') + '20' }"
+            :style="{ backgroundColor: getCategoryColor(getLocationString(memory.location)) + '20' }"
           >
-            <v-icon :color="getCategoryColor(memory.location || 'Default')" size="60">
-              {{ getCategoryIcon(memory.location || 'Default') }}
+            <v-icon :color="getCategoryColor(getLocationString(memory.location))" size="60">
+              {{ getCategoryIcon(getLocationString(memory.location)) }}
             </v-icon>
           </div>
 
@@ -165,7 +165,7 @@
               {{ memory.title }}
             </div>
             <div class="text-caption text-medium-emphasis mb-2">
-              {{ formatDate(memory.memoryDate) }}
+              {{ formatDate(memory.memoryDate || memory.date) }}
             </div>
             <p class="text-body-2 memory-description">
               {{ memory.description }}
@@ -216,14 +216,14 @@
               @click="viewMemory(memory)"
             >
               <template #prepend>
-                <v-avatar :color="getCategoryColor(memory.location || 'Default')">
-                  <v-icon>{{ getCategoryIcon(memory.location || 'Default') }}</v-icon>
+                <v-avatar :color="getCategoryColor(getLocationString(memory.location))">
+                  <v-icon>{{ getCategoryIcon(getLocationString(memory.location)) }}</v-icon>
                 </v-avatar>
               </template>
 
               <v-list-item-title>{{ memory.title }}</v-list-item-title>
               <v-list-item-subtitle>
-                {{ formatDate(memory.memoryDate) }} • {{ memory.location || 'Memory' }}
+                {{ formatDate(memory.memoryDate || memory.date) }} • {{ getLocationString(memory.location) || 'Memory' }}
               </v-list-item-subtitle>
 
               <template #append>
@@ -253,11 +253,11 @@
           <v-timeline-item
             v-for="memory in filteredMemories"
             :key="memory.id"
-            :dot-color="getCategoryColor(memory.location || 'Default')"
+            :dot-color="getCategoryColor(getLocationString(memory.location))"
             size="small"
           >
             <template #icon>
-              <v-icon>{{ getCategoryIcon(memory.location || 'Default') }}</v-icon>
+              <v-icon>{{ getCategoryIcon(getLocationString(memory.location)) }}</v-icon>
             </template>
 
             <v-card @click="viewMemory(memory)">
@@ -265,7 +265,7 @@
                 {{ memory.title }}
               </v-card-title>
               <v-card-subtitle>
-                {{ formatDate(memory.memoryDate) }}
+                {{ formatDate(memory.memoryDate || memory.date) }}
               </v-card-subtitle>
               <v-card-text>
                 {{ memory.description }}
@@ -462,9 +462,9 @@ const filteredMemories = computed(() => {
   filtered.sort((a, b) => {
     switch (sortBy.value) {
       case 'date-desc':
-        return new Date(b.memoryDate).getTime() - new Date(a.memoryDate).getTime()
+        return new Date(b.memoryDate || b.date || 0).getTime() - new Date(a.memoryDate || a.date || 0).getTime()
       case 'date-asc':
-        return new Date(a.memoryDate).getTime() - new Date(b.memoryDate).getTime()
+        return new Date(a.memoryDate || a.date || 0).getTime() - new Date(b.memoryDate || b.date || 0).getTime()
       case 'title-asc':
         return a.title.localeCompare(b.title)
       case 'favorites':
@@ -548,8 +548,9 @@ const saveMemory = async () => {
       await memoriesStore.updateMemory(editingMemory.value.id, {
         title: memoryForm.value.title,
         description: memoryForm.value.description,
-        memoryDate: memoryForm.value.date,
+        date: memoryForm.value.date,
         location: '',
+        category: 'Khác',
         tags: [],
         isPrivate: false
       })
@@ -558,8 +559,9 @@ const saveMemory = async () => {
       await memoriesStore.createMemory({
         title: memoryForm.value.title,
         description: memoryForm.value.description,
-        memoryDate: memoryForm.value.date,
+        date: memoryForm.value.date,
         location: '',
+        category: 'Khác',
         tags: [],
         isPrivate: false
       })
@@ -592,6 +594,13 @@ const getCategoryColor = (category: string) => {
   return colors[category] || 'grey'
 }
 
+// Helper function to get location as string
+const getLocationString = (location: string | { name: string } | undefined): string => {
+  if (!location) return 'Default'
+  if (typeof location === 'string') return location
+  return location.name || 'Default'
+}
+
 const getCategoryIcon = (category: string) => {
   const icons: Record<string, string> = {
     'Hẹn hò đầu tiên': 'mdi-heart',
@@ -604,7 +613,8 @@ const getCategoryIcon = (category: string) => {
   return icons[category] || 'mdi-bookmark'
 }
 
-const formatDate = (date: string | Date) => {
+const formatDate = (date: string | Date | undefined) => {
+  if (!date) return 'Không xác định'
   return dayjs(date).format('DD/MM/YYYY')
 }
 
@@ -639,4 +649,4 @@ onMounted(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-</style> 
+</style>

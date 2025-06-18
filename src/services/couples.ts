@@ -1,195 +1,121 @@
-import type { PaginationParams } from '@/types'
 import ApiService from './api'
 
-export interface Couple {
+// Core couple interfaces based on actual API endpoints
+export interface CoupleProfile {
   id: string
   user1Id: string
   user2Id: string
   relationshipStartDate: string
   status: 'active' | 'inactive' | 'pending'
+  preferences?: CouplePreferences
   createdAt: string
   updatedAt: string
-  user1?: {
-    id: string
-    displayName: string
-    email: string
-    photoURL?: string
-  }
-  user2?: {
-    id: string
-    displayName: string
-    email: string
-    photoURL?: string
-  }
 }
 
-export interface CoupleInvitation {
+export interface Partner {
   id: string
-  senderId: string
-  receiverEmail: string
-  receiverId?: string
-  invitationCode: string
-  message?: string
-  status: 'pending' | 'accepted' | 'rejected' | 'expired'
-  expiresAt: string
-  createdAt: string
-  updatedAt: string
-  sender?: {
-    id: string
-    displayName: string
-    email: string
-    photoURL?: string
-  }
-}
-
-export interface Partnership {
-  id: string
-  coupleId: string
   name: string
-  description?: string
-  type: 'relationship' | 'engagement' | 'marriage' | 'anniversary'
-  startDate: string
-  isActive: boolean
+  displayName?: string
+  email: string
+  photoURL?: string
+  isEmailVerified: boolean
+  lastLoginAt?: string
   createdAt: string
-  updatedAt: string
+}
+
+export interface CoupleStats {
+  daysTogether: number
+  memoriesCount: number
+  notesCount: number
+  filesCount: number
+  anniversariesCount: number
+  remindersCount: number
+}
+
+export interface CoupleStatus {
+  isConnected: boolean
+  connectionDate?: string
+  status: 'active' | 'inactive' | 'pending'
+  partnerId?: string
+}
+
+export interface CouplePreferences {
+  timezone?: string
+  notifications: {
+    email: boolean
+    push: boolean
+    anniversaries: boolean
+    reminders: boolean
+  }
+  privacy: {
+    profileVisibility: 'public' | 'private'
+    shareMemories: boolean
+    shareNotes: boolean
+  }
+  theme?: string
+  language?: string
+}
+
+export interface UpdateCoupleProfileData {
+  relationshipStartDate?: string
+  preferences?: Partial<CouplePreferences>
 }
 
 export interface LoveDay {
   id: string
-  coupleId: string
   title: string
-  description?: string
   date: string
   type: 'anniversary' | 'first_date' | 'proposal' | 'wedding' | 'milestone' | 'other'
-  isRecurring: boolean
+  description?: string
+  isRecurring?: boolean
+  reminderEnabled?: boolean
   reminderDays?: number
   createdAt: string
   updatedAt: string
 }
 
-export interface CreateInvitationData {
-  receiverEmail: string
-  message?: string
-}
-
-export interface CreatePartnershipData {
-  name: string
-  description?: string
-  type: 'relationship' | 'engagement' | 'marriage' | 'anniversary'
-  startDate: string
-}
-
-export interface CreateLoveDayData {
-  title: string
-  description?: string
-  date: string
-  type: 'anniversary' | 'first_date' | 'proposal' | 'wedding' | 'milestone' | 'other'
-  isRecurring: boolean
-  reminderDays?: number
-}
-
 class CouplesService {
-  private readonly baseUrl = '/couples'
+  private readonly baseUrl = '/couple'
 
-  // Couple Management
-  async getCurrentCouple(): Promise<Couple | null> {
-    try {
-      return await ApiService.get<Couple>(`${this.baseUrl}/current`)
-    } catch (error: any) {
-      if (error.response?.status === 404) {
-        return null
-      }
-      throw error
-    }
+  // Get couple profile
+  async getProfile(): Promise<CoupleProfile> {
+    return await ApiService.get<CoupleProfile>(`${this.baseUrl}/profile`)
   }
 
-  async getCoupleById(id: string): Promise<Couple> {
-    return await ApiService.get<Couple>(`${this.baseUrl}/${id}`)
+  // Update couple profile
+  async updateProfile(data: UpdateCoupleProfileData): Promise<CoupleProfile> {
+    return await ApiService.put<CoupleProfile>(`${this.baseUrl}/profile`, data)
   }
 
-  async updateCouple(id: string, data: Partial<Couple>): Promise<Couple> {
-    return await ApiService.put<Couple>(`${this.baseUrl}/${id}`, data)
+  // Get partner information
+  async getPartner(): Promise<Partner> {
+    return await ApiService.get<Partner>(`${this.baseUrl}/partner`)
   }
 
-  // Couple Invitations
-  async sendInvitation(data: CreateInvitationData): Promise<CoupleInvitation> {
-    return await ApiService.post<CoupleInvitation>(`${this.baseUrl}/invitations`, data)
+  // Get couple statistics
+  async getStats(): Promise<CoupleStats> {
+    return await ApiService.get<CoupleStats>(`${this.baseUrl}/stats`)
   }
 
-  async getMyInvitations(): Promise<{
-    sent: CoupleInvitation[]
-    received: CoupleInvitation[]
-  }> {
-    return await ApiService.get<{
-      sent: CoupleInvitation[]
-      received: CoupleInvitation[]
-    }>(`${this.baseUrl}/invitations/my`)
+  // Get couple connection status
+  async getStatus(): Promise<CoupleStatus> {
+    return await ApiService.get<CoupleStatus>(`${this.baseUrl}/status`)
   }
 
-  async acceptInvitation(invitationId: string): Promise<Couple> {
-    return await ApiService.post<Couple>(`${this.baseUrl}/invitations/${invitationId}/accept`)
+  // Disconnect from partner
+  async disconnect(): Promise<{ success: boolean; message: string }> {
+    return await ApiService.post<{ success: boolean; message: string }>(`${this.baseUrl}/disconnect`)
   }
 
-  async rejectInvitation(invitationId: string): Promise<void> {
-    return await ApiService.post<void>(`${this.baseUrl}/invitations/${invitationId}/reject`)
+  // Reconnect with partner
+  async reconnect(): Promise<{ success: boolean; message: string }> {
+    return await ApiService.post<{ success: boolean; message: string }>(`${this.baseUrl}/reconnect`)
   }
 
-  async joinByCode(invitationCode: string): Promise<Couple> {
-    return await ApiService.post<Couple>(`${this.baseUrl}/join`, { invitationCode })
-  }
-
-  // Partnerships
-  async getPartnerships(): Promise<Partnership[]> {
-    return await ApiService.get<Partnership[]>(`${this.baseUrl}/partnerships`)
-  }
-
-  async createPartnership(data: CreatePartnershipData): Promise<Partnership> {
-    return await ApiService.post<Partnership>(`${this.baseUrl}/partnerships`, data)
-  }
-
-  async updatePartnership(id: string, data: Partial<CreatePartnershipData>): Promise<Partnership> {
-    return await ApiService.put<Partnership>(`${this.baseUrl}/partnerships/${id}`, data)
-  }
-
-  async deletePartnership(id: string): Promise<void> {
-    return await ApiService.delete<void>(`${this.baseUrl}/partnerships/${id}`)
-  }
-
-  // Love Days
-  async getLoveDays(): Promise<LoveDay[]> {
-    return await ApiService.get<LoveDay[]>(`${this.baseUrl}/love-days`)
-  }
-
-  async createLoveDay(data: CreateLoveDayData): Promise<LoveDay> {
-    return await ApiService.post<LoveDay>(`${this.baseUrl}/love-days`, data)
-  }
-
-  async updateLoveDay(id: string, data: Partial<CreateLoveDayData>): Promise<LoveDay> {
-    return await ApiService.put<LoveDay>(`${this.baseUrl}/love-days/${id}`, data)
-  }
-
-  async deleteLoveDay(id: string): Promise<void> {
-    return await ApiService.delete<void>(`${this.baseUrl}/love-days/${id}`)
-  }
-
-  async getUpcomingLoveDays(): Promise<LoveDay[]> {
-    return await ApiService.get<LoveDay[]>(`${this.baseUrl}/love-days/upcoming`)
-  }
-
-  // Statistics
-  async getCoupleStats(): Promise<{
-    daysTogether: number
-    memoriesCount: number
-    notesCount: number
-    loveDaysCount: number
-  }> {
-    return await ApiService.get<{
-      daysTogether: number
-      memoriesCount: number
-      notesCount: number
-      loveDaysCount: number
-    }>(`${this.baseUrl}/stats`)
+  // Update couple preferences
+  async updatePreferences(preferences: Partial<CouplePreferences>): Promise<CoupleProfile> {
+    return await ApiService.put<CoupleProfile>(`${this.baseUrl}/preferences`, preferences)
   }
 }
 
-export const couplesService = new CouplesService() 
+export const couplesService = new CouplesService()

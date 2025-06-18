@@ -3,6 +3,22 @@ import { ref, computed } from 'vue'
 import type { Memory } from '@/types'
 import { memoriesService, type CreateMemoryData, type UpdateMemoryData, type MemoryFilters } from '@/services/memories'
 
+// Helper function to process memory data for backward compatibility
+const processMemoryData = (memory: any): Memory => {
+  return {
+    ...memory,
+    // Ensure both date and memoryDate are available for compatibility
+    date: memory.date || memory.memoryDate,
+    memoryDate: memory.memoryDate || memory.date,
+    // Ensure location is properly handled
+    location: typeof memory.location === 'string'
+      ? memory.location
+      : memory.location?.name || '',
+    // Ensure category exists
+    category: memory.category || 'other'
+  }
+}
+
 export const useMemoriesStore = defineStore('memories', () => {
   // State
   const memories = ref<Memory[]>([])
@@ -109,14 +125,17 @@ export const useMemoriesStore = defineStore('memories', () => {
       
       const response = await memoriesService.updateMemory(id, data)
       
+      // Process memory for compatibility
+      const processedMemory = processMemoryData(response)
+      
       const index = (memories.value || []).findIndex(memory => memory.id === id)
       if (index !== -1 && memories.value) {
-        memories.value[index] = response
+        memories.value[index] = processedMemory
       }
       if (currentMemory.value?.id === id) {
-        currentMemory.value = response
+        currentMemory.value = processedMemory
       }
-      return response
+      return processedMemory
     } catch (err: any) {
       error.value = err.message || 'Failed to update memory'
       console.error('Error updating memory:', err)
@@ -151,14 +170,17 @@ export const useMemoriesStore = defineStore('memories', () => {
     try {
       const response = await memoriesService.toggleFavorite(id)
       
+      // Process memory for compatibility
+      const processedMemory = processMemoryData(response)
+      
       const index = (memories.value || []).findIndex(memory => memory.id === id)
       if (index !== -1 && memories.value) {
-        memories.value[index] = response
+        memories.value[index] = processedMemory
       }
       if (currentMemory.value?.id === id) {
-        currentMemory.value = response
+        currentMemory.value = processedMemory
       }
-      return response
+      return processedMemory
     } catch (err: any) {
       error.value = err.message || 'Failed to toggle favorite'
       console.error('Error toggling favorite:', err)

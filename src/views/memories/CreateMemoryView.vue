@@ -38,9 +38,9 @@
             </v-col>
 
             <!-- Memory Date -->
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <v-text-field
-                v-model="formData.memoryDate"
+                v-model="formData.date"
                 :label="$t('memories.date') || 'Memory Date'"
                 :rules="dateRules"
                 variant="outlined"
@@ -48,6 +48,19 @@
                 type="date"
                 required
               ></v-text-field>
+            </v-col>
+
+            <!-- Category -->
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="formData.category"
+                :items="categoryOptions"
+                :label="$t('memories.category') || 'Category'"
+                :rules="categoryRules"
+                variant="outlined"
+                prepend-inner-icon="mdi-folder"
+                required
+              ></v-select>
             </v-col>
 
             <!-- Location -->
@@ -169,8 +182,9 @@ const valid = ref(false)
 const formData = ref({
   title: '',
   description: '',
-  memoryDate: '',
+  date: '',  // Changed from memoryDate to date
   location: '',
+  category: '',  // Added required category
   tags: [] as string[],
   isPrivate: false
 })
@@ -184,6 +198,15 @@ const privacyOptions = computed(() => [
   { title: t('memories.private') || 'Private', value: true }
 ])
 
+const categoryOptions = computed(() => [
+  { title: 'Hẹn hò', value: 'date' },
+  { title: 'Du lịch', value: 'travel' },
+  { title: 'Kỷ niệm', value: 'milestone' },
+  { title: 'Hằng ngày', value: 'daily' },
+  { title: 'Đặc biệt', value: 'special' },
+  { title: 'Khác', value: 'other' }
+])
+
 // Validation rules
 const titleRules = [
   (v: string) => !!v || t('validation.required') || 'This field is required',
@@ -191,6 +214,10 @@ const titleRules = [
 ]
 
 const dateRules = [
+  (v: string) => !!v || t('validation.required') || 'This field is required'
+]
+
+const categoryRules = [
   (v: string) => !!v || t('validation.required') || 'This field is required'
 ]
 
@@ -222,8 +249,9 @@ const saveMemory = async () => {
     await memoriesStore.createMemory({
       title: formData.value.title,
       description: formData.value.description,
-      memoryDate: formData.value.memoryDate,
+      date: formData.value.date,  // Changed from memoryDate to date
       location: formData.value.location || '',
+      category: formData.value.category,  // Added required category
       tags: formData.value.tags,
       isPrivate: formData.value.isPrivate
     })

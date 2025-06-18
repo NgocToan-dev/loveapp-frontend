@@ -1,83 +1,248 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { 
-  couplesService, 
-  type Couple, 
-  type CoupleInvitation, 
-  type Partnership, 
-  type LoveDay,
-  type CreateInvitationData,
-  type CreatePartnershipData,
-  type CreateLoveDayData
+import {
+  couplesService,
+  type CoupleProfile,
+  type Partner,
+  type CoupleStats,
+  type CoupleStatus,
+  type CouplePreferences,
+  type UpdateCoupleProfileData
 } from '@/services/couples'
+import { coupleInvitationsService, type CoupleInvitation } from '@/services/coupleInvitations'
 
 export const useCouplesStore = defineStore('couples', () => {
   // State
-  const currentCouple = ref<Couple | null>(null)
-  const invitations = ref<{
-    sent: CoupleInvitation[]
-    received: CoupleInvitation[]
-  }>({ sent: [], received: [] })
-  const partnerships = ref<Partnership[]>([])
-  const loveDays = ref<LoveDay[]>([])
-  const coupleStats = ref<{
-    daysTogether: number
-    memoriesCount: number
-    notesCount: number
-    loveDaysCount: number
-  } | null>(null)
+  const coupleProfile = ref<CoupleProfile | null>(null)
+  const partner = ref<Partner | null>(null)
+  const coupleStats = ref<CoupleStats | null>(null)
+  const coupleStatus = ref<CoupleStatus | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  
+  // Invitation state
+  const pendingReceivedInvitations = ref<CoupleInvitation[]>([])
+  const pendingSentInvitations = ref<CoupleInvitation[]>([])
+  const currentCouple = ref<CoupleProfile | null>(null)
 
   // Getters
-  const isConnected = computed(() => currentCouple.value !== null)
-  const partner = computed(() => {
-    if (!currentCouple.value) return null
-    // Assuming current user is stored somewhere, this would need to be adapted
-    return currentCouple.value.user1 || currentCouple.value.user2
-  })
+  const isConnected = computed(() => coupleStatus.value?.isConnected ?? false)
   
-  const pendingReceivedInvitations = computed(() => 
-    invitations.value.received.filter(inv => inv.status === 'pending')
-  )
-  
-  const pendingSentInvitations = computed(() =>
-    invitations.value.sent.filter(inv => inv.status === 'pending')
-  )
-
-  const upcomingLoveDays = computed(() => {
+  const daysTogether = computed(() => {
+    if (!coupleProfile.value?.relationshipStartDate) return 0
+    const startDate = new Date(coupleProfile.value.relationshipStartDate)
     const today = new Date()
-    const upcoming = loveDays.value.filter(day => {
-      const dayDate = new Date(day.date)
-      return dayDate >= today
-    })
-    return upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    const diffTime = Math.abs(today.getTime() - startDate.getTime())
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   })
 
-  const activePartnerships = computed(() =>
-    partnerships.value.filter(p => p.isActive)
-  )
+  const hasPartner = computed(() => partner.value !== null)
+
+  const preferences = computed(() => coupleProfile.value?.preferences || null)
 
   // Actions
-  const fetchCurrentCouple = async () => {
+  const fetchProfile = async () => {
     try {
       isLoading.value = true
       error.value = null
-      currentCouple.value = await couplesService.getCurrentCouple()
+      coupleProfile.value = await couplesService.getProfile()
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch couple information'
-      console.error('Error fetching current couple:', err)
+      if (err.response?.status === 404) {
+        // No couple profile exists yet
+        coupleProfile.value = null
+      } else {
+        error.value = err.message || 'Failed to fetch couple profile'
+        console.error('Error fetching couple profile:', err)
+      }
     } finally {
       isLoading.value = false
     }
   }
 
-  const sendInvitation = async (data: CreateInvitationData) => {
+  const updateProfile = async (data: UpdateCoupleProfileData) => {
     try {
       isLoading.value = true
       error.value = null
-      const invitation = await couplesService.sendInvitation(data)
-      invitations.value.sent.unshift(invitation)
+      coupleProfile.value = await couplesService.updateProfile(data)
+      return coupleProfile.value
+    } catch (err: any) {
+      error.value = err.message || 'Failed to update couple profile'
+      console.error('Error updating couple profile:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchPartner = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      partner.value = await couplesService.getPartner()
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        // No partner connected
+        partner.value = null
+      } else {
+        error.value = err.message || 'Failed to fetch partner information'
+        console.error('Error fetching partner:', err)
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchStats = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      coupleStats.value = await couplesService.getStats()
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch couple stats'
+      console.error('Error fetching couple stats:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchStatus = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      coupleStatus.value = await couplesService.getStatus()
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch couple status'
+      console.error('Error fetching couple status:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const disconnect = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      const result = await couplesService.disconnect()
+      
+      // Update local state
+      coupleStatus.value = { isConnected: false, status: 'inactive' }
+      partner.value = null
+      
+      return result
+    } catch (err: any) {
+      error.value = err.message || 'Failed to disconnect from partner'
+      console.error('Error disconnecting:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const reconnect = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      const result = await couplesService.reconnect()
+      
+      // Refresh data after reconnection
+      await Promise.all([
+        fetchStatus(),
+        fetchPartner(),
+        fetchProfile()
+      ])
+      
+      return result
+    } catch (err: any) {
+      error.value = err.message || 'Failed to reconnect with partner'
+      console.error('Error reconnecting:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const updatePreferences = async (preferences: Partial<CouplePreferences>) => {
+    try {
+      isLoading.value = true
+      error.value = null
+      coupleProfile.value = await couplesService.updatePreferences(preferences)
+      return coupleProfile.value
+    } catch (err: any) {
+      error.value = err.message || 'Failed to update preferences'
+      console.error('Error updating preferences:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchAll = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      await Promise.all([
+        fetchProfile(),
+        fetchPartner(),
+        fetchStats(),
+        fetchStatus()
+      ])
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch couple data'
+      console.error('Error fetching all couple data:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const clearError = () => {
+    error.value = null
+  }
+
+  const reset = () => {
+    coupleProfile.value = null
+    partner.value = null
+    coupleStats.value = null
+    coupleStatus.value = null
+    error.value = null
+    isLoading.value = false
+  }
+
+  // Invitation actions
+  const fetchReceivedInvitations = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      pendingReceivedInvitations.value = await coupleInvitationsService.getReceivedInvitations()
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch received invitations'
+      console.error('Error fetching received invitations:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchSentInvitations = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      pendingSentInvitations.value = await coupleInvitationsService.getSentInvitations()
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch sent invitations'
+      console.error('Error fetching sent invitations:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const sendInvitation = async (data: { email: string; message?: string }) => {
+    try {
+      isLoading.value = true
+      error.value = null
+      const invitation = await coupleInvitationsService.sendInvitation({
+        receiverEmail: data.email,
+        message: data.message
+      })
+      pendingSentInvitations.value.push(invitation)
       return invitation
     } catch (err: any) {
       error.value = err.message || 'Failed to send invitation'
@@ -88,33 +253,22 @@ export const useCouplesStore = defineStore('couples', () => {
     }
   }
 
-  const fetchInvitations = async () => {
-    try {
-      isLoading.value = true
-      error.value = null
-      invitations.value = await couplesService.getMyInvitations()
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch invitations'
-      console.error('Error fetching invitations:', err)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   const acceptInvitation = async (invitationId: string) => {
     try {
       isLoading.value = true
       error.value = null
-      const couple = await couplesService.acceptInvitation(invitationId)
-      currentCouple.value = couple
-      
-      // Update invitation status
-      const invitation = invitations.value.received.find(inv => inv.id === invitationId)
-      if (invitation) {
-        invitation.status = 'accepted'
-      }
-      
-      return couple
+      const result = await coupleInvitationsService.acceptInvitation(invitationId)
+      currentCouple.value = result.couple
+      // Remove from pending invitations
+      pendingReceivedInvitations.value = pendingReceivedInvitations.value.filter(
+        inv => inv.id !== invitationId
+      )
+      // Refresh profile and status
+      await Promise.all([
+        fetchProfile(),
+        fetchStatus()
+      ])
+      return result
     } catch (err: any) {
       error.value = err.message || 'Failed to accept invitation'
       console.error('Error accepting invitation:', err)
@@ -128,13 +282,9 @@ export const useCouplesStore = defineStore('couples', () => {
     try {
       isLoading.value = true
       error.value = null
-      await couplesService.rejectInvitation(invitationId)
-      
-      // Update invitation status
-      const invitation = invitations.value.received.find(inv => inv.id === invitationId)
-      if (invitation) {
-        invitation.status = 'rejected'
-      }
+      await coupleInvitationsService.rejectInvitation(invitationId)
+      // Remove from pending invitations
+      pendingReceivedInvitations.value = pendingReceivedInvitations.value.filter(invite => invite.id !== invitationId)
     } catch (err: any) {
       error.value = err.message || 'Failed to reject invitation'
       console.error('Error rejecting invitation:', err)
@@ -144,13 +294,13 @@ export const useCouplesStore = defineStore('couples', () => {
     }
   }
 
-  const joinByCode = async (invitationCode: string) => {
+  // Additional methods needed for CoupleConnection component
+  const joinByCode = async (code: string) => {
     try {
       isLoading.value = true
       error.value = null
-      const couple = await couplesService.joinByCode(invitationCode)
-      currentCouple.value = couple
-      return couple
+      // TODO: Implement join by code functionality
+      console.log('Joining with code:', code)
     } catch (err: any) {
       error.value = err.message || 'Failed to join by code'
       console.error('Error joining by code:', err)
@@ -160,183 +310,79 @@ export const useCouplesStore = defineStore('couples', () => {
     }
   }
 
-  const fetchPartnerships = async () => {
+  const fetchCurrentCouple = async () => {
     try {
       isLoading.value = true
       error.value = null
-      partnerships.value = await couplesService.getPartnerships()
+      currentCouple.value = await couplesService.getProfile()
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch partnerships'
-      console.error('Error fetching partnerships:', err)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const createPartnership = async (data: CreatePartnershipData) => {
-    try {
-      isLoading.value = true
-      error.value = null
-      const partnership = await couplesService.createPartnership(data)
-      partnerships.value.unshift(partnership)
-      return partnership
-    } catch (err: any) {
-      error.value = err.message || 'Failed to create partnership'
-      console.error('Error creating partnership:', err)
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const updatePartnership = async (id: string, data: Partial<CreatePartnershipData>) => {
-    try {
-      isLoading.value = true
-      error.value = null
-      const partnership = await couplesService.updatePartnership(id, data)
-      const index = partnerships.value.findIndex(p => p.id === id)
-      if (index !== -1) {
-        partnerships.value[index] = partnership
+      if (err.response?.status === 404) {
+        currentCouple.value = null
+      } else {
+        error.value = err.message || 'Failed to fetch current couple'
+        console.error('Error fetching current couple:', err)
       }
-      return partnership
-    } catch (err: any) {
-      error.value = err.message || 'Failed to update partnership'
-      console.error('Error updating partnership:', err)
-      throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  const deletePartnership = async (id: string) => {
+  const fetchInvitations = async () => {
     try {
       isLoading.value = true
       error.value = null
-      await couplesService.deletePartnership(id)
-      partnerships.value = partnerships.value.filter(p => p.id !== id)
+      const [received, sent] = await Promise.all([
+        coupleInvitationsService.getReceivedInvitations(),
+        coupleInvitationsService.getSentInvitations()
+      ])
+      pendingReceivedInvitations.value = received.filter(inv => inv.status === 'pending')
+      pendingSentInvitations.value = sent.filter(inv => inv.status === 'pending')
     } catch (err: any) {
-      error.value = err.message || 'Failed to delete partnership'
-      console.error('Error deleting partnership:', err)
-      throw err
+      error.value = err.message || 'Failed to fetch invitations'
+      console.error('Error fetching invitations:', err)
     } finally {
       isLoading.value = false
     }
-  }
-
-  const fetchLoveDays = async () => {
-    try {
-      isLoading.value = true
-      error.value = null
-      loveDays.value = await couplesService.getLoveDays()
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch love days'
-      console.error('Error fetching love days:', err)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const createLoveDay = async (data: CreateLoveDayData) => {
-    try {
-      isLoading.value = true
-      error.value = null
-      const loveDay = await couplesService.createLoveDay(data)
-      loveDays.value.unshift(loveDay)
-      return loveDay
-    } catch (err: any) {
-      error.value = err.message || 'Failed to create love day'
-      console.error('Error creating love day:', err)
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const updateLoveDay = async (id: string, data: Partial<CreateLoveDayData>) => {
-    try {
-      isLoading.value = true
-      error.value = null
-      const loveDay = await couplesService.updateLoveDay(id, data)
-      const index = loveDays.value.findIndex(ld => ld.id === id)
-      if (index !== -1) {
-        loveDays.value[index] = loveDay
-      }
-      return loveDay
-    } catch (err: any) {
-      error.value = err.message || 'Failed to update love day'
-      console.error('Error updating love day:', err)
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const deleteLoveDay = async (id: string) => {
-    try {
-      isLoading.value = true
-      error.value = null
-      await couplesService.deleteLoveDay(id)
-      loveDays.value = loveDays.value.filter(ld => ld.id !== id)
-    } catch (err: any) {
-      error.value = err.message || 'Failed to delete love day'
-      console.error('Error deleting love day:', err)
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const fetchCoupleStats = async () => {
-    try {
-      isLoading.value = true
-      error.value = null
-      coupleStats.value = await couplesService.getCoupleStats()
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch couple stats'
-      console.error('Error fetching couple stats:', err)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const clearError = () => {
-    error.value = null
   }
 
   return {
     // State
-    currentCouple,
-    invitations,
-    partnerships,
-    loveDays,
+    coupleProfile,
+    partner,
     coupleStats,
+    coupleStatus,
     isLoading,
     error,
+    pendingReceivedInvitations,
+    pendingSentInvitations,
+    currentCouple,
 
     // Getters
     isConnected,
-    partner,
-    pendingReceivedInvitations,
-    pendingSentInvitations,
-    upcomingLoveDays,
-    activePartnerships,
+    daysTogether,
+    hasPartner,
+    preferences,
 
     // Actions
-    fetchCurrentCouple,
+    fetchProfile,
+    updateProfile,
+    fetchPartner,
+    fetchStats,
+    fetchStatus,
+    disconnect,
+    reconnect,
+    updatePreferences,
+    fetchAll,
+    clearError,
+    reset,
+    // Invitation actions
+    fetchReceivedInvitations,
+    fetchSentInvitations,
     sendInvitation,
-    fetchInvitations,
     acceptInvitation,
     rejectInvitation,
     joinByCode,
-    fetchPartnerships,
-    createPartnership,
-    updatePartnership,
-    deletePartnership,
-    fetchLoveDays,
-    createLoveDay,
-    updateLoveDay,
-    deleteLoveDay,
-    fetchCoupleStats,
-    clearError
+    fetchCurrentCouple,
+    fetchInvitations
   }
-}) 
+})

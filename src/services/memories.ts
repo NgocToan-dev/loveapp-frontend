@@ -4,8 +4,15 @@ import ApiService from './api'
 export interface CreateMemoryData {
   title: string
   description: string
-  memoryDate: string
-  location?: string
+  date: string  // Changed from memoryDate to date
+  location?: {   // Changed from string to object
+    name: string
+    coordinates?: {
+      lat: number
+      lng: number
+    }
+  } | string  // Support both for backward compatibility
+  category: string  // Added required category field
   tags: string[]
   isPrivate: boolean
 }
@@ -13,8 +20,15 @@ export interface CreateMemoryData {
 export interface UpdateMemoryData {
   title?: string
   description?: string
-  memoryDate?: string
-  location?: string
+  date?: string  // Changed from memoryDate to date
+  location?: {   // Changed from string to object
+    name: string
+    coordinates?: {
+      lat: number
+      lng: number
+    }
+  } | string  // Support both for backward compatibility
+  category?: string  // Added category field
   tags?: string[]
   isPrivate?: boolean
 }
@@ -53,7 +67,18 @@ class MemoriesService {
   }
 
   async createMemory(data: CreateMemoryData): Promise<Memory> {
-    return await ApiService.post<Memory>(this.baseUrl, data)
+    // Transform data to match backend expectations
+    const transformedData = {
+      ...data,
+      // Ensure location is an object if it's a string
+      location: typeof data.location === 'string'
+        ? { name: data.location }
+        : data.location
+    }
+    
+    console.log('Creating memory with data:', transformedData)
+    
+    return await ApiService.post<Memory>(this.baseUrl, transformedData)
   }
 
   async updateMemory(id: string, data: UpdateMemoryData): Promise<Memory> {

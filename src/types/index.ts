@@ -41,8 +41,16 @@ export interface Memory {
   id: string
   title: string
   description: string
-  memoryDate: string
-  location?: string
+  date: string  // Changed from memoryDate to date to match backend
+  memoryDate?: string  // Keep for backward compatibility
+  location?: {
+    name: string
+    coordinates?: {
+      lat: number
+      lng: number
+    }
+  } | string  // Support both object and string
+  category: string  // Added required category field
   tags: string[]
   isPrivate: boolean
   isFavorite: boolean
@@ -288,4 +296,102 @@ export interface ThemeConfig {
   success: string
   background: string
   surface: string
+}
+
+// Notification types
+export interface Notification {
+  id: string
+  userId: string
+  type: 'anniversary' | 'memory' | 'reminder' | 'couple' | 'system' | 'general'
+  title: string
+  message: string
+  data?: Record<string, any>
+  isRead: boolean
+  isArchived: boolean
+  deliveryStatus: 'pending' | 'sent' | 'delivered' | 'failed'
+  scheduledAt?: string | Date
+  sentAt?: string | Date
+  readAt?: string | Date
+  archivedAt?: string | Date
+  createdAt: string | Date
+  updatedAt: string | Date
+}
+
+export interface NotificationFilters extends PaginationParams {
+  type?: 'anniversary' | 'memory' | 'reminder' | 'couple' | 'system' | 'general'
+  isRead?: boolean
+  isArchived?: boolean
+  deliveryStatus?: 'pending' | 'sent' | 'delivered' | 'failed'
+  startDate?: string
+  endDate?: string
+}
+
+export interface CreateNotificationData {
+  userId: string
+  type: 'anniversary' | 'memory' | 'reminder' | 'couple' | 'system' | 'general'
+  title: string
+  message: string
+  data?: Record<string, any>
+  scheduledAt?: Date
+}
+
+export interface UpdateNotificationDeliveryData {
+  deliveryStatus: 'pending' | 'sent' | 'delivered' | 'failed'
+  sentAt?: Date
+}
+
+export interface NotificationStats {
+  total: number
+  unread: number
+  pending: number
+  byType: {
+    anniversary: number
+    memory: number
+    reminder: number
+    couple: number
+    system: number
+    general: number
+  }
+  byDeliveryStatus: {
+    pending: number
+    sent: number
+    delivered: number
+    failed: number
+  }
+}
+
+// Timeline Events (combining memories and anniversaries)
+export interface TimelineEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: Date;
+  type: 'memory' | 'anniversary' | 'milestone';
+  images?: string[];
+  location?: string;
+  tags?: string[];
+  isRecurring: boolean;
+  recurringType?: 'yearly' | 'monthly';
+  priority: 'low' | 'medium' | 'high';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TimelineEventFilters {
+  type?: 'memory' | 'anniversary' | 'milestone' | 'all';
+  priority?: 'low' | 'medium' | 'high' | 'all';
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  tags?: string[];
+  searchQuery?: string;
+}
+
+export interface TimelineEventStats {
+  total: number;
+  memories: number;
+  anniversaries: number;
+  milestones: number;
+  recurring: number;
 }
