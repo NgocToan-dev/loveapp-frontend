@@ -217,21 +217,6 @@
     <v-overlay :model-value="isLoading" class="align-center justify-center">
       <v-progress-circular color="primary" indeterminate size="64"></v-progress-circular>
     </v-overlay>
-
-    <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="400">
-      <v-card>
-        <v-card-title class="text-h5">{{ $t('notes.deleteConfirm') }}</v-card-title>
-        <v-card-text>
-          {{ $t('notes.deleteWarning') }}
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="confirmDelete">{{ $t('common.delete') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
@@ -241,6 +226,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotesStore } from '@/stores/notes'
 import dayjs from 'dayjs'
+import Swal from 'sweetalert2'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -251,32 +237,26 @@ const searchQuery = ref('')
 const selectedCategory = ref('')
 const privacyFilter = ref('')
 const currentPage = ref(1)
-const deleteDialog = ref(false)
-const noteToDelete = ref('')
 
 // Computed
-const {
-  notes,
-  isLoading,
-  error,
-  totalNotes,
-  totalPages,
-  allCategories,
-  privateNotes,
-  publicNotes,
-  searchResults
-} = notesStore
-
 const displayedNotes = computed(() => {
   if (searchQuery.value) {
-    return searchResults || []
+    return notesStore.searchResults || []
   }
-  return notes || []
+  return notesStore.notes || []
 })
+
+const totalNotes = computed(() => notesStore.totalNotes)
+const totalPages = computed(() => notesStore.totalPages)
+const allCategories = computed(() => notesStore.allCategories)
+const privateNotes = computed(() => notesStore.privateNotes)
+const publicNotes = computed(() => notesStore.publicNotes)
+const isLoading = computed(() => notesStore.isLoading)
+const error = computed(() => notesStore.error)
 
 const categoryItems = computed(() => [
   { title: t('common.all'), value: '' },
-  ...allCategories.map(category => ({
+  ...allCategories.value.map((category: string) => ({
     title: category,
     value: category
   }))
@@ -341,18 +321,54 @@ const editNote = (id: string) => {
   router.push({ name: 'note-detail', params: { id }, query: { edit: 'true' } })
 }
 
-const deleteNote = (id: string) => {
-  noteToDelete.value = id
-  deleteDialog.value = true
-}
+const deleteNote = async (id: string) => {
+  const result = await Swal.fire({
+    title: t('notes.confirmDeleteTitle') || 'Xác nhận xóa',
+    text: t('notes.confirmDelete') || 'Bạn có chắc chắn muốn xóa ghi chú này?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#FF5722',
+    cancelButtonColor: '#757575',
+    confirmButtonText: t('common.delete'),
+    cancelButtonText: t('common.cancel'),
+    reverseButtons: true,
+    customClass: {
+      popup: 'swal2-popup-custom',
+      title: 'swal2-title-custom',
+      confirmButton: 'swal2-confirm-custom',
+      cancelButton: 'swal2-cancel-custom'
+    }
+  })
 
-const confirmDelete = async () => {
-  try {
-    await notesStore.deleteNote(noteToDelete.value)
-    deleteDialog.value = false
-    noteToDelete.value = ''
-  } catch (error) {
-    console.error('Error deleting note:', error)
+  if (result.isConfirmed) {
+    try {
+      await notesStore.deleteNote(id)
+      
+      Swal.fire({
+        title: t('common.deleted') || 'Đã xóa!',
+        text: t('notes.deleteSuccess') || 'Ghi chú đã được xóa thành công!',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: {
+          popup: 'swal2-popup-custom'
+        }
+      })
+    } catch (error) {
+      console.error('Error deleting note:', error)
+      
+      Swal.fire({
+        title: t('common.error') || 'Lỗi!',
+        text: t('notes.deleteError') || 'Có lỗi xảy ra khi xóa ghi chú. Vui lòng thử lại.',
+        icon: 'error',
+        confirmButtonText: t('common.ok') || 'OK',
+        confirmButtonColor: '#FF6B35',
+        customClass: {
+          popup: 'swal2-popup-custom',
+          confirmButton: 'swal2-confirm-custom'
+        }
+      })
+    }
   }
 }
 
@@ -367,8 +383,18 @@ const truncateText = (text: string, maxLength: number) => {
   return text.substring(0, maxLength) + '...'
 }
 
-const formatDate = (date: Date) => {
-  return dayjs(date).format('MMM D, YYYY')
+const formatDate = (date: Date | { _seconds: number; _nanoseconds: number } | string) => {
+  let actualDate: Date
+  if (date instanceof Date) {
+    actualDate = date
+  } else if (typeof date === 'string') {
+    actualDate = new Date(date)
+  } else if (date && typeof date === 'object' && '_seconds' in date) {
+    actualDate = new Date(date._seconds * 1000 + (date._nanoseconds || 0) / 1000000)
+  } else {
+    actualDate = new Date()
+  }
+  return dayjs(actualDate).format('MMM D, YYYY')
 }
 
 // Lifecycle
@@ -377,7 +403,7 @@ onMounted(() => {
 })
 
 // Watchers
-watch(() => notesStore.error, (newError) => {
+watch(error, (newError) => {
   if (newError) {
     console.error('Notes error:', newError)
   }
@@ -398,4 +424,61 @@ watch(() => notesStore.error, (newError) => {
 .border-primary {
   border-left: 4px solid rgb(var(--v-theme-primary));
 }
-</style> 
+
+/* SweetAlert2 Custom Styles */
+:deep(.swal2-popup-custom) {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+:deep(.swal2-title-custom) {
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
+:deep(.swal2-confirm-custom) {
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-confirm-custom:hover) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+}
+
+:deep(.swal2-cancel-custom) {
+  background: #f5f5f5 !important;
+  color: #666 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-cancel-custom:hover) {
+  background: #e0e0e0 !important;
+  border-color: #bbb !important;
+  transform: translateY(-1px) !important;
+}
+
+:deep(.swal2-icon.swal2-warning) {
+  border-color: #FF8A65 !important;
+  color: #FF6B35 !important;
+}
+
+:deep(.swal2-icon.swal2-success) {
+  border-color: #4CAF50 !important;
+  color: #4CAF50 !important;
+}
+
+:deep(.swal2-icon.swal2-error) {
+  border-color: #F44336 !important;
+  color: #F44336 !important;
+}
+</style>

@@ -16,11 +16,11 @@ export const useRemindersStore = defineStore('reminders', () => {
     page: 1,
     limit: 10,
     sortBy: 'reminderDate',
-    sortOrder: 'asc'
-  })
-
+    sortOrder: 'asc'  })
   // Getters
   const upcomingReminders = computed(() => {
+    if (!reminders.value) return []
+    
     const today = new Date()
     const nextWeek = new Date(today)
     nextWeek.setDate(nextWeek.getDate() + 7)
@@ -33,6 +33,8 @@ export const useRemindersStore = defineStore('reminders', () => {
   })
 
   const overdueReminders = computed(() => {
+    if (!reminders.value) return []
+    
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
@@ -45,44 +47,46 @@ export const useRemindersStore = defineStore('reminders', () => {
   })
 
   const completedReminders = computed(() => 
-    reminders.value.filter(reminder => reminder.isCompleted)
+    reminders.value ? reminders.value.filter(reminder => reminder.isCompleted) : []
   )
-
   const pendingReminders = computed(() => 
-    reminders.value.filter(reminder => !reminder.isCompleted)
+    reminders.value ? reminders.value.filter(reminder => !reminder.isCompleted) : []
   )
-
   const remindersByPriority = computed(() => {
     const grouped: Record<string, Reminder[]> = {
-      urgent: [],
       high: [],
       medium: [],
       low: []
     }
+    
+    if (!reminders.value) return grouped
+    
     reminders.value.forEach(reminder => {
-      grouped[reminder.priority].push(reminder)
+      const priority = reminder.priority || 'medium' // Default to medium if priority is undefined
+      if (grouped[priority]) {
+        grouped[priority].push(reminder)
+      } else {
+        // If priority is not one of the expected values, default to medium
+        grouped.medium.push(reminder)
+      }
     })
     return grouped
   })
-
   const recurringReminders = computed(() => 
-    reminders.value.filter(reminder => reminder.repeat)
+    reminders.value ? reminders.value.filter(reminder => reminder.repeat) : []
   )
 
   const totalPages = computed(() => 
     Math.ceil(totalReminders.value / pageSize.value)
-  )
-
-  // Statistics
+  )  // Statistics
   const stats = computed(() => ({
-    total: reminders.value.length,
+    total: reminders.value ? reminders.value.length : 0,
     pending: pendingReminders.value.length,
     completed: completedReminders.value.length,
     overdue: overdueReminders.value.length,
     upcoming: upcomingReminders.value.length,
     recurring: recurringReminders.value.length,
     byPriority: {
-      urgent: remindersByPriority.value.urgent.filter(r => !r.isCompleted).length,
       high: remindersByPriority.value.high.filter(r => !r.isCompleted).length,
       medium: remindersByPriority.value.medium.filter(r => !r.isCompleted).length,
       low: remindersByPriority.value.low.filter(r => !r.isCompleted).length
@@ -145,6 +149,7 @@ export const useRemindersStore = defineStore('reminders', () => {
       }
       reminders.value.unshift(response)
       totalReminders.value += 1
+      
       return response
     } catch (err: any) {
       error.value = err.message || 'Failed to create reminder'
@@ -154,21 +159,28 @@ export const useRemindersStore = defineStore('reminders', () => {
       isLoading.value = false
     }
   }
-
   const updateReminder = async (id: string, data: UpdateReminderData) => {
     try {
       isLoading.value = true
       error.value = null
       
       const response = await remindersService.updateReminder(id, data)
+      debugger
+      // Ensure reminders array exists
+      if (!reminders.value) {
+        reminders.value = []
+      }
       
-      const index = (reminders.value || []).findIndex(reminder => reminder.id === id)
-      if (index !== -1 && reminders.value) {
+      const index = reminders.value.findIndex((reminder: Reminder) => reminder.id === id)
+      if (index !== -1) {
         reminders.value[index] = response
       }
+      
+      // Update current reminder if it's the one being updated
       if (currentReminder.value?.id === id) {
         currentReminder.value = response
       }
+      
       return response
     } catch (err: any) {
       error.value = err.message || 'Failed to update reminder'
@@ -178,7 +190,6 @@ export const useRemindersStore = defineStore('reminders', () => {
       isLoading.value = false
     }
   }
-
   const deleteReminder = async (id: string) => {
     try {
       isLoading.value = true
@@ -186,8 +197,15 @@ export const useRemindersStore = defineStore('reminders', () => {
       
       await remindersService.deleteReminder(id)
       
-      reminders.value = (reminders.value || []).filter(reminder => reminder.id !== id)
-      totalReminders.value -= 1
+      // Ensure reminders array exists
+      if (!reminders.value) {
+        reminders.value = []
+      } else {
+        reminders.value = reminders.value.filter((reminder: Reminder) => reminder.id !== id)
+        totalReminders.value = Math.max(0, totalReminders.value - 1)
+      }
+      
+      // Clear current reminder if it's the one being deleted
       if (currentReminder.value?.id === id) {
         currentReminder.value = null
       }
@@ -199,7 +217,6 @@ export const useRemindersStore = defineStore('reminders', () => {
       isLoading.value = false
     }
   }
-
   const completeReminder = async (id: string) => {
     try {
       isLoading.value = true
@@ -207,53 +224,60 @@ export const useRemindersStore = defineStore('reminders', () => {
       
       const response = await remindersService.completeReminder(id)
       
-      const index = (reminders.value || []).findIndex(reminder => reminder.id === id)
-      if (index !== -1 && reminders.value) {
+      // Ensure reminders array exists
+      if (!reminders.value) {
+        reminders.value = []
+      }
+      
+      const index = reminders.value.findIndex((reminder: Reminder) => reminder.id === id)
+      if (index !== -1) {
         reminders.value[index] = response
       }
+      
+      // Update current reminder if it's the one being completed
       if (currentReminder.value?.id === id) {
         currentReminder.value = response
       }
+      
       return response
-    } catch (err: any) {
-      error.value = err.message || 'Failed to complete reminder'
+    } catch (err: any) {      error.value = err.message || 'Failed to complete reminder'
       console.error('Error completing reminder:', err)
       throw err
     } finally {
       isLoading.value = false
     }
   }
-
-  const fetchUpcomingReminders = async () => {
+  
+  const snoozeReminder = async (id: string, newDate: Date) => {
     try {
-      const response = await remindersService.getUpcomingReminders()
+      isLoading.value = true
+      error.value = null
+      
+      // For now, update reminder with new date
+      const response = await remindersService.updateReminder(id, { reminderDate: newDate })
+      
+      // Ensure reminders array exists
+      if (!reminders.value) {
+        reminders.value = []
+      }
+      
+      const index = reminders.value.findIndex((reminder: Reminder) => reminder.id === id)
+      if (index !== -1) {
+        reminders.value[index] = response
+      }
+      
+      // Update current reminder if it's the one being snoozed
+      if (currentReminder.value?.id === id) {
+        currentReminder.value = response
+      }
+      
       return response
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch upcoming reminders'
-      console.error('Error fetching upcoming reminders:', err)
+      error.value = err.message || 'Failed to snooze reminder'
+      console.error('Error snoozing reminder:', err)
       throw err
-    }
-  }
-
-  const fetchOverdueReminders = async () => {
-    try {
-      const response = await remindersService.getOverdueReminders()
-      return response
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch overdue reminders'
-      console.error('Error fetching overdue reminders:', err)
-      throw err
-    }
-  }
-
-  const fetchRemindersStats = async () => {
-    try {
-      const response = await remindersService.getRemindersStats()
-      return response
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch reminders stats'
-      console.error('Error fetching reminders stats:', err)
-      throw err
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -306,9 +330,7 @@ export const useRemindersStore = defineStore('reminders', () => {
     updateReminder,
     deleteReminder,
     completeReminder,
-    fetchUpcomingReminders,
-    fetchOverdueReminders,
-    fetchRemindersStats,
+    snoozeReminder,
     updateFilters,
     resetFilters,
     clearError,

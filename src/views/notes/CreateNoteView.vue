@@ -156,46 +156,6 @@
       </v-card>
     </v-form>
 
-    <!-- Preview Dialog -->
-    <v-dialog v-model="previewDialog" max-width="800">
-      <v-card>
-        <v-card-title class="d-flex justify-space-between align-center">
-          <span>{{ $t('notes.preview') }}</span>
-          <v-btn icon="mdi-close" variant="text" @click="previewDialog = false"></v-btn>
-        </v-card-title>
-        <v-card-text>
-          <div class="mb-4">
-            <h2 class="text-h5 mb-2">{{ formData.title }}</h2>
-            <div class="d-flex align-center gap-2 mb-3">
-              <v-chip color="primary" size="small">{{ formData.category }}</v-chip>
-              <v-chip v-if="formData.isPrivate" color="orange" size="small">
-                <v-icon icon="mdi-lock" start></v-icon>
-                {{ $t('notes.private') }}
-              </v-chip>
-            </div>
-          </div>
-          
-          <div class="text-body-1 mb-4" style="white-space: pre-wrap;">
-            {{ formData.content }}
-          </div>
-          
-          <div v-if="formData.tags.length > 0">
-            <v-label class="mb-2">{{ $t('notes.tags') }}</v-label>
-            <div class="d-flex flex-wrap gap-1">
-              <v-chip
-                v-for="tag in formData.tags"
-                :key="tag"
-                size="small"
-                variant="outlined"
-              >
-                #{{ tag }}
-              </v-chip>
-            </div>
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-
     <!-- Floating Action Button for Preview -->
     <v-fab
       icon="mdi-eye"

@@ -16,7 +16,7 @@
         color="purple"
         variant="flat"
         prepend-icon="mdi-plus"
-        @click="createDialog = true"
+        @click="openCreateAnniversaryDialog"
       >
         {{ $t('anniversaries.create') || 'Create Anniversary' }}
       </v-btn>
@@ -201,82 +201,6 @@
       </v-col>
     </v-row>
 
-    <!-- Create/Edit Dialog -->
-    <v-dialog v-model="createDialog" max-width="500">
-      <v-card>
-        <v-card-title>
-          {{ editingAnniversary ? 'Edit Anniversary' : 'Create New Anniversary' }}
-        </v-card-title>
-        
-        <v-card-text>
-          <v-form ref="form" v-model="valid">
-            <v-text-field
-              v-model="anniversaryForm.title"
-              label="Anniversary Title"
-              :rules="[v => !!v || 'Title is required']"
-              class="mb-3"
-            />
-            
-            <v-textarea
-              v-model="anniversaryForm.description"
-              label="Description (Optional)"
-              rows="3"
-              class="mb-3"
-            />
-
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="anniversaryForm.date"
-                  label="Date"
-                  type="date"
-                  :rules="[v => !!v || 'Date is required']"
-                />
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="anniversaryForm.type"
-                  :items="typeOptions"
-                  label="Type"
-                  :rules="[v => !!v || 'Type is required']"
-                />
-              </v-col>
-            </v-row>
-
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-switch
-                  v-model="anniversaryForm.isRecurring"
-                  label="Recurring"
-                  color="purple"
-                />
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-select
-                  v-if="anniversaryForm.isRecurring"
-                  v-model="anniversaryForm.frequency"
-                  :items="frequencyOptions"
-                  label="Frequency"
-                />
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-        
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="createDialog = false">Cancel</v-btn>
-          <v-btn 
-            color="purple" 
-            @click="saveAnniversary"
-            :loading="isLoading"
-            :disabled="!valid"
-          >
-            {{ editingAnniversary ? 'Update' : 'Create' }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
@@ -284,11 +208,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAnniversariesStore } from '@/stores/anniversaries'
+import { useDialogsStore } from '@/stores/dialogs'
 import type { Anniversary } from '@/types'
 import dayjs from 'dayjs'
 
 const { t } = useI18n()
 const anniversariesStore = useAnniversariesStore()
+const dialogsStore = useDialogsStore()
 
 // State
 const createDialog = ref(false)
@@ -375,6 +301,18 @@ const filteredAnniversaries = computed(() => {
   return filtered
 })
 
+// Dialog methods
+const openCreateAnniversaryDialog = () => {
+  dialogsStore.openAlertDialog({
+    title: 'Tạo Anniversary',
+    message: 'Anniversary form dialog sẽ được tích hợp sau. Hiện tại sử dụng form cục bộ.',
+    onClose: () => {
+      // Fallback to local dialog
+      createDialog.value = true
+    }
+  })
+}
+
 // Methods
 const loadAnniversaries = async () => {
   try {
@@ -402,13 +340,29 @@ const editAnniversary = (anniversary: Anniversary) => {
 }
 
 const deleteAnniversary = async (anniversary: Anniversary) => {
-  if (confirm(`Are you sure you want to delete "${anniversary.title}"?`)) {
-    try {
-      await anniversariesStore.deleteAnniversary(anniversary.id)
-    } catch (error) {
-      console.error('Delete failed:', error)
+  dialogsStore.openConfirmDialog({
+    title: t('anniversaries.confirmDeleteTitle') || 'Xác nhận xóa',
+    message: t('anniversaries.confirmDelete', { title: anniversary.title }) || `Bạn có chắc chắn muốn xóa "${anniversary.title}"?`,
+    confirmText: t('common.delete') || 'Xóa',
+    cancelText: t('common.cancel') || 'Hủy',
+    onConfirm: async () => {
+      try {
+        await anniversariesStore.deleteAnniversary(anniversary.id)
+        
+        dialogsStore.openAlertDialog({
+          title: t('common.deleted') || 'Đã xóa!',
+          message: t('anniversaries.deleteSuccess') || 'Ngày kỷ niệm đã được xóa thành công!'
+        })
+      } catch (error) {
+        console.error('Delete failed:', error)
+        
+        dialogsStore.openAlertDialog({
+          title: t('common.error') || 'Lỗi!',
+          message: t('anniversaries.deleteError') || 'Có lỗi xảy ra khi xóa ngày kỷ niệm. Vui lòng thử lại.'
+        })
+      }
     }
-  }
+  })
 }
 
 const saveAnniversary = async () => {
@@ -501,3 +455,62 @@ onMounted(() => {
   loadAnniversaries()
 })
 </script>
+
+<style scoped>
+/* SweetAlert2 Custom Styles */
+:deep(.swal2-popup-custom) {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+:deep(.swal2-title-custom) {
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
+:deep(.swal2-confirm-custom) {
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-confirm-custom:hover) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+}
+
+:deep(.swal2-cancel-custom) {
+  background: #f5f5f5 !important;
+  color: #666 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-cancel-custom:hover) {
+  background: #e0e0e0 !important;
+  border-color: #bbb !important;
+  transform: translateY(-1px) !important;
+}
+
+:deep(.swal2-icon.swal2-warning) {
+  border-color: #FF8A65 !important;
+  color: #FF6B35 !important;
+}
+
+:deep(.swal2-icon.swal2-success) {
+  border-color: #4CAF50 !important;
+  color: #4CAF50 !important;
+}
+
+:deep(.swal2-icon.swal2-error) {
+  border-color: #F44336 !important;
+  color: #F44336 !important;
+}
+</style>

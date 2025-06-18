@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { 
   Notification, 
   NotificationFilters, 
@@ -26,28 +26,26 @@ export const useNotificationsStore = defineStore('notifications', () => {
     sortBy: 'createdAt',
     sortOrder: 'desc'
   })
-
   // Getters
   const unreadNotifications = computed(() => {
     if (!notifications.value) return []
-    return notifications.value.filter(notification => !notification.isRead)
+    return notifications.value.filter(notification => !notification.readAt)
   })
 
   const readNotifications = computed(() => {
     if (!notifications.value) return []
-    return notifications.value.filter(notification => notification.isRead)
+    return notifications.value.filter(notification => !!notification.readAt)
   })
 
   const archivedNotifications = computed(() => {
     if (!notifications.value) return []
-    return notifications.value.filter(notification => notification.isArchived)
+    return notifications.value.filter(notification => !!notification.archivedAt)
   })
 
   const unarchivedNotifications = computed(() => {
     if (!notifications.value) return []
-    return notifications.value.filter(notification => !notification.isArchived)
+    return notifications.value.filter(notification => !notification.archivedAt)
   })
-
   const notificationsByType = computed(() => {
     const grouped: Record<string, Notification[]> = {
       anniversary: [],
@@ -57,14 +55,16 @@ export const useNotificationsStore = defineStore('notifications', () => {
       system: [],
       general: []
     }
+    
     if (!notifications.value) return grouped
     
     notifications.value.forEach(notification => {
-      grouped[notification.type].push(notification)
+      if (grouped[notification.type]) {
+        grouped[notification.type].push(notification)
+      }
     })
     return grouped
   })
-
   const notificationsByDeliveryStatus = computed(() => {
     const grouped: Record<string, Notification[]> = {
       pending: [],
@@ -75,15 +75,16 @@ export const useNotificationsStore = defineStore('notifications', () => {
     if (!notifications.value) return grouped
     
     notifications.value.forEach(notification => {
-      grouped[notification.deliveryStatus].push(notification)
+      if (notification.deliveryStatus) {
+        grouped[notification.deliveryStatus].push(notification)
+      }
     })
     return grouped
   })
-
   const recentNotifications = computed(() => {
     if (!notifications.value) return []
     return notifications.value
-      .filter(n => !n.isArchived)
+      .filter(n => !n.archivedAt)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5)
   })
@@ -105,19 +106,17 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const totalPages = computed(() => 
     Math.ceil(totalNotifications.value / pageSize.value)
   )
-
   // Computed statistics from local data
   const localStats = computed(() => ({
     total: notifications.value?.length || 0,
     unread: unreadNotifications.value?.length || 0,
     pending: pendingNotifications.value?.length || 0,
-    byType: {
-      anniversary: notificationsByType.value?.anniversary?.length || 0,
-      memory: notificationsByType.value?.memory?.length || 0,
-      reminder: notificationsByType.value?.reminder?.length || 0,
-      couple: notificationsByType.value?.couple?.length || 0,
-      system: notificationsByType.value?.system?.length || 0,
-      general: notificationsByType.value?.general?.length || 0
+    byType: {      anniversary: notificationsByType.value.anniversary?.length || 0,
+      memory: notificationsByType.value.memory?.length || 0,
+      reminder: notificationsByType.value.reminder?.length || 0,
+      couple: notificationsByType.value.couple?.length || 0,
+      system: notificationsByType.value.system?.length || 0,
+      general: notificationsByType.value.general?.length || 0
     },
     byDeliveryStatus: {
       pending: notificationsByDeliveryStatus.value?.pending?.length || 0,
@@ -126,6 +125,17 @@ export const useNotificationsStore = defineStore('notifications', () => {
       failed: notificationsByDeliveryStatus.value?.failed?.length || 0
     }
   }))
+
+  // Computed unread count based on readAt field
+  const computedUnreadCount = computed(() => {
+    if (!notifications.value) return 0
+    return notifications.value.filter(notification => !notification.readAt).length
+  })
+
+  // Update unreadCount whenever notifications change
+  watch(computedUnreadCount, (newCount) => {
+    unreadCount.value = newCount
+  })
 
   // Actions
   const fetchNotifications = async (customFilters?: Partial<NotificationFilters>) => {
@@ -194,7 +204,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
       throw err
     }
   }
-
   const markAsRead = async (id: string) => {
     try {
       const response = await notificationsService.markAsRead(id)
@@ -207,8 +216,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
         currentNotification.value = response
       }
       
-      // Update unread count
-      if (!response.isRead) {
+      // Update unread count if notification was marked as read
+      if (response.readAt && !notifications.value[index]?.readAt) {
         unreadCount.value = Math.max(0, unreadCount.value - 1)
       }
       
@@ -219,7 +228,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
       throw err
     }
   }
-
   const markAllAsRead = async () => {
     try {
       isLoading.value = true
@@ -230,8 +238,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
       // Update all notifications to read status
       notifications.value = notifications.value.map(notification => ({
         ...notification,
-        isRead: true,
-        readAt: new Date().toISOString()
+        readAt: notification.readAt || new Date().toISOString()
       }))
       
       unreadCount.value = 0
@@ -277,10 +284,9 @@ export const useNotificationsStore = defineStore('notifications', () => {
       if (currentNotification.value?.id === id) {
         currentNotification.value = null
       }
-      
-      // Update unread count if deleted notification was unread
+        // Update unread count if deleted notification was unread
       const deletedNotification = notifications.value.find(n => n.id === id)
-      if (deletedNotification && !deletedNotification.isRead) {
+      if (deletedNotification && !deletedNotification.readAt) {
         unreadCount.value = Math.max(0, unreadCount.value - 1)
       }
     } catch (err: any) {

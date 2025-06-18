@@ -15,6 +15,16 @@ const memoriesStore = useMemoriesStore()
 const notesStore = useNotesStore()
 const filesStore = useFilesStore()
 
+// Helper function to safely convert dates
+const safeDate = (date: Date | { _seconds: number; _nanoseconds: number } | string): Date => {
+  if (date instanceof Date) return date
+  if (typeof date === 'string') return new Date(date)
+  if (date && typeof date === 'object' && '_seconds' in date) {
+    return new Date(date._seconds * 1000 + (date._nanoseconds || 0) / 1000000)
+  }
+  return new Date()
+}
+
 // Get real stats from stores
 const stats = computed(() => ({
   memories: memoriesStore.totalMemories,
@@ -53,7 +63,7 @@ const recentItems = computed(() => {
         id: memory.id,
         title: memory.title,
         type: 'memory',
-        updatedAt: new Date(memory.updatedAt)
+        updatedAt: safeDate(memory.updatedAt)
       })
     })
   }
@@ -65,7 +75,7 @@ const recentItems = computed(() => {
         id: note.id,
         title: note.title,
         type: 'note',
-        updatedAt: new Date(note.updatedAt)
+        updatedAt: safeDate(note.updatedAt)
       })
     })
   }

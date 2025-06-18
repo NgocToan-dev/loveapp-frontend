@@ -88,8 +88,8 @@ api.interceptors.response.use(
           
           console.log('Refresh response:', refreshResponse.data)
           
-          if (refreshResponse.data?.data?.tokens) {
-            const tokens = refreshResponse.data.data.tokens
+          if (refreshResponse.data?.tokens) {
+            const tokens = refreshResponse.data.tokens
             localStorage.setItem('accessToken', tokens.accessToken)
             localStorage.setItem('refreshToken', tokens.refreshToken)
             
@@ -169,27 +169,27 @@ api.interceptors.response.use(
 export class ApiService {
   static async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.get<ApiResponse<T>>(url, config)
-    return response.data.data as T
+    return response.data as T
   }
 
   static async post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.post<ApiResponse<T>>(url, data, config)
-    return response.data.data as T
+    return response.data as T
   }
 
   static async put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.put<ApiResponse<T>>(url, data, config)
-    return response.data.data as T
+    return response.data as T
   }
 
   static async patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.patch<ApiResponse<T>>(url, data, config)
-    return response.data.data as T
+    return response.data as T
   }
 
   static async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await api.delete<ApiResponse<T>>(url, config)
-    return response.data.data as T
+    return response.data as T
   }
 
   // File upload with progress
@@ -215,7 +215,7 @@ export class ApiService {
       },
     })
 
-    return response.data.data as T
+    return response.data as T
   }
 
   // Download file

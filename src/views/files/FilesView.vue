@@ -2,11 +2,13 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
+import { useDialogsStore } from '@/stores/dialogs'
 import FilesService from '@/services/files'
 import dayjs from 'dayjs'
 
 const { t } = useI18n()
 const filesStore = useFilesStore()
+const dialogsStore = useDialogsStore()
 
 // Local state
 const uploadDialog = ref(false)
@@ -64,6 +66,16 @@ const handleDrop = (event: DragEvent) => {
     const droppedFiles = Array.from(event.dataTransfer.files)
     uploadFiles(droppedFiles)
   }
+}
+
+const openUploadDialog = () => {
+  dialogsStore.openAlertDialog({
+    title: 'Upload Files',
+    message: 'File upload dialog sẽ được tích hợp với global system sau. Hiện tại sử dụng dialog cục bộ.',
+    onClose: () => {
+      uploadDialog.value = true
+    }
+  })
 }
 
 const uploadFiles = async (filesToUpload: File[]) => {
@@ -167,13 +179,30 @@ const shareFile = async (file: any) => {
 
 const deleteFile = async (file: any) => {
   const fileName = getFileName(file)
-  if (confirm(t('files.confirmDelete', { name: fileName }))) {
-    try {
-      await filesStore.deleteFile(file.id)
-    } catch (error) {
-      console.error('Delete failed:', error)
+  
+  dialogsStore.openConfirmDialog({
+    title: t('files.confirmDeleteTitle') || 'Xác nhận xóa',
+    message: t('files.confirmDelete', { name: fileName }) || `Bạn có chắc chắn muốn xóa file "${fileName}"?`,
+    confirmText: t('common.delete') || 'Xóa',
+    cancelText: t('common.cancel') || 'Hủy',
+    onConfirm: async () => {
+      try {
+        await filesStore.deleteFile(file.id)
+        
+        dialogsStore.openAlertDialog({
+          title: t('common.deleted') || 'Đã xóa!',
+          message: t('files.deleteSuccess') || 'Tệp tin đã được xóa thành công!'
+        })
+      } catch (error) {
+        console.error('Delete failed:', error)
+        
+        dialogsStore.openAlertDialog({
+          title: t('common.error') || 'Lỗi!',
+          message: t('files.deleteError') || 'Có lỗi xảy ra khi xóa tệp tin. Vui lòng thử lại.'
+        })
+      }
     }
-  }
+  })
 }
 
 const isImage = (type: string) => {
@@ -236,7 +265,7 @@ onMounted(() => {
           <v-btn
             color="primary"
             prepend-icon="mdi-upload"
-            @click="uploadDialog = true"
+            @click="openUploadDialog"
           >
             {{ $t('files.upload') }}
           </v-btn>
@@ -413,7 +442,7 @@ onMounted(() => {
         <v-btn
           color="primary"
           prepend-icon="mdi-upload"
-          @click="uploadDialog = true"
+          @click="openUploadDialog"
         >
           {{ $t('files.uploadFirst') }}
         </v-btn>
@@ -427,45 +456,7 @@ onMounted(() => {
         <p class="text-body-1 mt-4">{{ $t('files.loading') }}</p>
       </v-col>
     </v-row>
-    <!-- Upload Dialog -->
-    <v-dialog v-model="uploadDialog" max-width="600">
-      <v-card>
-        <v-card-title>{{ $t('files.uploadFiles') }}</v-card-title>
-        <v-card-text>
-          <div class="upload-area" @drop="handleDrop" @dragover.prevent @dragenter.prevent>
-            <v-icon size="80" color="grey-lighten-2">mdi-cloud-upload</v-icon>
-            <h3 class="mt-4 mb-2">{{ $t('files.dragAndDrop') }}</h3>
-            <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('files.orClickToSelect') }}</p>
-            <v-btn color="primary" @click="triggerFileSelect">
-              {{ $t('files.selectFiles') }}
-            </v-btn>
-            <input
-              ref="fileInputRef"
-              type="file"
-              multiple
-              style="display: none"
-              @change="handleFileSelect"
-            />
-          </div>
-          
-          <!-- Upload Progress -->
-          <div v-if="uploadProgress.length > 0" class="mt-4">
-            <h4 class="mb-2">{{ $t('files.uploadProgress') }}</h4>
-            <div v-for="progress in uploadProgress" :key="progress.name" class="mb-2">
-              <div class="d-flex justify-space-between align-center mb-1">
-                <span class="text-body-2">{{ progress.name }}</span>
-                <span class="text-caption">{{ progress.progress }}%</span>
-              </div>
-              <v-progress-linear :model-value="progress.progress" height="4" />
-            </div>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="uploadDialog = false">{{ $t('common.cancel') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    
   </v-container>
 </template>
 
@@ -485,5 +476,62 @@ onMounted(() => {
 .file-preview {
   position: relative;
   overflow: hidden;
+}
+
+/* SweetAlert2 Custom Styles */
+:deep(.swal2-popup-custom) {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+:deep(.swal2-title-custom) {
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
+:deep(.swal2-confirm-custom) {
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-confirm-custom:hover) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+}
+
+:deep(.swal2-cancel-custom) {
+  background: #f5f5f5 !important;
+  color: #666 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-cancel-custom:hover) {
+  background: #e0e0e0 !important;
+  border-color: #bbb !important;
+  transform: translateY(-1px) !important;
+}
+
+:deep(.swal2-icon.swal2-warning) {
+  border-color: #FF8A65 !important;
+  color: #FF6B35 !important;
+}
+
+:deep(.swal2-icon.swal2-success) {
+  border-color: #4CAF50 !important;
+  color: #4CAF50 !important;
+}
+
+:deep(.swal2-icon.swal2-error) {
+  border-color: #F44336 !important;
+  color: #F44336 !important;
 }
 </style>

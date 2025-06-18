@@ -69,13 +69,13 @@ export class AuthService {
       const refreshToken = this.getRefreshToken()
       if (!refreshToken) return false
 
-      const response = await ApiService.post<AuthResponse['data']>('/auth/refresh-token', {
+      const response = await ApiService.post<AuthResponse>('/auth/refresh-token', {
         refreshToken,
       })
 
       // ApiService already extracts .data, so response is the clean data
-      if (response.tokens) {
-        this.setTokens(response.tokens)
+      if (response.data.tokens) {
+        this.setTokens(response.data.tokens)
         return true
       }
 
@@ -90,17 +90,17 @@ export class AuthService {
   // Register new user
   async register(email: string, password: string, displayName: string): Promise<User> {
     try {
-      const response = await ApiService.post<AuthResponse['data']>('/auth/register', {
+      const response = await ApiService.post<AuthResponse>('/auth/register', {
         email,
         password,
         displayName,
       })
 
-      if (response.tokens) {
-        this.setTokens(response.tokens)
+      if (response.data.tokens) {
+        this.setTokens(response.data.tokens)
       }
 
-      return this.processUserData(response.user)
+      return this.processUserData(response.data.user)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Registration failed')
@@ -110,16 +110,16 @@ export class AuthService {
   // Login user
   async login(email: string, password: string): Promise<User> {
     try {
-      const response = await ApiService.post<AuthResponse['data']>('/auth/login', {
+      const response = await ApiService.post<AuthResponse>('/auth/login', {
         email,
         password,
       })
 
-      if (response.tokens) {
-        this.setTokens(response.tokens)
+      if (response.data.tokens) {
+        this.setTokens(response.data.tokens)
       }
 
-      return this.processUserData(response.user)
+      return this.processUserData(response.data.user)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       throw new Error(err.response?.data?.message || 'Login failed')

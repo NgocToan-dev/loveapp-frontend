@@ -262,7 +262,7 @@
                             {{ invitation.receiverEmail }}
                           </h5>
                           <p class="text-body-2 text-medium-emphasis mb-2">
-                            Mã: {{ invitation.invitationCode }}
+                            ID: {{ invitation.id }}
                           </p>
                           <p v-if="invitation.message" class="text-body-2 mb-0">
                             "{{ invitation.message }}"
@@ -364,7 +364,7 @@ const sendInvitation = async () => {
     if (!valid) return
 
     await couplesStore.sendInvitation({
-      receiverEmail: inviteForm.email,
+      email: inviteForm.email,
       message: inviteForm.message || undefined
     })
 

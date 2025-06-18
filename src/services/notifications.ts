@@ -8,10 +8,31 @@ import type {
 } from '@/types'
 import ApiService from './api'
 
-class NotificationsService {
-  private readonly baseUrl = '/notifications'
+export interface NotificationsApiResponse {
+  data: Notification[]
+  meta?: {
+    pagination?: {
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+      hasNext: boolean
+      hasPrev: boolean
+    }
+  }
+}
 
-  // 1. GET /notifications - Get notifications
+export interface NotificationsResponse {
+  notifications: Notification[]
+  total: number
+}
+
+export interface UnreadCountResponse {
+  count: number
+}
+
+class NotificationsService {
+  private readonly baseUrl = '/notifications'  // 1. GET /notifications - Get notifications
   async getNotifications(filters?: NotificationFilters): Promise<{ notifications: Notification[], total: number }> {
     const params = new URLSearchParams()
     
@@ -23,12 +44,18 @@ class NotificationsService {
       })
     }
 
-    return await ApiService.get<{ notifications: Notification[], total: number }>(`${this.baseUrl}?${params.toString()}`)
+    const response = await ApiService.get<NotificationsApiResponse>(`${this.baseUrl}?${params.toString()}`)
+    
+    // Transform the response to match expected format
+    return {
+      notifications: response.data || [],
+      total: response.meta?.pagination?.total || 0
+    }
   }
 
   // 2. GET /notifications/unread-count - Get unread count
   async getUnreadCount(): Promise<{ count: number }> {
-    return await ApiService.get<{ count: number }>(`${this.baseUrl}/unread-count`)
+    return await ApiService.get<UnreadCountResponse>(`${this.baseUrl}/unread-count`)
   }
 
   // 3. GET /notifications/stats - Get notification stats

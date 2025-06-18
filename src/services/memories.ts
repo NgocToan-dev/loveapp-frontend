@@ -1,6 +1,21 @@
 import type { Memory, PaginationParams } from '@/types'
 import ApiService from './api'
 
+export interface MemoriesResponse {
+  data: {
+    memories: Memory[]
+    pagination: PaginationParams
+  }
+}
+
+export interface MemoryStatsResponse {
+  totalMemories: number
+  favoriteMemories: number
+  sharedMemories: number
+  memoriesByCategory: Record<string, number>
+  recentMemories: Memory[]
+}
+
 export interface CreateMemoryData {
   title: string
   description: string
@@ -48,7 +63,7 @@ export interface ShareMemoryData {
 class MemoriesService {
   private readonly baseUrl = '/memories'
 
-  async getMemories(filters?: MemoryFilters): Promise<{ memories: Memory[], total: number }> {
+  async getMemories(filters?: MemoryFilters): Promise<MemoriesResponse> {
     const params = new URLSearchParams()
     
     if (filters) {
@@ -59,7 +74,7 @@ class MemoriesService {
       })
     }
 
-    return await ApiService.get<{ memories: Memory[], total: number }>(`${this.baseUrl}?${params.toString()}`)
+    return await ApiService.get<MemoriesResponse>(`${this.baseUrl}?${params.toString()}`)
   }
 
   async getMemoryById(id: string): Promise<Memory> {
@@ -108,8 +123,8 @@ class MemoriesService {
     return await ApiService.get<Memory[]>(`${this.baseUrl}/shared`)
   }
 
-  async getMemoryStats(): Promise<any> {
-    return await ApiService.get<any>(`${this.baseUrl}/stats`)
+  async getMemoryStats(): Promise<MemoryStatsResponse> {
+    return await ApiService.get<MemoryStatsResponse>(`${this.baseUrl}/stats`)
   }
 }
 

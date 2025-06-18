@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import ServerOfflineNotice from '@/components/ServerOfflineNotice.vue'
 import NotificationBell from '@/components/NotificationBell.vue'
+import GlobalDialogContainer from '@/components/GlobalDialogContainer.vue'
 
 const { t, locale } = useI18n()
 const theme = useTheme()
@@ -262,6 +263,9 @@ const logout = async () => {
         </v-col>
       </v-row>
     </v-footer>
+
+    <!-- Global Dialog Container -->
+    <GlobalDialogContainer />
   </v-app>
 </template>
 

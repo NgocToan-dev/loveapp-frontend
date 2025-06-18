@@ -60,9 +60,8 @@ export const useMemoriesStore = defineStore('memories', () => {
       
       const mergedFilters = { ...filters.value, ...customFilters }
       const response = await memoriesService.getMemories(mergedFilters)
-      
-      memories.value = response.memories
-      totalMemories.value = response.total
+      memories.value = response.data.memories
+      totalMemories.value = response.data.pagination.total || 0
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch memories'
       console.error('Error fetching memories:', err)

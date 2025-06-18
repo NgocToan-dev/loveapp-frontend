@@ -1,17 +1,19 @@
 Kho<script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useNotificationsStore } from '@/stores/notifications'
+import { useDialogsStore } from '@/stores/dialogs'
 import type { Notification, NotificationFilters } from '@/types'
 
 const notificationsStore = useNotificationsStore()
+const dialogsStore = useDialogsStore()
 
 // State
 const selectedTab = ref('all')
 const viewMode = ref<'list' | 'grid'>('list')
 const searchQuery = ref('')
 const showFilters = ref(false)
+// Remove old dialog state - now using global dialogs
 const selectedNotifications = ref<string[]>([])
-const showDeleteDialog = ref(false)
 const notificationToDelete = ref<string | null>(null)
 
 // Filters
@@ -25,17 +27,16 @@ const currentFilters = ref<NotificationFilters>({
 // Computed properties
 const filteredNotifications = computed(() => {
   let notifications = notificationsStore.notifications || []
-  
-  // Filter by tab
+    // Filter by tab
   switch (selectedTab.value) {
     case 'unread':
-      notifications = notifications.filter(n => !n.isRead)
+      notifications = notifications.filter(n => !n.readAt)
       break
     case 'read':
-      notifications = notifications.filter(n => n.isRead)
+      notifications = notifications.filter(n => !!n.readAt)
       break
     case 'archived':
-      notifications = notifications.filter(n => n.isArchived)
+      notifications = notifications.filter(n => !!n.archivedAt)
       break
     case 'anniversary':
     case 'memory':
@@ -52,7 +53,7 @@ const filteredNotifications = computed(() => {
     const query = searchQuery.value.toLowerCase()
     notifications = notifications.filter(n =>
       n.title.toLowerCase().includes(query) ||
-      n.message.toLowerCase().includes(query)
+      (n.message && n.message.toLowerCase().includes(query))
     )
   }
   
@@ -86,6 +87,11 @@ const handleMarkAsRead = async (id: string) => {
   }
 }
 
+const handleMarkAsReadWithEvent = async (event: Event, id: string) => {
+  event.stopPropagation()
+  await handleMarkAsRead(id)
+}
+
 const handleMarkAllAsRead = async () => {
   try {
     await notificationsStore.markAllAsRead()
@@ -102,22 +108,41 @@ const handleArchive = async (id: string) => {
   }
 }
 
-const confirmDelete = (id: string) => {
-  notificationToDelete.value = id
-  showDeleteDialog.value = true
+const handleArchiveWithEvent = async (event: Event, id: string) => {
+  event.stopPropagation()
+  await handleArchive(id)
 }
 
-const handleDelete = async () => {
-  if (!notificationToDelete.value) return
-  
-  try {
-    await notificationsStore.deleteNotification(notificationToDelete.value)
-    showDeleteDialog.value = false
-    notificationToDelete.value = null
-  } catch (error) {
-    console.error('Error deleting notification:', error)
-  }
+const confirmDelete = (id: string) => {
+  dialogsStore.openConfirmDialog({
+    title: 'Xác nhận xóa',
+    message: 'Bạn có chắc chắn muốn xóa thông báo này?',
+    confirmText: 'Xóa',
+    cancelText: 'Hủy',
+    onConfirm: async () => {
+      try {
+        await notificationsStore.deleteNotification(id)
+        dialogsStore.openAlertDialog({
+          title: 'Thành công',
+          message: 'Đã xóa thông báo thành công!'
+        })
+      } catch (error) {
+        console.error('Error deleting notification:', error)
+        dialogsStore.openAlertDialog({
+          title: 'Lỗi',
+          message: 'Có lỗi xảy ra khi xóa thông báo.'
+        })
+      }
+    }
+  })
 }
+
+const confirmDeleteWithEvent = (event: Event, id: string) => {
+  event.stopPropagation()
+  confirmDelete(id)
+}
+
+// Remove old handleDelete method as it's now integrated into confirmDelete
 
 const handleBulkAction = async (action: 'read' | 'archive' | 'delete') => {
   // Implementation for bulk actions
@@ -164,7 +189,7 @@ const getNotificationColor = (type: string) => {
   }
 }
 
-const getDeliveryStatusColor = (status: string) => {
+const getDeliveryStatusColor = (status?: string) => {
   switch (status) {
     case 'delivered': return 'success'
     case 'sent': return 'info'
@@ -174,13 +199,31 @@ const getDeliveryStatusColor = (status: string) => {
   }
 }
 
-const getDeliveryStatusIcon = (status: string) => {
+const getDeliveryStatusIcon = (status?: string) => {
   switch (status) {
     case 'delivered': return 'mdi-check-circle'
     case 'sent': return 'mdi-send'
     case 'pending': return 'mdi-clock'
     case 'failed': return 'mdi-alert-circle'
     default: return 'mdi-help-circle'
+  }
+}
+
+const handleNotificationClick = async (notification: Notification) => {
+  // Mark as read if not already read
+  if (!notification.readAt) {
+    await handleMarkAsRead(notification.id)
+  }
+  
+  // Navigate to actionUrl if available
+  if (notification.actionUrl) {
+    // Handle internal routes
+    if (notification.actionUrl.startsWith('/')) {
+      window.location.href = notification.actionUrl
+    } else {
+      // Handle external URLs
+      window.open(notification.actionUrl, '_blank')
+    }
   }
 }
 
@@ -376,13 +419,13 @@ onMounted(() => {
       <!-- List View -->
       <v-card v-if="viewMode === 'list'" elevation="2">
         <v-list lines="three" class="pa-0">
-          <v-list-item
-            v-for="(notification, index) in filteredNotifications"
+          <v-list-item            v-for="(notification, index) in filteredNotifications"
             :key="notification.id"
             class="notification-item"
-            :class="{ 'notification-unread': !notification.isRead }"
+            :class="{ 'notification-unread': !notification.readAt }"
             :ripple="false"
             min-height="88"
+            @click="() => handleNotificationClick(notification)"
           >
             <template #prepend>
               <div class="d-flex align-center mr-4">
@@ -406,9 +449,8 @@ onMounted(() => {
             </template>
 
             <v-list-item-title class="text-subtitle-1 font-weight-medium mb-1 d-flex align-center flex-wrap">
-              <span class="mr-2">{{ notification.title }}</span>
-              <v-chip
-                v-if="!notification.isRead"
+              <span class="mr-2">{{ notification.title }}</span>              <v-chip
+                v-if="!notification.readAt"
                 size="x-small"
                 color="primary"
                 variant="flat"
@@ -417,8 +459,7 @@ onMounted(() => {
                 Mới
               </v-chip>
             </v-list-item-title>
-            
-            <v-list-item-subtitle class="text-body-2 mb-2 notification-message">
+              <v-list-item-subtitle v-if="notification.message" class="text-body-2 mb-2 notification-message">
               {{ notification.message }}
             </v-list-item-subtitle>
 
@@ -451,11 +492,10 @@ onMounted(() => {
               <div class="d-flex align-center flex-column flex-sm-row gap-1">
                 <v-btn
                   v-if="!notification.isRead"
-                  icon="mdi-check"
-                  size="small"
+                  icon="mdi-check"                  size="small"
                   variant="text"
                   color="primary"
-                  @click="() => handleMarkAsRead(notification.id)"
+                  @click="(event: Event) => handleMarkAsReadWithEvent(event, notification.id)"
                   density="comfortable"
                 >
                   <v-icon>mdi-check</v-icon>
@@ -463,11 +503,10 @@ onMounted(() => {
                 </v-btn>
                 
                 <v-btn
-                  icon="mdi-archive"
-                  size="small"
+                  icon="mdi-archive"                  size="small"
                   variant="text"
                   color="orange"
-                  @click="() => handleArchive(notification.id)"
+                  @click="(event: Event) => handleArchiveWithEvent(event, notification.id)"
                   density="comfortable"
                 >
                   <v-icon>mdi-archive</v-icon>
@@ -475,11 +514,10 @@ onMounted(() => {
                 </v-btn>
                 
                 <v-btn
-                  icon="mdi-delete"
-                  size="small"
+                  icon="mdi-delete"                  size="small"
                   variant="text"
                   color="error"
-                  @click="() => confirmDelete(notification.id)"
+                  @click="(event: Event) => confirmDeleteWithEvent(event, notification.id)"
                   density="comfortable"
                 >
                   <v-icon>mdi-delete</v-icon>
@@ -501,10 +539,10 @@ onMounted(() => {
           md="4"
           lg="3"
         >
-          <v-card
-            class="notification-card h-100"
-            :class="{ 'notification-unread': !notification.isRead }"
+          <v-card            class="notification-card h-100"
+            :class="{ 'notification-unread': !notification.readAt }"
             elevation="2"
+            @click="() => handleNotificationClick(notification)"
           >
             <v-card-title class="d-flex align-center pb-2">
               <v-avatar
@@ -567,7 +605,7 @@ onMounted(() => {
                 size="small"
                 color="primary"
                 variant="text"
-                @click="() => handleMarkAsRead(notification.id)"
+                @click="(event: Event) => handleMarkAsReadWithEvent(event, notification.id)"
               >
                 <v-icon start>mdi-check</v-icon>
                 Đã đọc
@@ -580,7 +618,7 @@ onMounted(() => {
                 size="small"
                 variant="text"
                 color="orange"
-                @click="() => handleArchive(notification.id)"
+                @click="(event: Event) => handleArchiveWithEvent(event, notification.id)"
               >
                 <v-icon>mdi-archive</v-icon>
               </v-btn>
@@ -590,40 +628,16 @@ onMounted(() => {
                 size="small"
                 variant="text"
                 color="error"
-                @click="() => confirmDelete(notification.id)"
+                @click="(event: Event) => confirmDeleteWithEvent(event, notification.id)"
               >
                 <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </v-card-actions>
+              </v-btn>            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
     </template>
 
-    <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="showDeleteDialog" max-width="400">
-      <v-card>
-        <v-card-title class="text-h6">
-          Xác nhận xóa
-        </v-card-title>
-        <v-card-text>
-          Bạn có chắc chắn muốn xóa thông báo này? Hành động này không thể hoàn tác.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="() => { showDeleteDialog = false }">
-            Hủy
-          </v-btn>
-          <v-btn
-            color="error"
-            @click="handleDelete"
-            :loading="isLoading"
-          >
-            Xóa
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Delete dialog removed - using global dialog system -->
   </v-container>
 </template>
 

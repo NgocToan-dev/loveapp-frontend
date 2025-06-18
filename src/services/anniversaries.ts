@@ -1,6 +1,50 @@
 import type { Anniversary, PaginationParams } from '@/types'
 import ApiService from './api'
 
+// Helper function to convert Firebase timestamp to Date
+const convertFirebaseTimestamp = (timestamp: any): Date => {
+  if (timestamp && typeof timestamp === 'object' && '_seconds' in timestamp) {
+    return new Date(timestamp._seconds * 1000 + (timestamp._nanoseconds || 0) / 1000000)
+  }
+  return new Date(timestamp)
+}
+
+// Helper function to normalize anniversary data  
+const normalizeAnniversary = (anniversary: any): Anniversary => {
+  return {
+    ...anniversary,
+    createdAt: convertFirebaseTimestamp(anniversary.createdAt),
+    updatedAt: convertFirebaseTimestamp(anniversary.updatedAt),
+    date: typeof anniversary.date === 'string' ? anniversary.date : new Date(anniversary.date).toISOString().split('T')[0]
+  }
+}
+
+export interface AnniversariesApiResponse {
+  data: Anniversary[]
+  meta: {
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      totalPages: number
+      hasNext: boolean
+      hasPrev: boolean
+    }
+  }
+}
+
+export interface AnniversariesResponse {
+  anniversaries: Anniversary[]
+  total: number
+}
+
+export interface AnniversaryStatsResponse {
+  total: number
+  byType: Record<string, number>
+  upcoming: Anniversary[]
+  recurring: number
+}
+
 export interface CreateAnniversaryData {
   title: string
   description?: string
@@ -40,19 +84,28 @@ class AnniversariesService {
       })
     }
 
-    return await ApiService.get<{ anniversaries: Anniversary[], total: number }>(`${this.baseUrl}?${params.toString()}`)
+    const response = await ApiService.get<AnniversariesApiResponse>(`${this.baseUrl}?${params.toString()}`)
+    
+    // Transform the response to match expected format
+    return {
+      anniversaries: (response.data || []).map(normalizeAnniversary),
+      total: response.meta?.pagination?.total || 0
+    }
   }
 
   async getAnniversaryById(id: string): Promise<Anniversary> {
-    return await ApiService.get<Anniversary>(`${this.baseUrl}/${id}`)
+    const response = await ApiService.get<any>(`${this.baseUrl}/${id}`)
+    return normalizeAnniversary(response)
   }
 
   async createAnniversary(data: CreateAnniversaryData): Promise<Anniversary> {
-    return await ApiService.post<Anniversary>(this.baseUrl, data)
+    const response = await ApiService.post<any>(this.baseUrl, data)
+    return normalizeAnniversary(response)
   }
 
   async updateAnniversary(id: string, data: UpdateAnniversaryData): Promise<Anniversary> {
-    return await ApiService.put<Anniversary>(`${this.baseUrl}/${id}`, data)
+    const response = await ApiService.put<any>(`${this.baseUrl}/${id}`, data)
+    return normalizeAnniversary(response)
   }
 
   async deleteAnniversary(id: string): Promise<void> {
@@ -60,15 +113,17 @@ class AnniversariesService {
   }
 
   async getUpcomingAnniversaries(): Promise<Anniversary[]> {
-    return await ApiService.get<Anniversary[]>(`${this.baseUrl}/upcoming`)
+    const response = await ApiService.get<any[]>(`${this.baseUrl}/upcoming`)
+    return response.map(normalizeAnniversary)
   }
 
   async getAnniversariesByType(type: string): Promise<Anniversary[]> {
-    return await ApiService.get<Anniversary[]>(`${this.baseUrl}/type/${type}`)
+    const response = await ApiService.get<any[]>(`${this.baseUrl}/type/${type}`)
+    return response.map(normalizeAnniversary)
   }
 
-  async getAnniversariesStats(): Promise<any> {
-    return await ApiService.get<any>(`${this.baseUrl}/stats`)
+  async getAnniversariesStats(): Promise<AnniversaryStatsResponse> {
+    return await ApiService.get<AnniversaryStatsResponse>(`${this.baseUrl}/stats`)
   }
 }
 

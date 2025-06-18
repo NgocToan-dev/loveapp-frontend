@@ -20,6 +20,25 @@ interface FileUploadResponse {
   uploadUrl?: string
 }
 
+interface DownloadUrlResponse {
+  downloadUrl: string
+}
+
+interface ShareUrlResponse {
+  shareUrl: string
+}
+
+interface ThumbnailResponse {
+  thumbnailUrl: string
+}
+
+interface FileStatsResponse {
+  totalFiles: number
+  totalSize: number
+  filesByType: Record<string, number>
+  recentFiles: FileItem[]
+}
+
 export class FilesService {
   // Get all files with pagination and filters
   async getFiles(params?: {
@@ -144,7 +163,7 @@ export class FilesService {
   // Get file download URL
   async getDownloadUrl(id: string): Promise<string> {
     try {
-      const response = await ApiService.get<{ downloadUrl: string }>(`/files/${id}/download`)
+      const response = await ApiService.get<DownloadUrlResponse>(`/files/${id}/download`)
       return response.downloadUrl
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
@@ -173,7 +192,7 @@ export class FilesService {
   // Get file share URL
   async getShareUrl(id: string, expiresIn?: number): Promise<string> {
     try {
-      const response = await ApiService.post<{ shareUrl: string }>(`/files/${id}/share`, {
+      const response = await ApiService.post<ShareUrlResponse>(`/files/${id}/share`, {
         expiresIn
       })
       return response.shareUrl
@@ -184,19 +203,9 @@ export class FilesService {
   }
 
   // Get file statistics
-  async getFileStats(): Promise<{
-    totalFiles: number
-    totalSize: number
-    filesByType: Record<string, number>
-    recentFiles: FileItem[]
-  }> {
+  async getFileStats(): Promise<FileStatsResponse> {
     try {
-      const response = await ApiService.get<{
-        totalFiles: number
-        totalSize: number
-        filesByType: Record<string, number>
-        recentFiles: FileItem[]
-      }>('/files/stats')
+      const response = await ApiService.get<FileStatsResponse>('/files/stats')
       return response
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
@@ -229,7 +238,7 @@ export class FilesService {
   // Get file thumbnail
   async getThumbnailUrl(id: string, size: 'small' | 'medium' | 'large' = 'medium'): Promise<string> {
     try {
-      const response = await ApiService.get<{ thumbnailUrl: string }>(`/files/${id}/thumbnail`, {
+      const response = await ApiService.get<ThumbnailResponse>(`/files/${id}/thumbnail`, {
         params: { size }
       })
       return response.thumbnailUrl

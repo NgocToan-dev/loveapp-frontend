@@ -13,7 +13,7 @@
           <v-btn
             color="orange"
             prepend-icon="mdi-bell-plus"
-            @click="createDialog = true"
+            @click="createNewReminder"
           >
             {{ $t('reminders.create') }}
           </v-btn>
@@ -329,7 +329,7 @@
     </v-row>
 
     <!-- Empty State -->
-    <v-row v-if="reminders.length === 0 && !loading">
+    <v-row v-if="!loading && (!reminders || reminders.length === 0)">
       <v-col cols="12" class="text-center py-12">
         <v-icon size="120" color="grey-lighten-2">mdi-bell-outline</v-icon>
         <h3 class="text-h5 mt-4 mb-2">{{ $t('reminders.noReminders') }}</h3>
@@ -337,7 +337,7 @@
         <v-btn
           color="orange"
           prepend-icon="mdi-bell-plus"
-          @click="createDialog = true"
+          @click="createNewReminder"
         >
           {{ $t('reminders.createFirst') }}
         </v-btn>
@@ -352,85 +352,29 @@
       </v-col>
     </v-row>
 
-    <!-- Create/Edit Reminder Dialog -->
-    <v-dialog v-model="createDialog" max-width="600">
-      <v-card>
-        <v-card-title>
-          {{ editingReminder ? $t('reminders.editReminder') : $t('reminders.createReminder') }}
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="reminderForm">
-            <v-text-field
-              v-model="reminderForm.title"
-              :label="$t('reminders.reminderTitle')"
-              variant="outlined"
-              :rules="[rules.required]"
-              class="mb-3"
-            />
-            
-            <v-textarea
-              v-model="reminderForm.description"
-              :label="$t('reminders.description')"
-              variant="outlined"
-              rows="3"
-              class="mb-3"
-            />
-
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="reminderForm.reminderDate"
-                  :label="$t('reminders.reminderDate')"
-                  type="datetime-local"
-                  variant="outlined"
-                  :rules="[rules.required]"
-                />
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="reminderForm.priority"
-                  :items="priorityOptions"
-                  :label="$t('reminders.priority')"
-                  variant="outlined"
-                  :rules="[rules.required]"
-                />
-              </v-col>
-            </v-row>
-
-            <v-row>
-              <v-col cols="12">
-                <v-select
-                  v-model="reminderForm.repeat"
-                  :items="repeatOptions"
-                  :label="$t('reminders.repeat')"
-                  variant="outlined"
-                  clearable
-                />
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="createDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="orange" @click="saveReminder">
-            {{ editingReminder ? $t('common.save') : $t('reminders.create') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRemindersStore } from '@/stores/reminders'
-import type { Reminder } from '@/types'
+import { useDialogsStore } from '@/stores/dialogs'
+import type { Reminder, FirebaseTimestamp } from '@/types'
 import dayjs from 'dayjs'
+import Swal from 'sweetalert2'
 
 const { t } = useI18n()
 const remindersStore = useRemindersStore()
+const dialogsStore = useDialogsStore()
+
+// Helper function to convert Firebase timestamp to Date
+const convertToDate = (timestamp: FirebaseTimestamp | Date | string): Date => {
+  if (timestamp && typeof timestamp === 'object' && '_seconds' in timestamp) {
+    return new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000)
+  }
+  return new Date(timestamp)
+}
 
 // State
 const createDialog = ref(false)
@@ -442,13 +386,13 @@ const sortBy = ref('dueDateAsc')
 const viewMode = ref('grid')
 
 // Get data from store
-const reminders = computed(() => remindersStore.reminders)
+const reminders = computed(() => remindersStore.reminders || [])
 const loading = computed(() => remindersStore.isLoading)
 const error = computed(() => remindersStore.error)
-const stats = computed(() => remindersStore.stats)
+const stats = computed(() => remindersStore.stats || { total: 0, upcoming: 0, overdue: 0, completed: 0 })
 
 // Form
-const reminderForm = ref({
+const reminderForm = reactive({
   title: '',
   description: '',
   reminderDate: '',
@@ -485,7 +429,7 @@ const sortOptions = [
 ]
 
 const filteredReminders = computed(() => {
-  let filtered = [...reminders.value]
+  let filtered = [...(reminders.value || [])]
 
   // Filter by search
   if (searchQuery.value) {
@@ -524,7 +468,7 @@ const filteredReminders = computed(() => {
       case 'titleAsc':
         return a.title.localeCompare(b.title)
       case 'createdDesc':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        return convertToDate(b.createdAt).getTime() - convertToDate(a.createdAt).getTime()
       default:
         return 0
     }
@@ -547,6 +491,24 @@ const loadReminders = async () => {
   }
 }
 
+const createNewReminder = () => {
+  // Use global dialog system for reminder form
+  dialogsStore.openAlertDialog({
+    title: 'Tạo Reminder',
+    message: 'Reminder form dialog sẽ được tích hợp sau. Hiện tại sử dụng form cục bộ.',
+    onClose: () => {
+      // Fallback to local dialog for now
+      editingReminder.value = null
+      reminderForm.title = ''
+      reminderForm.description = ''
+      reminderForm.reminderDate = ''
+      reminderForm.priority = 'medium'
+      reminderForm.repeat = ''
+      createDialog.value = true
+    }
+  })
+}
+
 const viewReminder = (reminder: Reminder) => {
   // TODO: Navigate to reminder detail view or show detailed modal
   console.log('View reminder:', reminder)
@@ -554,24 +516,41 @@ const viewReminder = (reminder: Reminder) => {
 
 const editReminder = (reminder: Reminder) => {
   editingReminder.value = reminder
-  reminderForm.value = {
-    title: reminder.title,
-    description: reminder.description || '',
-    reminderDate: dayjs(reminder.reminderDate).format('YYYY-MM-DDTHH:mm'),
-    priority: reminder.priority,
-    repeat: reminder.repeat || ''
-  }
+  // Update form values without reassigning the object
+  reminderForm.title = reminder.title
+  reminderForm.description = reminder.description || ''
+  // Convert reminderDate to proper format for datetime-local input
+  const reminderDate = new Date(reminder.reminderDate)
+  reminderForm.reminderDate = dayjs(reminderDate).format('YYYY-MM-DDTHH:mm')
+  reminderForm.priority = reminder.priority
+  reminderForm.repeat = reminder.repeat || ''
   createDialog.value = true
 }
 
 const deleteReminder = async (reminder: Reminder) => {
-  if (confirm(t('reminders.confirmDelete', { title: reminder.title }))) {
-    try {
-      await remindersStore.deleteReminder(reminder.id)
-    } catch (error) {
-      console.error('Delete failed:', error)
+  dialogsStore.openConfirmDialog({
+    title: t('reminders.confirmDeleteTitle') || 'Xác nhận xóa',
+    message: t('reminders.confirmDelete', { title: reminder.title }) || `Bạn có chắc chắn muốn xóa reminder "${reminder.title}"?`,
+    confirmText: t('common.delete') || 'Xóa',
+    cancelText: t('common.cancel') || 'Hủy',
+    onConfirm: async () => {
+      try {
+        await remindersStore.deleteReminder(reminder.id)
+        
+        dialogsStore.openAlertDialog({
+          title: t('common.deleted') || 'Đã xóa!',
+          message: t('reminders.deleteSuccess') || 'Reminder đã được xóa thành công!'
+        })
+      } catch (error) {
+        console.error('Delete failed:', error)
+        
+        dialogsStore.openAlertDialog({
+          title: t('common.error') || 'Lỗi!',
+          message: t('reminders.deleteError') || 'Có lỗi xảy ra khi xóa reminder. Vui lòng thử lại.'
+        })
+      }
     }
-  }
+  })
 }
 
 const completeReminder = async (reminder: Reminder) => {
@@ -598,12 +577,16 @@ const shareReminder = async (reminder: Reminder) => {
 
 const saveReminder = async () => {
   try {
+    if (!reminderForm || !reminderForm.title?.trim() || !reminderForm.reminderDate) {
+      return
+    }
+
     const reminderData = {
-      title: reminderForm.value.title,
-      description: reminderForm.value.description,
-      reminderDate: new Date(reminderForm.value.reminderDate),
-      priority: reminderForm.value.priority,
-      repeat: reminderForm.value.repeat || undefined
+      title: reminderForm.title.trim(),
+      description: reminderForm.description?.trim() || '',
+      reminderDate: new Date(reminderForm.reminderDate),
+      priority: reminderForm.priority,
+      repeat: reminderForm.repeat || undefined
     }
 
     if (editingReminder.value) {
@@ -616,13 +599,12 @@ const saveReminder = async () => {
     
     createDialog.value = false
     editingReminder.value = null
-    reminderForm.value = {
-      title: '',
-      description: '',
-      reminderDate: '',
-      priority: 'medium',
-      repeat: ''
-    }
+    // Reset form values without reassigning the object
+    reminderForm.title = ''
+    reminderForm.description = ''
+    reminderForm.reminderDate = ''
+    reminderForm.priority = 'medium'
+    reminderForm.repeat = ''
   } catch (error) {
     console.error('Save failed:', error)
   }
@@ -675,20 +657,22 @@ const getStatusClass = (reminder: Reminder) => {
 }
 
 const isOverdue = (reminder: Reminder) => {
+  if (!reminder.reminderDate) return false
   return !reminder.isCompleted && new Date(reminder.reminderDate) < new Date()
 }
 
 const formatDateTime = (date: string | Date) => {
+  if (!date) return ''
   return dayjs(date).format('DD/MM/YYYY HH:mm')
 }
 
 // Lifecycle
-onMounted(() => {
-  loadReminders()
+onMounted(async () => {
+  await loadReminders()
 })
 </script>
 
-<style scoped>
+<style lang="scss">
 .text-orange {
   color: rgb(255, 152, 0) !important;
 }
@@ -708,7 +692,65 @@ onMounted(() => {
 .reminder-description {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* SweetAlert2 Custom Styles */
+.swal2-popup-custom {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.swal2-title-custom {
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
+.swal2-confirm-custom {
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.swal2-confirm-custom:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+}
+
+.swal2-cancel-custom {
+  background: #f5f5f5 !important;
+  color: #666 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  transition: all 0.3s ease !important;
+}
+
+.swal2-cancel-custom:hover {
+  background: #e0e0e0 !important;
+  border-color: #bbb !important;
+  transform: translateY(-1px) !important;
+}
+
+.swal2-icon.swal2-warning {
+  border-color: #FF8A65 !important;
+  color: #FF6B35 !important;
+}
+
+.swal2-icon.swal2-success {
+  border-color: #4CAF50 !important;
+  color: #4CAF50 !important;
+}
+
+.swal2-icon.swal2-error {
+  border-color: #F44336 !important;
+  color: #F44336 !important;
 }
 </style>

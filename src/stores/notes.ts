@@ -10,10 +10,11 @@ export const useNotesStore = defineStore('notes', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const totalNotes = ref(0)
+  const pagination = ref<any>(null)
   const searchResults = ref<Note[]>([])
   const filters = ref<NoteFilters>({
     page: 1,
-    limit: 10,
+    limit: 12,
     sortBy: 'updatedAt',
     sortOrder: 'desc'
   })
@@ -42,9 +43,12 @@ export const useNotesStore = defineStore('notes', () => {
     [...new Set((notes.value || []).map(note => note.category))]
   )
 
-  const totalPages = computed(() => 
-    Math.ceil(totalNotes.value / (filters.value.limit || 10))
-  )
+  const totalPages = computed(() => {
+    if (pagination.value?.totalPages) {
+      return pagination.value.totalPages
+    }
+    return Math.ceil(totalNotes.value / (filters.value.limit || 12))
+  })
 
   // Actions
   const fetchNotes = async (customFilters?: Partial<NoteFilters>) => {
@@ -57,6 +61,7 @@ export const useNotesStore = defineStore('notes', () => {
       
       notes.value = response.notes
       totalNotes.value = response.total
+      pagination.value = response.pagination
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch notes'
       console.error('Error fetching notes:', err)
@@ -65,6 +70,7 @@ export const useNotesStore = defineStore('notes', () => {
       if (err.code === 'ERR_NETWORK' || err.code === 'ERR_NAME_NOT_RESOLVED') {
         notes.value = []
         totalNotes.value = 0
+        pagination.value = null
         error.value = 'Backend server not available. Please check if the server is running.'
       }
     } finally {
@@ -224,6 +230,7 @@ export const useNotesStore = defineStore('notes', () => {
     isLoading,
     error,
     totalNotes,
+    pagination,
     searchResults,
     filters,
     

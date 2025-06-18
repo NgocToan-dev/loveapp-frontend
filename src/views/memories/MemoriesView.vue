@@ -10,7 +10,7 @@
           <v-btn
             color="primary"
             prepend-icon="mdi-plus"
-            @click="createDialog = true"
+            @click="openCreateMemoryDialog"
           >
             {{ $t('memories.create') }}
           </v-btn>
@@ -285,7 +285,7 @@
         <v-btn
           color="primary"
           prepend-icon="mdi-plus"
-          @click="createDialog = true"
+          @click="openCreateMemoryDialog"
         >
           {{ $t('memories.createFirst') }}
         </v-btn>
@@ -299,78 +299,8 @@
         <p class="text-body-1 mt-4">{{ $t('memories.loading') }}</p>
       </v-col>
     </v-row>
-
-    <!-- Create/Edit Memory Dialog -->
-    <v-dialog v-model="createDialog" max-width="800">
-      <v-card>
-        <v-card-title>
-          {{ editingMemory ? $t('memories.editMemory') : $t('memories.createMemory') }}
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="memoryForm">
-            <v-text-field
-              v-model="memoryForm.title"
-              :label="$t('memories.memoryTitle')"
-              variant="outlined"
-              :rules="[rules.required]"
-              class="mb-3"
-            />
-            
-            <v-textarea
-              v-model="memoryForm.description"
-              :label="$t('memories.description')"
-              variant="outlined"
-              rows="3"
-              class="mb-3"
-            />
-
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="memoryForm.date"
-                  :label="$t('memories.date')"
-                  type="date"
-                  variant="outlined"
-                  :rules="[rules.required]"
-                />
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="memoryForm.category"
-                  :items="categories"
-                  :label="$t('memories.category')"
-                  variant="outlined"
-                  :rules="[rules.required]"
-                />
-              </v-col>
-            </v-row>
-
-            <v-file-input
-              v-model="memoryForm.photos"
-              :label="$t('memories.photos')"
-              variant="outlined"
-              multiple
-              accept="image/*"
-              prepend-icon="mdi-camera"
-              class="mb-3"
-            />
-
-            <v-switch
-              v-model="memoryForm.isFavorite"
-              :label="$t('memories.markAsFavorite')"
-              color="pink"
-            />
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="createDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" @click="saveMemory">
-            {{ editingMemory ? $t('common.save') : $t('memories.create') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    
+    <!-- Dialog removed - using global dialog system -->
   </v-container>
 </template>
 
@@ -379,15 +309,17 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMemoriesStore } from '@/stores/memories'
 import { useAuthStore } from '@/stores/auth'
+import { useDialogsStore } from '@/stores/dialogs'
 import type { Memory } from '@/types'
 import dayjs from 'dayjs'
+import Swal from 'sweetalert2'
 
 const { t } = useI18n()
 const memoriesStore = useMemoriesStore()
 const authStore = useAuthStore()
+const dialogsStore = useDialogsStore()
 
 // State
-const createDialog = ref(false)
 const editingMemory = ref<Memory | null>(null)
 const searchQuery = ref('')
 const selectedCategory = ref('')
@@ -491,30 +423,74 @@ const loadMemories = async () => {
   }
 }
 
+const openCreateMemoryDialog = () => {
+  // For now, use alert dialog as placeholder
+  dialogsStore.openAlertDialog({
+    title: 'Tạo Memory',
+    message: 'Memory dialog sẽ được tích hợp sau. Hiện tại sử dụng route /memories/create'
+  })
+}
+
 const viewMemory = (memory: Memory) => {
   // TODO: Navigate to memory detail view
   console.log('View memory:', memory)
 }
 
 const editMemory = (memory: Memory) => {
-  editingMemory.value = memory
-  memoryForm.value = {
-    title: memory.title,
-    description: memory.description,
-    date: dayjs(memory.memoryDate).format('YYYY-MM-DD'),
-    category: '', // Memory type doesn't have category, we'll handle this differently
-    photos: [],
-    isFavorite: memory.isFavorite || false
-  }
-  createDialog.value = true
+  // Use global dialog or route to edit
+  dialogsStore.openAlertDialog({
+    title: 'Chỉnh sửa Memory', 
+    message: 'Edit memory dialog sẽ được tích hợp sau.'
+  })
 }
 
 const deleteMemory = async (memory: Memory) => {
-  if (confirm(t('memories.confirmDelete', { title: memory.title }))) {
+  const result = await Swal.fire({
+    title: t('memories.confirmDeleteTitle') || 'Xác nhận xóa',
+    text: t('memories.confirmDelete', { title: memory.title }),
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#FF5722',
+    cancelButtonColor: '#757575',
+    confirmButtonText: t('common.delete'),
+    cancelButtonText: t('common.cancel'),
+    reverseButtons: true,
+    customClass: {
+      popup: 'swal2-popup-custom',
+      title: 'swal2-title-custom',
+      confirmButton: 'swal2-confirm-custom',
+      cancelButton: 'swal2-cancel-custom'
+    }
+  })
+
+  if (result.isConfirmed) {
     try {
       await memoriesStore.deleteMemory(memory.id)
+      
+      Swal.fire({
+        title: t('common.deleted') || 'Đã xóa!',
+        text: t('memories.deleteSuccess') || 'Kỷ niệm đã được xóa thành công!',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: {
+          popup: 'swal2-popup-custom'
+        }
+      })
     } catch (error) {
       console.error('Delete failed:', error)
+      
+      Swal.fire({
+        title: t('common.error') || 'Lỗi!',
+        text: t('memories.deleteError') || 'Có lỗi xảy ra khi xóa kỷ niệm. Vui lòng thử lại.',
+        icon: 'error',
+        confirmButtonText: t('common.ok') || 'OK',
+        confirmButtonColor: '#FF6B35',
+        customClass: {
+          popup: 'swal2-popup-custom',
+          confirmButton: 'swal2-confirm-custom'
+        }
+      })
     }
   }
 }
@@ -567,16 +543,9 @@ const saveMemory = async () => {
       })
     }
     
-    createDialog.value = false
+    // Dialog closed automatically in global system
     editingMemory.value = null
-    memoryForm.value = {
-      title: '',
-      description: '',
-      date: '',
-      category: '',
-      photos: [],
-      isFavorite: false
-    }
+    // Reset form handled by global dialog
   } catch (error) {
     console.error('Save failed:', error)
   }
@@ -646,7 +615,65 @@ onMounted(() => {
 .memory-description {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* SweetAlert2 Custom Styles */
+:deep(.swal2-popup-custom) {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+:deep(.swal2-title-custom) {
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
+:deep(.swal2-confirm-custom) {
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-confirm-custom:hover) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+}
+
+:deep(.swal2-cancel-custom) {
+  background: #f5f5f5 !important;
+  color: #666 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.swal2-cancel-custom:hover) {
+  background: #e0e0e0 !important;
+  border-color: #bbb !important;
+  transform: translateY(-1px) !important;
+}
+
+:deep(.swal2-icon.swal2-warning) {
+  border-color: #FF8A65 !important;
+  color: #FF6B35 !important;
+}
+
+:deep(.swal2-icon.swal2-success) {
+  border-color: #4CAF50 !important;
+  color: #4CAF50 !important;
+}
+
+:deep(.swal2-icon.swal2-error) {
+  border-color: #F44336 !important;
+  color: #F44336 !important;
 }
 </style>

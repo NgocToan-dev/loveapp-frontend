@@ -143,7 +143,10 @@ const vi = {
     orClickToSelect: 'hoặc nhấp để chọn tệp',
     selectFiles: 'Chọn tệp',
     uploadProgress: 'Tiến trình tải lên',
-    confirmDelete: 'Bạn có chắc muốn xóa "{name}"?'
+    confirmDelete: 'Bạn có chắc muốn xóa "{name}"?',
+    confirmDeleteTitle: 'Xác nhận xóa',
+    deleteSuccess: 'Tệp tin đã được xóa thành công!',
+    deleteError: 'Có lỗi xảy ra khi xóa tệp tin. Vui lòng thử lại.',
   },
   notes: {
     title: 'Ghi chú của chúng ta',
@@ -175,8 +178,11 @@ const vi = {
     content: 'Nội dung',
     markAsFavorite: 'Đánh dấu yêu thích',
     confirmDelete: 'Bạn có chắc muốn xóa ghi chú "{title}"?',
+    confirmDeleteTitle: 'Xác nhận xóa',
     deleteConfirm: 'Xác nhận xóa',
-    deleteWarning: 'Hành động này không thể hoàn tác.'
+    deleteWarning: 'Hành động này không thể hoàn tác.',
+    deleteSuccess: 'Ghi chú đã được xóa thành công!',
+    deleteError: 'Có lỗi xảy ra khi xóa ghi chú. Vui lòng thử lại.',
   },
   reminders: {
     title: 'Nhắc nhở của chúng ta',
@@ -211,6 +217,9 @@ const vi = {
     repeat: 'Lặp lại',
     markAsCompleted: 'Đánh dấu hoàn thành',
     confirmDelete: 'Bạn có chắc muốn xóa nhắc nhở "{title}"?',
+    confirmDeleteTitle: 'Xác nhận xóa',
+    deleteSuccess: 'Nhắc nhở đã được xóa thành công!',
+    deleteError: 'Có lỗi xảy ra khi xóa nhắc nhở. Vui lòng thử lại.',
     priorities: {
       low: 'Thấp',
       medium: 'Trung bình',
@@ -263,6 +272,9 @@ const vi = {
     noAnniversariesDescription: 'Hãy tạo ngày kỷ niệm đầu tiên',
     createFirst: 'Tạo ngày kỷ niệm đầu tiên',
     confirmDelete: 'Bạn có chắc muốn xóa ngày kỷ niệm "{title}"?',
+    confirmDeleteTitle: 'Xác nhận xóa',
+    deleteSuccess: 'Ngày kỷ niệm đã được xóa thành công!',
+    deleteError: 'Có lỗi xảy ra khi xóa ngày kỷ niệm. Vui lòng thử lại.',
     types: {
       relationship: 'Tình yêu',
       milestone: 'Cột mốc',
@@ -315,7 +327,10 @@ const vi = {
     private: 'Riêng tư',
     save: 'Lưu kỷ niệm',
     markAsFavorite: 'Đánh dấu yêu thích',
-    confirmDelete: 'Bạn có chắc muốn xóa kỷ niệm "{title}"?'
+    confirmDelete: 'Bạn có chắc muốn xóa kỷ niệm "{title}"?',
+    confirmDeleteTitle: 'Xác nhận xóa',
+    deleteSuccess: 'Kỷ niệm đã được xóa thành công!',
+    deleteError: 'Có lỗi xảy ra khi xóa kỷ niệm. Vui lòng thử lại.',
   },
   common: {
     comingSoon: 'Sắp ra mắt',
@@ -332,7 +347,10 @@ const vi = {
     share: 'Chia sẻ',
     search: 'Tìm kiếm',
     all: 'Tất cả',
-    updated: 'Cập nhật'
+    updated: 'Cập nhật',
+    deleted: 'Đã xóa!',
+    error: 'Lỗi!',
+    ok: 'OK'
   },
   theme: {
     toggleDark: 'Chuyển sang chế độ tối',
@@ -673,6 +691,9 @@ const en = {
     repeat: 'Repeat',
     markAsCompleted: 'Mark as completed',
     confirmDelete: 'Are you sure you want to delete reminder "{title}"?',
+    confirmDeleteTitle: 'Confirm Delete',
+    deleteSuccess: 'Reminder has been deleted successfully!',
+    deleteError: 'An error occurred while deleting the reminder. Please try again.',
     priorities: {
       low: 'Low',
       medium: 'Medium',
@@ -777,7 +798,10 @@ const en = {
       private: 'Private',
       save: 'Save Memory',
       markAsFavorite: 'Mark as favorite',
-      confirmDelete: 'Are you sure you want to delete memory "{title}"?'
+      confirmDelete: 'Are you sure you want to delete memory "{title}"?',
+      confirmDeleteTitle: 'Confirm Delete',
+      deleteSuccess: 'Memory has been deleted successfully!',
+      deleteError: 'An error occurred while deleting the memory. Please try again.',
     },
     common: {
       comingSoon: 'Coming Soon',
@@ -794,7 +818,10 @@ const en = {
     share: 'Share',
     search: 'Search',
     all: 'All',
-    updated: 'Updated'
+    updated: 'Updated',
+    deleted: 'Deleted!',
+    error: 'Error!',
+    ok: 'OK'
   },
   theme: {
     toggleDark: 'Switch to dark mode',

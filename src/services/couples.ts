@@ -1,5 +1,10 @@
 import ApiService from './api'
 
+export interface CoupleActionResponse {
+  success: boolean
+  message: string
+}
+
 // Core couple interfaces based on actual API endpoints
 export interface CoupleProfile {
   id: string
@@ -103,13 +108,13 @@ class CouplesService {
   }
 
   // Disconnect from partner
-  async disconnect(): Promise<{ success: boolean; message: string }> {
-    return await ApiService.post<{ success: boolean; message: string }>(`${this.baseUrl}/disconnect`)
+  async disconnect(): Promise<CoupleActionResponse> {
+    return await ApiService.post<CoupleActionResponse>(`${this.baseUrl}/disconnect`)
   }
 
   // Reconnect with partner
-  async reconnect(): Promise<{ success: boolean; message: string }> {
-    return await ApiService.post<{ success: boolean; message: string }>(`${this.baseUrl}/reconnect`)
+  async reconnect(): Promise<CoupleActionResponse> {
+    return await ApiService.post<CoupleActionResponse>(`${this.baseUrl}/reconnect`)
   }
 
   // Update couple preferences

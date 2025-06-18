@@ -1,5 +1,10 @@
 import ApiService from './api'
 
+export interface AcceptInvitationResponse {
+  invitation: CoupleInvitation
+  couple: any
+}
+
 export interface CoupleInvitation {
   id: string
   senderId: string
@@ -55,16 +60,9 @@ class CoupleInvitationsService {
   async sendInvitation(data: CreateInvitationData): Promise<CoupleInvitation> {
     return await ApiService.post<CoupleInvitation>(this.baseUrl, data)
   }
-
   // Accept invitation
-  async acceptInvitation(invitationId: string): Promise<{ 
-    invitation: CoupleInvitation
-    couple: any 
-  }> {
-    return await ApiService.post<{ 
-      invitation: CoupleInvitation
-      couple: any 
-    }>(`${this.baseUrl}/${invitationId}/accept`)
+  async acceptInvitation(invitationId: string): Promise<AcceptInvitationResponse> {
+    return await ApiService.post<AcceptInvitationResponse>(`${this.baseUrl}/${invitationId}/accept`)
   }
 
   // Reject invitation

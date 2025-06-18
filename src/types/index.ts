@@ -41,16 +41,18 @@ export interface Memory {
   id: string
   title: string
   description: string
-  date: string  // Changed from memoryDate to date to match backend
-  memoryDate?: string  // Keep for backward compatibility
-  location?: {
-    name: string
-    coordinates?: {
-      lat: number
-      lng: number
-    }
-  } | string  // Support both object and string
-  category: string  // Added required category field
+  date: string // Changed from memoryDate to date to match backend
+  memoryDate?: string // Keep for backward compatibility
+  location?:
+    | {
+        name: string
+        coordinates?: {
+          lat: number
+          lng: number
+        }
+      }
+    | string // Support both object and string
+  category: string // Added required category field
   tags: string[]
   isPrivate: boolean
   isFavorite: boolean
@@ -68,22 +70,35 @@ export interface Note {
   category: string
   tags: string[]
   isPrivate: boolean
-  createdBy: string
-  createdAt: Date
-  updatedAt: Date
+  userId: string
+  createdBy?: string // Keep for backward compatibility
+  createdAt: Date | { _seconds: number; _nanoseconds: number }
+  updatedAt: Date | { _seconds: number; _nanoseconds: number }
+  isArchived: boolean
+  isDeleted: boolean
+  attachments: string[]
+  sharedWith: string[]
 }
 
 export interface Reminder {
   id: string
   title: string
   description?: string
-  reminderDate: Date
+  reminderDate: string | Date
   priority: 'low' | 'medium' | 'high'
   repeat?: 'daily' | 'weekly' | 'monthly' | 'yearly'
   isCompleted: boolean
-  createdBy: string
-  createdAt: Date
-  updatedAt: Date
+  isActive: boolean
+  userId: string
+  createdAt: FirebaseTimestamp | Date | string
+  updatedAt: FirebaseTimestamp | Date | string
+  completedAt?: FirebaseTimestamp | Date | string | null
+  notificationsSent?: string[]
+}
+
+export interface FirebaseTimestamp {
+  _seconds: number
+  _nanoseconds: number
 }
 
 export interface Anniversary {
@@ -157,7 +172,7 @@ export interface FileItem {
   backups: unknown[]
   createdAt: string | Date
   updatedAt: string | Date
-  
+
   // Computed properties for backward compatibility
   name?: string
   size?: number
@@ -195,6 +210,11 @@ export interface ApiResponse<T = unknown> {
   data?: T
   message?: string
   error?: string
+  timestamp?: string
+  requestId?: string
+  meta?: {
+    pagination?: PaginationParams
+  }
 }
 
 export interface PaginationParams {
@@ -203,6 +223,8 @@ export interface PaginationParams {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
   search?: string
+  totalPages?: number
+  total?: number
 }
 
 export interface UploadOptions {
@@ -242,7 +264,6 @@ export interface ApiError {
   message: string
   details?: unknown
 }
-
 
 // MinIO specific types
 export interface MinIOConfig {
@@ -301,18 +322,20 @@ export interface ThemeConfig {
 // Notification types
 export interface Notification {
   id: string
-  userId: string
+  userId?: string // Optional since API response doesn't include it
   type: 'anniversary' | 'memory' | 'reminder' | 'couple' | 'system' | 'general'
   title: string
-  message: string
+  message?: string // Optional since API uses title instead
   data?: Record<string, any>
-  isRead: boolean
-  isArchived: boolean
-  deliveryStatus: 'pending' | 'sent' | 'delivered' | 'failed'
-  scheduledAt?: string | Date
-  sentAt?: string | Date
-  readAt?: string | Date
-  archivedAt?: string | Date
+  actionUrl?: string // New field from API
+  isRead?: boolean // Optional, derived from readAt
+  isArchived?: boolean // Optional, derived from archivedAt
+  deliveryStatus?: 'pending' | 'sent' | 'delivered' | 'failed' // Optional
+  scheduledAt?: string | Date | null
+  sentAt?: string | Date | null
+  readAt?: string | Date | null
+  archivedAt?: string | Date | null
+  expiresAt?: string | Date | null // New field from API
   createdAt: string | Date
   updatedAt: string | Date
 }
@@ -327,12 +350,14 @@ export interface NotificationFilters extends PaginationParams {
 }
 
 export interface CreateNotificationData {
-  userId: string
+  userId?: string // Optional since it can be derived from auth
   type: 'anniversary' | 'memory' | 'reminder' | 'couple' | 'system' | 'general'
   title: string
-  message: string
+  message?: string // Optional since API uses title as main content
   data?: Record<string, any>
+  actionUrl?: string // New field for action URLs
   scheduledAt?: Date
+  expiresAt?: Date // New field for notification expiration
 }
 
 export interface UpdateNotificationDeliveryData {
@@ -362,36 +387,36 @@ export interface NotificationStats {
 
 // Timeline Events (combining memories and anniversaries)
 export interface TimelineEvent {
-  id: string;
-  title: string;
-  description?: string;
-  date: Date;
-  type: 'memory' | 'anniversary' | 'milestone';
-  images?: string[];
-  location?: string;
-  tags?: string[];
-  isRecurring: boolean;
-  recurringType?: 'yearly' | 'monthly';
-  priority: 'low' | 'medium' | 'high';
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  title: string
+  description?: string
+  date: Date
+  type: 'memory' | 'anniversary' | 'milestone'
+  images?: string[]
+  location?: string
+  tags?: string[]
+  isRecurring: boolean
+  recurringType?: 'yearly' | 'monthly'
+  priority: 'low' | 'medium' | 'high'
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface TimelineEventFilters {
-  type?: 'memory' | 'anniversary' | 'milestone' | 'all';
-  priority?: 'low' | 'medium' | 'high' | 'all';
+  type?: 'memory' | 'anniversary' | 'milestone' | 'all'
+  priority?: 'low' | 'medium' | 'high' | 'all'
   dateRange?: {
-    start: Date;
-    end: Date;
-  };
-  tags?: string[];
-  searchQuery?: string;
+    start: Date
+    end: Date
+  }
+  tags?: string[]
+  searchQuery?: string
 }
 
 export interface TimelineEventStats {
-  total: number;
-  memories: number;
-  anniversaries: number;
-  milestones: number;
-  recurring: number;
+  total: number
+  memories: number
+  anniversaries: number
+  milestones: number
+  recurring: number
 }

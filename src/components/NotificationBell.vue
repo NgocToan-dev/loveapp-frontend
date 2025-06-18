@@ -95,14 +95,13 @@ onMounted(() => {
     location="bottom end"
     offset="10"
     max-width="400"
-  >
-    <template #activator="{ props }">
+  >    <template #activator="{ props }">
       <v-btn
         v-bind="props"
         variant="text"
-        size="small"
+        size="large"
         color="on-primary"
-        class="mr-2"
+        class="mr-2 notification-bell-btn"
         :title="hasUnread ? `${unreadCount} thông báo chưa đọc` : 'Thông báo'"
         @click="toggleDropdown"
       >
@@ -110,12 +109,12 @@ onMounted(() => {
           v-if="hasUnread"
           :content="unreadCount > 99 ? '99+' : unreadCount.toString()"
           color="error"
-          offset-x="2"
-          offset-y="2"
+          offset-x="8"
+          offset-y="8"
         >
-          <v-icon>mdi-bell</v-icon>
+          <v-icon size="24">mdi-bell</v-icon>
         </v-badge>
-        <v-icon v-else>mdi-bell-outline</v-icon>
+        <v-icon v-else size="24">mdi-bell-outline</v-icon>
       </v-btn>
     </template>
 
@@ -162,7 +161,7 @@ onMounted(() => {
           v-for="notification in recentNotifications"
           :key="notification.id"
           class="notification-item"
-          :class="{ 'notification-unread': !notification.isRead }"
+          :class="{ 'notification-unread': !notification.readAt }"
           @click="markAsRead(notification.id)"
         >
           <template #prepend>
@@ -180,15 +179,13 @@ onMounted(() => {
           <v-list-item-title class="text-subtitle-2 font-weight-medium">
             {{ notification.title }}
           </v-list-item-title>
-          
-          <v-list-item-subtitle class="text-body-2 mt-1">
+            <v-list-item-subtitle v-if="notification.message" class="text-body-2 mt-1">
             {{ notification.message }}
           </v-list-item-subtitle>
 
           <template #append>
-            <div class="d-flex flex-column align-end">
-              <v-chip
-                v-if="!notification.isRead"
+            <div class="d-flex flex-column align-end">              <v-chip
+                v-if="!notification.readAt"
                 size="x-small"
                 color="primary"
                 variant="flat"
@@ -257,5 +254,33 @@ onMounted(() => {
 
 .notification-unread:hover {
   background-color: rgba(var(--v-theme-primary), 0.12);
+}
+
+.notification-bell-btn {
+  position: relative;
+  min-width: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.notification-bell-btn :deep(.v-badge__wrapper) {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-bell-btn :deep(.v-badge__badge) {
+  font-size: 11px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  top: 8px !important;
+  right: 8px !important;
+}
+
+.notification-bell-btn :deep(.v-icon) {
+  font-size: 24px !important;
 }
 </style>

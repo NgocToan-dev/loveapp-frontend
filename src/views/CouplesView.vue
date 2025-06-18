@@ -46,7 +46,7 @@
                   size="large"
                   rounded="xl"
                   block
-                  @click="showSendInvitationDialog = true"
+                  @click="openInvitationDialog"
                 >
                   <v-icon start>mdi-plus</v-icon>
                   Gửi Lời Mời
@@ -68,7 +68,7 @@
                   size="large"
                   rounded="xl"
                   block
-                  @click="showInvitationsDialog = true"
+                  @click="openViewInvitationsDialog"
                 >
                   <v-icon start>mdi-email-check</v-icon>
                   Xem Lời Mời
@@ -145,7 +145,7 @@
                   <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
                 </template>
                 <v-list>
-                  <v-list-item @click="showPreferencesDialog = true">
+                  <v-list-item @click="openPreferencesDialog">
                     <v-list-item-title>
                       <v-icon start>mdi-cog</v-icon>
                       Cài Đặt
@@ -253,53 +253,6 @@
       </div>
     </v-container>
 
-    <!-- Send Invitation Dialog -->
-    <v-dialog v-model="showSendInvitationDialog" max-width="500">
-      <v-card rounded="xl">
-        <v-card-title class="text-h5 font-weight-bold pa-6">
-          <v-icon color="primary" class="mr-2">mdi-email-send</v-icon>
-          Gửi Lời Mời Kết Nối
-        </v-card-title>
-        <v-card-text class="px-6">
-          <v-form ref="invitationForm" @submit.prevent="sendInvitation">
-            <v-text-field
-              v-model="invitationData.receiverEmail"
-              label="Email người yêu"
-              type="email"
-              variant="outlined"
-              :rules="emailRules"
-              required
-            />
-            <v-textarea
-              v-model="invitationData.message"
-              label="Lời nhắn (tùy chọn)"
-              variant="outlined"
-              rows="3"
-              placeholder="Hãy kết nối với em để chúng ta có thể chia sẻ những khoảnh khắc đẹp nhất..."
-            />
-          </v-form>
-        </v-card-text>
-        <v-card-actions class="pa-6 pt-0">
-          <v-spacer />
-          <v-btn
-            variant="text"
-            @click="showSendInvitationDialog = false"
-          >
-            Hủy
-          </v-btn>
-          <v-btn
-            color="primary"
-            variant="elevated"
-            :loading="invitationsStore.isLoading"
-            @click="sendInvitation"
-          >
-            <v-icon start>mdi-send</v-icon>
-            Gửi Lời Mời
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <!-- Invitations Management Dialog -->
     <InvitationsDialog 
       v-model="showInvitationsDialog"
@@ -313,38 +266,6 @@
       @updated="handlePreferencesUpdated"
     />
 
-    <!-- Disconnect Confirmation Dialog -->
-    <v-dialog v-model="showDisconnectDialog" max-width="400">
-      <v-card rounded="xl">
-        <v-card-title class="text-h6 font-weight-bold pa-6">
-          <v-icon color="error" class="mr-2">mdi-alert</v-icon>
-          Xác Nhận Ngắt Kết Nối
-        </v-card-title>
-        <v-card-text class="px-6">
-          <p>Bạn có chắc chắn muốn ngắt kết nối với người yêu không?</p>
-          <p class="text-error text-body-2 mt-2">
-            Lưu ý: Dữ liệu chung sẽ không bị xóa và có thể kết nối lại sau.
-          </p>
-        </v-card-text>
-        <v-card-actions class="pa-6 pt-0">
-          <v-spacer />
-          <v-btn
-            variant="text"
-            @click="showDisconnectDialog = false"
-          >
-            Hủy
-          </v-btn>
-          <v-btn
-            color="error"
-            variant="elevated"
-            :loading="couplesStore.isLoading"
-            @click="disconnectFromPartner"
-          >
-            Ngắt Kết Nối
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
@@ -353,6 +274,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCouplesStore } from '@/stores/couples'
 import { useCoupleInvitationsStore } from '@/stores/coupleInvitations'
+import { useDialogsStore } from '@/stores/dialogs'
 import type { CreateInvitationData } from '@/services/coupleInvitations'
 import InvitationsDialog from '@/components/InvitationsDialog.vue'
 import CouplePreferencesDialog from '@/components/CouplePreferencesDialog.vue'
@@ -360,8 +282,9 @@ import CouplePreferencesDialog from '@/components/CouplePreferencesDialog.vue'
 const router = useRouter()
 const couplesStore = useCouplesStore()
 const invitationsStore = useCoupleInvitationsStore()
+const dialogsStore = useDialogsStore()
 
-// Dialog states
+// Dialog states - keeping some for compatibility
 const showSendInvitationDialog = ref(false)
 const showInvitationsDialog = ref(false)
 const showPreferencesDialog = ref(false)
@@ -454,6 +377,46 @@ const disconnectFromPartner = async () => {
   } catch (error) {
     // Error is handled in the store
   }
+}
+
+// Dialog methods - hybrid approach (local + global)
+const openInvitationDialog = () => {
+  // For now use local dialog, can switch to global later
+  showSendInvitationDialog.value = true
+  // Future: dialogsStore.openInvitationsDialog()
+}
+
+const openViewInvitationsDialog = () => {
+  showInvitationsDialog.value = true
+  // Future: dialogsStore.openInvitationsDialog()
+}
+
+const openPreferencesDialog = () => {
+  showPreferencesDialog.value = true
+  // Future: dialogsStore.openCouplePreferencesDialog()
+}
+
+const confirmDisconnect = () => {
+  dialogsStore.openConfirmDialog({
+    title: 'Xác Nhận Ngắt Kết Nối',
+    message: 'Bạn có chắc chắn muốn ngắt kết nối với người yêu không? Dữ liệu chung sẽ không bị xóa và có thể kết nối lại sau.',
+    confirmText: 'Ngắt Kết Nối',
+    cancelText: 'Hủy',
+    onConfirm: async () => {
+      try {
+        await couplesStore.disconnect()
+        dialogsStore.openAlertDialog({
+          title: 'Thành công',
+          message: 'Đã ngắt kết nối thành công!'
+        })
+      } catch (error) {
+        dialogsStore.openAlertDialog({
+          title: 'Lỗi',
+          message: 'Có lỗi xảy ra khi ngắt kết nối. Vui lòng thử lại.'
+        })
+      }
+    }
+  })
 }
 
 // Navigation methods
