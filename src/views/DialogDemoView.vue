@@ -110,7 +110,11 @@ const dialogsStore = useDialogsStore()
 
 // Mở dialog tạo sự kiện
 const openEventForm = () => {
-  dialogsStore.openTimelineEventForm()
+  dialogsStore.openBaseDialog(
+    'TimelineEventForm',
+    {},
+    { maxWidth: '600', persistent: true }
+  )
 }
 
 // Mở dialog confirm
@@ -142,13 +146,17 @@ const showSuccess = () => {
 </template>
 
 <script setup lang="ts">
-import { useDialogsStore } from '@/stores/dialogs'
+import { useDialogsStore } from '@stores/dialogs'
 
 const dialogsStore = useDialogsStore()
 
 // Timeline Event Dialogs
 const openCreateEventDialog = () => {
-  dialogsStore.openTimelineEventForm()
+  dialogsStore.openBaseDialog(
+    'TimelineEventForm',
+    {},
+    { maxWidth: '600', persistent: true }
+  )
 }
 
 const openEditEventDialog = () => {
@@ -167,16 +175,28 @@ const openEditEventDialog = () => {
     updatedAt: new Date()
   }
   
-  dialogsStore.openTimelineEventForm(fakeEvent)
+  dialogsStore.openBaseDialog(
+    'TimelineEventForm',
+    { event: fakeEvent },
+    { maxWidth: '600', persistent: true }
+  )
 }
 
 // Other Dialogs
 const openInvitationsDialog = () => {
-  dialogsStore.openInvitationsDialog()
+  dialogsStore.openBaseDialog(
+    'InvitationsDialog',
+    {},
+    { maxWidth: '800', scrollable: true }
+  )
 }
 
 const openPreferencesDialog = () => {
-  dialogsStore.openCouplePreferencesDialog()
+  dialogsStore.openBaseDialog(
+    'CouplePreferencesDialog',
+    {},
+    { maxWidth: '600', scrollable: true }
+  )
 }
 
 // Confirmation & Alert Dialogs

@@ -28,11 +28,15 @@ import { computed } from 'vue'
 import { useDialogsStore } from '@/stores/dialogs'
 
 // Import dialog components
-import TimelineEventFormDialog from './TimelineEventFormDialog.vue'
 import InvitationsDialog from './InvitationsDialog.vue'
 import CouplePreferencesDialog from './CouplePreferencesDialog.vue'
 import ConfirmDialog from '@components/ConfirmDialog.vue'
 import AlertDialog from '@components/AlertDialog.vue'
+import CreateMemoryDialog from '@components/CreateMemoryDialog.vue'
+import CreateNoteDialog from '@components/CreateNoteDialog.vue'
+import EditNoteDialog from '@components/EditNoteDialog.vue'
+import CreateReminderDialog from '@components/CreateReminderDialog.vue'
+import CreateAnniversaryDialog from '@components/CreateAnniversaryDialog.vue'
 
 const dialogsStore = useDialogsStore()
 
@@ -40,11 +44,15 @@ const dialogs = computed(() => dialogsStore.dialogs)
 
 const getDialogComponent = (componentName: string) => {
   const components: Record<string, any> = {
-    TimelineEventForm: TimelineEventFormDialog,
     InvitationsDialog,
     CouplePreferencesDialog,
     ConfirmDialog,
-    AlertDialog
+    AlertDialog,
+    CreateMemoryDialog,
+    CreateNoteDialog,
+    EditNoteDialog,
+    CreateReminderDialog,
+    CreateAnniversaryDialog
   }
   return components[componentName] || null
 }

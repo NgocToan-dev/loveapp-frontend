@@ -1,6 +1,6 @@
 // Main SCSS file for LoveApp - Gentle & Loving Multi-theme support
-@import './variables.scss';
-@import './animations.scss';
+@use './variables' as vars;
+@use './animations';
 
 // Global gentle styles
 * {

@@ -225,12 +225,14 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotesStore } from '@/stores/notes'
+import { useDialogsStore } from '@/stores/dialogs'
 import dayjs from 'dayjs'
 import Swal from 'sweetalert2'
 
 const { t } = useI18n()
 const router = useRouter()
 const notesStore = useNotesStore()
+const dialogsStore = useDialogsStore()
 
 // Reactive data
 const searchQuery = ref('')
@@ -310,7 +312,19 @@ const onPageChange = async (page: number) => {
 }
 
 const createNote = () => {
-  router.push({ name: 'create-note' })
+  // Use global dialog system for creating notes
+  dialogsStore.openBaseDialog(
+    'CreateNoteDialog',
+    {},
+    { maxWidth: '800', scrollable: true, persistent: true },
+    {
+      onConfirm: (newNote) => {
+        console.log('New note created:', newNote)
+        // Refresh notes list
+        fetchNotes()
+      }
+    }
+  )
 }
 
 const viewNote = (id: string) => {
@@ -318,7 +332,23 @@ const viewNote = (id: string) => {
 }
 
 const editNote = (id: string) => {
-  router.push({ name: 'note-detail', params: { id }, query: { edit: 'true' } })
+  // Find the note to edit
+  const noteToEdit = displayedNotes.value.find(note => note.id === id)
+  if (!noteToEdit) return
+  
+  // Use global dialog system for editing notes
+  dialogsStore.openBaseDialog(
+    'EditNoteDialog',
+    { note: noteToEdit },
+    { maxWidth: '800', scrollable: true, persistent: true },
+    {
+      onConfirm: (updatedNote) => {
+        console.log('Note updated:', updatedNote)
+        // Refresh notes list
+        fetchNotes()
+      }
+    }
+  )
 }
 
 const deleteNote = async (id: string) => {

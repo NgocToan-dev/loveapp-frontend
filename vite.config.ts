@@ -20,8 +20,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: 'LoveApp',
-        short_name: 'LoveApp',
+        name: 'AnhVaCun',
+        short_name: 'AnhVaCun',
         description: 'Personal love app for couples - Store memories, share notes, and celebrate your relationship',
         theme_color: '#ff4081',
         background_color: '#fce4ec',

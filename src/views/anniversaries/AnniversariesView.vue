@@ -303,14 +303,19 @@ const filteredAnniversaries = computed(() => {
 
 // Dialog methods
 const openCreateAnniversaryDialog = () => {
-  dialogsStore.openAlertDialog({
-    title: 'Tạo Anniversary',
-    message: 'Anniversary form dialog sẽ được tích hợp sau. Hiện tại sử dụng form cục bộ.',
-    onClose: () => {
-      // Fallback to local dialog
-      createDialog.value = true
+  // Use global dialog system for anniversary form
+  dialogsStore.openBaseDialog(
+    'CreateAnniversaryDialog',
+    {},
+    { maxWidth: '700', scrollable: true, persistent: true },
+    {
+      onConfirm: (newAnniversary) => {
+        console.log('New anniversary created:', newAnniversary)
+        // Refresh anniversaries list
+        loadAnniversaries()
+      }
     }
-  })
+  )
 }
 
 // Methods
@@ -327,16 +332,19 @@ const viewAnniversary = (anniversary: Anniversary) => {
 }
 
 const editAnniversary = (anniversary: Anniversary) => {
-  editingAnniversary.value = anniversary
-  anniversaryForm.value = {
-    title: anniversary.title,
-    description: anniversary.description || '',
-    date: dayjs(anniversary.date).format('YYYY-MM-DD'),
-    type: anniversary.type,
-    isRecurring: anniversary.isRecurring,
-    frequency: anniversary.frequency || 'yearly'
-  }
-  createDialog.value = true
+  // Use global dialog system for editing anniversaries
+  dialogsStore.openBaseDialog(
+    'EditAnniversaryDialog',
+    { anniversary },
+    { maxWidth: '700', scrollable: true, persistent: true },
+    {
+      onConfirm: (updatedAnniversary) => {
+        console.log('Anniversary updated:', updatedAnniversary)
+        // Refresh anniversaries list
+        loadAnniversaries()
+      }
+    }
+  )
 }
 
 const deleteAnniversary = async (anniversary: Anniversary) => {

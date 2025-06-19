@@ -84,15 +84,16 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true
     }
   },
-  {
-    path: '/memories/create',
-    name: 'create-memory',
-    component: () => import('@views/memories/CreateMemoryView.vue'),
-    meta: {
-      title: 'Create Memory',
-      requiresAuth: true
-    }
-  },
+  // Commented out - using dialog instead
+  // {
+  //   path: '/memories/create',
+  //   name: 'create-memory',
+  //   component: () => import('@views/memories/CreateMemoryView.vue'),
+  //   meta: {
+  //     title: 'Create Memory',
+  //     requiresAuth: true
+  //   }
+  // },
   {
     path: '/memories/:id',
     name: 'memory-detail',
@@ -172,15 +173,6 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Settings',
       requiresAuth: false
-    }
-  },
-  {
-    path: '/timeline',
-    name: 'timeline',
-    component: () => import('@views/timeline/TimelineView.vue'),
-    meta: {
-      title: 'Timeline',
-      requiresAuth: true
     }
   },
   // Catch all route - 404

@@ -493,20 +493,18 @@ const loadReminders = async () => {
 
 const createNewReminder = () => {
   // Use global dialog system for reminder form
-  dialogsStore.openAlertDialog({
-    title: 'Tạo Reminder',
-    message: 'Reminder form dialog sẽ được tích hợp sau. Hiện tại sử dụng form cục bộ.',
-    onClose: () => {
-      // Fallback to local dialog for now
-      editingReminder.value = null
-      reminderForm.title = ''
-      reminderForm.description = ''
-      reminderForm.reminderDate = ''
-      reminderForm.priority = 'medium'
-      reminderForm.repeat = ''
-      createDialog.value = true
+  dialogsStore.openBaseDialog(
+    'CreateReminderDialog',
+    {},
+    { maxWidth: '700', scrollable: true, persistent: true },
+    {
+      onConfirm: (newReminder) => {
+        console.log('New reminder created:', newReminder)
+        // Refresh reminders list
+        loadReminders()
+      }
     }
-  })
+  )
 }
 
 const viewReminder = (reminder: Reminder) => {
@@ -515,16 +513,19 @@ const viewReminder = (reminder: Reminder) => {
 }
 
 const editReminder = (reminder: Reminder) => {
-  editingReminder.value = reminder
-  // Update form values without reassigning the object
-  reminderForm.title = reminder.title
-  reminderForm.description = reminder.description || ''
-  // Convert reminderDate to proper format for datetime-local input
-  const reminderDate = new Date(reminder.reminderDate)
-  reminderForm.reminderDate = dayjs(reminderDate).format('YYYY-MM-DDTHH:mm')
-  reminderForm.priority = reminder.priority
-  reminderForm.repeat = reminder.repeat || ''
-  createDialog.value = true
+  // Use global dialog system for editing reminders
+  dialogsStore.openBaseDialog(
+    'EditReminderDialog',
+    { reminder },
+    { maxWidth: '700', scrollable: true, persistent: true },
+    {
+      onConfirm: (updatedReminder) => {
+        console.log('Reminder updated:', updatedReminder)
+        // Refresh reminders list
+        loadReminders()
+      }
+    }
+  )
 }
 
 const deleteReminder = async (reminder: Reminder) => {

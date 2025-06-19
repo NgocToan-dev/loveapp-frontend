@@ -19,7 +19,7 @@ const vi = {
     logout: 'Đăng xuất'
   },
   home: {
-    title: 'Chào mừng đến với LoveApp',
+    title: 'Chào mừng đến với không gian riêng của anh và em',
     subtitle: 'Không gian riêng tư cho tình yêu của chúng ta 💕',
     description: 'Một ứng dụng được tạo ra dành riêng cho hai chúng ta - nơi lưu giữ những kỷ niệm đẹp, chia sẻ cảm xúc và xây dựng tình yêu mỗi ngày.',
     cta: {
@@ -337,7 +337,7 @@ const vi = {
     learnMore: 'Tìm hiểu thêm',
     getStarted: 'Bắt đầu',
     contactUs: 'Liên hệ',
-    copyright: '© {year} LoveApp - Không gian tình yêu riêng tư của chúng ta 💕',
+    copyright: '© {year} AnhVaCun - Không gian tình yêu riêng tư của chúng ta 💕',
     cancel: 'Hủy',
     save: 'Lưu',
     delete: 'Xóa',
@@ -499,7 +499,7 @@ const en = {
     logout: 'Logout'
   },
   home: {
-    title: 'Welcome to LoveApp',
+    title: 'Welcome to AnhVaCun',
     subtitle: 'Our Private Space for Love 💕',
     description: 'An app created exclusively for the two of us - where we preserve beautiful memories, share emotions, and build our love every day.',
     cta: {
@@ -808,7 +808,7 @@ const en = {
     learnMore: 'Learn More',
     getStarted: 'Get Started',
     contactUs: 'Contact Us',
-    copyright: '© {year} LoveApp - Our Private Love Space 💕',
+    copyright: '© {year} AnhVaCun - Our Private Love Space 💕',
     cancel: 'Cancel',
     save: 'Save',
     delete: 'Delete',

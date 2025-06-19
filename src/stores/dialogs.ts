@@ -21,7 +21,7 @@ export const useDialogsStore = defineStore('dialogs', () => {
   const dialogs = ref<DialogConfig[]>([])
   const isLoading = ref(false)
 
-  // Actions
+  // Base dialog function - main focus
   const openDialog = (config: Omit<DialogConfig, 'id'>) => {
     const id = `dialog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const dialog: DialogConfig = {
@@ -45,6 +45,35 @@ export const useDialogsStore = defineStore('dialogs', () => {
     }
   }
 
+  // Base dialog opener with common patterns
+  const openBaseDialog = (
+    component: string,
+    props?: Record<string, any>,
+    options?: {
+      maxWidth?: string
+      persistent?: boolean
+      scrollable?: boolean
+      fullscreen?: boolean
+    },
+    callbacks?: {
+      onConfirm?: (data?: any) => void
+      onCancel?: () => void
+    }
+  ) => {
+    return openDialog({
+      component,
+      props: props || {},
+      options: {
+        maxWidth: '600',
+        persistent: false,
+        scrollable: true,
+        ...options
+      },
+      onConfirm: callbacks?.onConfirm,
+      onCancel: callbacks?.onCancel
+    })
+  }
+
   const closeAllDialogs = () => {
     dialogs.value.length = 0
   }
@@ -52,52 +81,8 @@ export const useDialogsStore = defineStore('dialogs', () => {
   const getDialog = (id: string) => {
     return dialogs.value.find(d => d.id === id)
   }
-  // Specific dialog helpers
-  const openTimelineEventForm = (event?: TimelineEvent) => {
-    return openDialog({
-      component: 'TimelineEventForm',
-      props: { event },
-      options: {
-        maxWidth: '600',
-        persistent: true
-      },
-      onConfirm: async (data) => {
-        // Handle form submission - you can customize this or pass callback
-        console.log('Timeline event form submitted:', data)
-        
-        // Here you would normally call the timelineEvents store to save
-        // But to avoid circular dependency, we'll emit an event or use a callback
-        if (event) {
-          // Update existing event
-          // await timelineEventsStore.updateEvent(event.id, data)
-        } else {
-          // Create new event
-          // await timelineEventsStore.addEvent(data)
-        }
-      }
-    })
-  }
 
-  const openInvitationsDialog = () => {
-    return openDialog({
-      component: 'InvitationsDialog',
-      options: {
-        maxWidth: '800',
-        scrollable: true
-      }
-    })
-  }
-
-  const openCouplePreferencesDialog = () => {
-    return openDialog({
-      component: 'CouplePreferencesDialog',
-      options: {
-        maxWidth: '600',
-        scrollable: true
-      }
-    })
-  }
-
+  // Essential dialog helpers - keep only basic ones
   const openConfirmDialog = (options: {
     title: string
     message: string
@@ -106,20 +91,20 @@ export const useDialogsStore = defineStore('dialogs', () => {
     onConfirm?: () => void
     onCancel?: () => void
   }) => {
-    return openDialog({
-      component: 'ConfirmDialog',
-      props: {
+    return openBaseDialog(
+      'ConfirmDialog',
+      {
         title: options.title,
         message: options.message,
         confirmText: options.confirmText || 'Xác nhận',
         cancelText: options.cancelText || 'Hủy'
       },
-      options: {
-        maxWidth: '400'
-      },
-      onConfirm: options.onConfirm,
-      onCancel: options.onCancel
-    })
+      { maxWidth: '400' },
+      {
+        onConfirm: options.onConfirm,
+        onCancel: options.onCancel
+      }
+    )
   }
 
   const openAlertDialog = (options: {
@@ -128,18 +113,16 @@ export const useDialogsStore = defineStore('dialogs', () => {
     buttonText?: string
     onClose?: () => void
   }) => {
-    return openDialog({
-      component: 'AlertDialog',
-      props: {
+    return openBaseDialog(
+      'AlertDialog',
+      {
         title: options.title,
         message: options.message,
         buttonText: options.buttonText || 'OK'
       },
-      options: {
-        maxWidth: '400'
-      },
-      onConfirm: options.onClose
-    })
+      { maxWidth: '400' },
+      { onConfirm: options.onClose }
+    )
   }
 
   return {
@@ -147,16 +130,14 @@ export const useDialogsStore = defineStore('dialogs', () => {
     dialogs,
     isLoading,
     
-    // Actions
+    // Base Actions
     openDialog,
+    openBaseDialog,
     closeDialog,
     closeAllDialogs,
     getDialog,
     
-    // Specific helpers
-    openTimelineEventForm,
-    openInvitationsDialog,
-    openCouplePreferencesDialog,
+    // Essential helpers only
     openConfirmDialog,
     openAlertDialog
   }

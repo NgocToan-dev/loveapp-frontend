@@ -67,7 +67,7 @@ const logout = async () => {
       <v-list>
         <v-list-item
           prepend-avatar="https://via.placeholder.com/40x40/ff4081/ffffff?text=💕"
-          title="LoveApp"
+          title="AnhVaCun"
           :subtitle="authStore.isAuthenticated ? authStore.user?.displayName : 'Ứng dụng quản lý tình yêu'"
         />
       </v-list>
@@ -179,7 +179,7 @@ const logout = async () => {
         style="color: rgb(var(--v-theme-on-primary)) !important;"
       >
         <v-icon class="mr-2" color="on-primary">mdi-heart</v-icon>
-        LoveApp
+        AnhVaCun
       </v-toolbar-title>
 
       <v-spacer />

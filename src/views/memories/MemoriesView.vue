@@ -307,6 +307,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useMemoriesStore } from '@/stores/memories'
 import { useAuthStore } from '@/stores/auth'
 import { useDialogsStore } from '@/stores/dialogs'
@@ -315,6 +316,7 @@ import dayjs from 'dayjs'
 import Swal from 'sweetalert2'
 
 const { t } = useI18n()
+const router = useRouter()
 const memoriesStore = useMemoriesStore()
 const authStore = useAuthStore()
 const dialogsStore = useDialogsStore()
@@ -424,11 +426,19 @@ const loadMemories = async () => {
 }
 
 const openCreateMemoryDialog = () => {
-  // For now, use alert dialog as placeholder
-  dialogsStore.openAlertDialog({
-    title: 'Tạo Memory',
-    message: 'Memory dialog sẽ được tích hợp sau. Hiện tại sử dụng route /memories/create'
-  })
+  // Open create memory dialog using base function
+  dialogsStore.openBaseDialog(
+    'CreateMemoryDialog',
+    {},
+    { maxWidth: '800', scrollable: true, persistent: true },
+    {
+      onConfirm: (newMemory) => {
+        console.log('New memory created:', newMemory)
+        // Refresh the memories list
+        loadMemories()
+      }
+    }
+  )
 }
 
 const viewMemory = (memory: Memory) => {
