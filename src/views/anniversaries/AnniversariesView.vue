@@ -1,238 +1,340 @@
 <template>
-  <v-container fluid class="pa-4">
-    <!-- Header -->
-    <div class="d-flex align-center justify-space-between mb-6">
-      <div>
-        <h1 class="text-h4 font-weight-bold mb-2">
-          <v-icon class="mr-3" color="purple">mdi-calendar-heart</v-icon>
-          {{ $t('anniversaries.title') || 'Anniversaries' }}
-        </h1>
-        <p class="text-body-1 text-medium-emphasis">
-          {{ $t('anniversaries.subtitle') || 'Special dates to remember' }}
-        </p>
-      </div>
-      
-      <v-btn
-        color="purple"
-        variant="flat"
-        prepend-icon="mdi-plus"
-        @click="openCreateAnniversaryDialog"
-      >
-        {{ $t('anniversaries.create') || 'Create Anniversary' }}
-      </v-btn>
-    </div>
-
-    <!-- Stats Cards -->
-    <v-row class="mb-6">
-      <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4">
-          <v-icon size="48" color="purple" class="mb-2">mdi-calendar-heart</v-icon>
-          <div class="text-h4 font-weight-bold">{{ stats.total }}</div>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('anniversaries.totalAnniversaries') || 'Total' }}</div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4">
-          <v-icon size="48" color="orange" class="mb-2">mdi-calendar-clock</v-icon>
-          <div class="text-h4 font-weight-bold">{{ stats.upcoming }}</div>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('anniversaries.upcoming') || 'Upcoming' }}</div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4">
-          <v-icon size="48" color="success" class="mb-2">mdi-repeat</v-icon>
-          <div class="text-h4 font-weight-bold">{{ stats.recurring }}</div>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('anniversaries.recurring') || 'Recurring' }}</div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card class="text-center pa-4">
-          <v-icon size="48" color="pink" class="mb-2">mdi-heart</v-icon>
-          <div class="text-h4 font-weight-bold">{{ stats.relationship }}</div>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('anniversaries.relationship') || 'Love' }}</div>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- Search and Filters -->
-    <v-card class="mb-4">
-      <v-card-text>
-        <v-row align="center">
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="searchQuery"
-              prepend-inner-icon="mdi-magnify"
-              :label="$t('anniversaries.search') || 'Search anniversaries...'"
-              hide-details
-              clearable
-            />
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="selectedType"
-              :items="typeOptions"
-              :label="$t('anniversaries.type') || 'Type'"
-              hide-details
-              clearable
-            />
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="sortBy"
-              :items="sortOptions"
-              :label="$t('anniversaries.sortBy') || 'Sort by'"
-              hide-details
-            />
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
-
-    <!-- Loading -->
-    <div v-if="isLoading" class="text-center py-8">
-      <v-progress-circular indeterminate color="purple" size="64" />
-      <div class="mt-4 text-h6">{{ $t('anniversaries.loading') || 'Loading...' }}</div>
-    </div>
-
-    <!-- Error -->
-    <v-alert
-      v-else-if="error"
-      type="error"
-      class="mb-4"
-      closable
-      @click:close="anniversariesStore.clearError()"
-    >
-      {{ error }}
-    </v-alert>
-
-    <!-- Empty State -->
-    <v-card v-else-if="filteredAnniversaries.length === 0" class="text-center pa-8">
-      <v-icon size="80" color="grey-lighten-1" class="mb-4">
-        mdi-calendar-heart-outline
-      </v-icon>
-      <h3 class="text-h5 mb-2">{{ $t('anniversaries.noAnniversaries') || 'No anniversaries' }}</h3>
-      <p class="text-body-1 text-medium-emphasis mb-4">
-        {{ $t('anniversaries.noAnniversariesDescription') || 'Create your first anniversary' }}
-      </p>
-      <v-btn color="purple" @click="createDialog = true">
-        {{ $t('anniversaries.createFirst') || 'Create First Anniversary' }}
-      </v-btn>
-    </v-card>
-
-    <!-- Anniversaries List -->
-    <v-row v-else>
-      <v-col
-        v-for="anniversary in filteredAnniversaries"
-        :key="anniversary.id"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-      >
-        <v-card hover class="h-100">
-          <v-card-title class="d-flex align-center">
-            <v-avatar
-              :color="getTypeColor(anniversary.type)"
-              class="mr-3"
-              size="40"
-            >
-              <v-icon color="white">{{ getTypeIcon(anniversary.type) }}</v-icon>
-            </v-avatar>
-            <div>
-              <div class="text-subtitle-1 font-weight-medium">
-                {{ anniversary.title }}
-              </div>
-              <v-chip
-                :color="getTypeColor(anniversary.type)"
-                size="x-small"
-                variant="tonal"
-              >
-                {{ getTypeLabel(anniversary.type) }}
-              </v-chip>
+  <ResponsiveContainer>
+    <div class="anniversaries-view">
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <v-container>
+          <div class="hero-content">
+            <div class="hero-text">
+              <h1 class="hero-title">
+                <v-icon icon="mdi-calendar-heart" size="40" class="hero-icon" />
+                Our Special Moments
+              </h1>
+              <p class="hero-subtitle">
+                Cherish and celebrate every milestone in your love story
+              </p>
             </div>
-          </v-card-title>
-
-          <v-card-text>
-            <div class="mb-3">
-              <div class="text-body-2 text-medium-emphasis mb-1">
-                <v-icon size="16" class="mr-1">mdi-calendar</v-icon>
-                {{ formatDate(anniversary.date) }}
-              </div>
-              <div v-if="getDaysUntil(anniversary.date) >= 0" class="text-success text-body-2">
-                <v-icon size="16" class="mr-1">mdi-clock</v-icon>
-                {{ getDaysUntil(anniversary.date) === 0 ? 'Today!' : `In ${getDaysUntil(anniversary.date)} days` }}
-              </div>
+              <!-- Next Anniversary Countdown -->
+            <div v-if="anniversaries.length > 0" class="hero-countdown">
+              <AnniversaryCountdownWidget :anniversaries="anniversaries" />
             </div>
-            
-            <p v-if="anniversary.description" class="text-body-2 mb-3">
-              {{ anniversary.description }}
+          </div>
+        </v-container>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="stats-section">
+        <v-container>
+          <v-row>
+            <v-col cols="6" md="3">
+              <v-card rounded="xl" elevation="2" class="stat-card">
+                <v-card-text class="text-center">
+                  <div class="stat-icon">
+                    <v-icon icon="mdi-calendar-multiple" size="32" color="primary" />
+                  </div>
+                  <div class="stat-number">{{ stats.total }}</div>
+                  <div class="stat-label">Total Anniversaries</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="6" md="3">
+              <v-card rounded="xl" elevation="2" class="stat-card">
+                <v-card-text class="text-center">
+                  <div class="stat-icon">
+                    <v-icon icon="mdi-clock-outline" size="32" color="warning" />
+                  </div>
+                  <div class="stat-number">{{ stats.upcoming }}</div>
+                  <div class="stat-label">Upcoming</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="6" md="3">
+              <v-card rounded="xl" elevation="2" class="stat-card">
+                <v-card-text class="text-center">
+                  <div class="stat-icon">
+                    <v-icon icon="mdi-repeat" size="32" color="success" />
+                  </div>
+                  <div class="stat-number">{{ stats.recurring }}</div>
+                  <div class="stat-label">Recurring</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="6" md="3">
+              <v-card rounded="xl" elevation="2" class="stat-card">
+                <v-card-text class="text-center">
+                  <div class="stat-icon">
+                    <v-icon icon="mdi-heart" size="32" color="pink" />
+                  </div>
+                  <div class="stat-number">{{ stats.relationship }}</div>
+                  <div class="stat-label">Love Milestones</div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </section>
+
+      <!-- Controls Section -->      <!-- Advanced Filter Section -->
+      <section class="filter-section">
+        <v-container>
+          <v-card class="filter-card" elevation="0" rounded="xl">
+            <v-card-text class="pa-6">
+              <!-- Header with Title and Create Button -->
+              <div class="filter-header">
+                <div class="filter-title">
+                  <h2>Anniversary Collection</h2>
+                  <p class="text-medium-emphasis mb-0">Manage and explore your special moments</p>
+                </div>
+                <v-btn
+                  color="primary"
+                  size="large"
+                  rounded="xl"
+                  @click="createAnniversary"
+                  class="create-btn"
+                >
+                  <v-icon icon="mdi-plus" start />
+                  Add Anniversary
+                </v-btn>
+              </div>
+
+              <v-divider class="my-6" />
+
+              <!-- Main Filter Controls -->
+              <v-row align="center" class="filter-controls">
+                <!-- Search -->
+                <v-col cols="12" md="4">
+                  <v-text-field
+                    v-model="searchQuery"
+                    prepend-inner-icon="mdi-magnify"
+                    placeholder="Search anniversaries..."
+                    variant="outlined"
+                    density="comfortable"
+                    hide-details
+                    clearable
+                    rounded="lg"
+                    class="search-field"
+                    bg-color="surface"
+                  />
+                </v-col>
+
+                <!-- Sort -->
+                <v-col cols="12" md="3">
+                  <v-select
+                    v-model="sortBy"
+                    :items="sortOptions"
+                    label="Sort by"
+                    variant="outlined"
+                    density="comfortable"
+                    hide-details
+                    rounded="lg"
+                    bg-color="surface"
+                    prepend-inner-icon="mdi-sort"
+                  />
+                </v-col>
+
+                <!-- Type Filter -->
+                <v-col cols="12" md="3">
+                  <v-select
+                    v-model="selectedType"
+                    :items="typeOptions"
+                    label="Filter by type"
+                    variant="outlined"
+                    density="comfortable"
+                    hide-details
+                    clearable
+                    rounded="lg"
+                    bg-color="surface"
+                    prepend-inner-icon="mdi-filter"
+                  />
+                </v-col>
+
+                <!-- View Toggle -->
+                <v-col cols="12" md="2" class="text-right">
+                  <v-btn-toggle v-model="viewMode" mandatory class="view-toggle" rounded="lg">
+                    <v-btn value="grid" variant="outlined" icon size="large">
+                      <v-icon icon="mdi-grid" />
+                    </v-btn>
+                    <v-btn value="list" variant="outlined" icon size="large">
+                      <v-icon icon="mdi-view-list" />
+                    </v-btn>
+                  </v-btn-toggle>
+                </v-col>
+              </v-row>
+
+              <!-- Quick Filter Chips -->
+              <div class="quick-filters mt-4">
+                <div class="quick-filters-label">
+                  <v-icon icon="mdi-lightning-bolt" size="small" class="mr-2" />
+                  Quick Filters:
+                </div>
+                <v-chip-group
+                  v-model="selectedQuickFilter"
+                  selected-class="text-primary"
+                  class="quick-filter-chips"
+                >
+                  <v-chip
+                    v-for="type in typeQuickFilters"
+                    :key="type.value"
+                    :value="type.value"
+                    variant="outlined"
+                    size="small"
+                    rounded="lg"
+                    class="quick-filter-chip"
+                    @click="handleQuickFilter(type.value)"
+                  >
+                    <v-icon :icon="type.icon" start size="small" />
+                    {{ type.text }}
+                    <v-badge
+                      v-if="getTypeCount(type.value) > 0"
+                      :content="getTypeCount(type.value)"
+                      color="primary"
+                      class="ml-2"
+                    />
+                  </v-chip>
+                </v-chip-group>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-container>
+      </section>
+
+      <!-- Content Area -->
+      <section class="content-section" ref="anniversariesSection">
+        <v-container>
+          <!-- Loading State -->
+          <div v-if="isLoading" class="loading-container">
+            <v-progress-circular
+              indeterminate
+              color="primary"
+              size="64"
+              width="4"
+            />
+            <p class="loading-text">Loading your special moments...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else-if="filteredAnniversaries.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <v-icon icon="mdi-calendar-heart" size="120" color="grey-lighten-2" />
+            </div>
+            <h3 class="empty-title">No anniversaries yet</h3>
+            <p class="empty-subtitle">
+              Create your first anniversary to start celebrating special moments!
             </p>
-            
-            <div v-if="anniversary.isRecurring" class="d-flex align-center">
-              <v-chip color="purple" size="small" variant="tonal" prepend-icon="mdi-repeat">
-                {{ anniversary.frequency || 'Yearly' }}
-              </v-chip>
-            </div>
-          </v-card-text>
+            <v-btn
+              color="primary"
+              size="large"
+              rounded
+              @click="createAnniversary"
+            >
+              <v-icon icon="mdi-plus" start />
+              Add Your First Anniversary
+            </v-btn>
+          </div>
 
-          <v-card-actions>
-            <v-btn
-              icon="mdi-pencil"
-              size="small"
-              variant="text"
-              @click="editAnniversary(anniversary)"
-            />
-            <v-btn
-              icon="mdi-delete"
-              size="small"
-              variant="text"
-              color="error"
-              @click="deleteAnniversary(anniversary)"
-            />
-            <v-spacer />
-            <v-btn
-              icon="mdi-eye"
-              size="small"
-              variant="text"
-              @click="viewAnniversary(anniversary)"
-            />
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
+          <!-- Anniversaries Grid View -->
+          <div v-else-if="viewMode === 'grid'" class="anniversaries-grid">
+            <v-row>
+              <v-col
+                v-for="anniversary in filteredAnniversaries"
+                :key="anniversary.id"
+                cols="12"
+                sm="6"
+                md="4"
+                lg="3"
+              >
+                <AnniversaryCard
+                  :anniversary="anniversary"
+                  @open-anniversary="handleOpenAnniversary"
+                  @edit-anniversary="handleEditAnniversary"
+                  @delete-anniversary="handleDeleteAnniversary"
+                  @celebrate="handleCelebrate"
+                />
+              </v-col>
+            </v-row>
+          </div>
 
-  </v-container>
+          <!-- Anniversaries List View -->
+          <div v-else class="anniversaries-list">
+            <v-card rounded="xl" elevation="2">
+              <v-list>
+                <v-list-item
+                  v-for="anniversary in filteredAnniversaries"
+                  :key="anniversary.id"
+                  class="anniversary-list-item"
+                  @click="handleOpenAnniversary(anniversary)"
+                >
+                  <template #prepend>
+                    <v-avatar :color="getTypeColor(anniversary.type)" size="40">
+                      <v-icon color="white">{{ getTypeIcon(anniversary.type) }}</v-icon>
+                    </v-avatar>
+                  </template>
+
+                  <v-list-item-title class="anniversary-list-title">
+                    {{ anniversary.title }}
+                  </v-list-item-title>
+                  
+                  <v-list-item-subtitle class="anniversary-list-subtitle">
+                    <div class="d-flex align-center">
+                      <v-chip size="x-small" :color="getTypeColor(anniversary.type)" variant="tonal" class="me-2">
+                        {{ getTypeLabel(anniversary.type) }}
+                      </v-chip>
+                      <span>{{ formatDate(anniversary.date) }}</span>
+                      <v-icon v-if="anniversary.isRecurring" size="14" color="success" class="ms-2">mdi-repeat</v-icon>
+                    </div>
+                  </v-list-item-subtitle>
+
+                  <template #append>
+                    <div class="list-actions">
+                      <v-btn
+                        icon
+                        size="small"
+                        variant="text"
+                        @click.stop="handleEditAnniversary(anniversary)"
+                      >
+                        <v-icon size="16">mdi-pencil</v-icon>
+                      </v-btn>
+                      <v-btn
+                        icon
+                        size="small"
+                        variant="text"
+                        @click.stop="handleCelebrate(anniversary)"
+                        color="pink"
+                      >
+                        <v-icon size="16">mdi-party-popper</v-icon>
+                      </v-btn>
+                    </div>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </div>        </v-container>
+      </section>
+    </div>
+  </ResponsiveContainer>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useAnniversariesStore } from '@/stores/anniversaries'
 import { useDialogsStore } from '@/stores/dialogs'
 import type { Anniversary } from '@/types'
 import dayjs from 'dayjs'
+import AnniversaryCard from '@/components/anniversaries/AnniversaryCard.vue'
+import AnniversaryCountdownWidget from '@/components/anniversaries/AnniversaryCountdownWidget.vue'
+import ResponsiveContainer from '@/components/ui/ResponsiveContainer.vue'
 
-const { t } = useI18n()
 const anniversariesStore = useAnniversariesStore()
 const dialogsStore = useDialogsStore()
+const router = useRouter()
 
 // State
-const createDialog = ref(false)
-const editingAnniversary = ref<Anniversary | null>(null)
 const searchQuery = ref('')
 const selectedType = ref('')
 const sortBy = ref('date-asc')
-const valid = ref(false)
-
-// Form
-const anniversaryForm = ref({
-  title: '',
-  description: '',
-  date: '',
-  type: 'other',
-  isRecurring: false,
-  frequency: 'yearly'
-})
+const viewMode = ref<'grid' | 'list'>('grid')
+const selectedQuickFilter = ref('')
 
 // Computed
 const anniversaries = computed(() => anniversariesStore.anniversaries || [])
@@ -241,21 +343,24 @@ const error = computed(() => anniversariesStore.error)
 
 const stats = computed(() => ({
   total: anniversaries.value.length,
-  upcoming: anniversariesStore.upcomingAnniversaries?.length || 0,
-  recurring: anniversariesStore.recurringAnniversaries?.length || 0,
+  upcoming: anniversaries.value.filter(a => getDaysUntil(a.date) >= 0 && getDaysUntil(a.date) <= 30).length,
+  recurring: anniversaries.value.filter(a => a.isRecurring).length,
   relationship: anniversaries.value.filter(a => a.type === 'relationship').length
 }))
+
+const nextAnniversary = computed(() => {
+  const upcoming = anniversaries.value
+    .filter(a => getDaysUntil(a.date) >= 0)
+    .sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date))
+  
+  return upcoming.length > 0 ? upcoming[0] : null
+})
 
 const typeOptions = [
   { title: 'Relationship', value: 'relationship' },
   { title: 'Milestone', value: 'milestone' },
   { title: 'Birthday', value: 'birthday' },
   { title: 'Other', value: 'other' }
-]
-
-const frequencyOptions = [
-  { title: 'Yearly', value: 'yearly' },
-  { title: 'Monthly', value: 'monthly' }
 ]
 
 const sortOptions = [
@@ -301,22 +406,14 @@ const filteredAnniversaries = computed(() => {
   return filtered
 })
 
-// Dialog methods
-const openCreateAnniversaryDialog = () => {
-  // Use global dialog system for anniversary form
-  dialogsStore.openBaseDialog(
-    'CreateAnniversaryDialog',
-    {},
-    { maxWidth: '700', scrollable: true, persistent: true },
-    {
-      onConfirm: (newAnniversary) => {
-        console.log('New anniversary created:', newAnniversary)
-        // Refresh anniversaries list
-        loadAnniversaries()
-      }
-    }
-  )
-}
+// Quick filter definitions
+const typeQuickFilters = [
+  { text: 'All', value: '', icon: 'mdi-all-inclusive' },
+  { text: 'Relationship', value: 'relationship', icon: 'mdi-heart' },
+  { text: 'Milestone', value: 'milestone', icon: 'mdi-trophy' },
+  { text: 'Birthday', value: 'birthday', icon: 'mdi-cake' },
+  { text: 'Other', value: 'other', icon: 'mdi-star' }
+]
 
 // Methods
 const loadAnniversaries = async () => {
@@ -327,89 +424,58 @@ const loadAnniversaries = async () => {
   }
 }
 
-const viewAnniversary = (anniversary: Anniversary) => {
+const createAnniversary = () => {
+  router.push('/anniversaries/create')
+}
+
+const handleOpenAnniversary = (anniversary: Anniversary) => {
   console.log('View anniversary:', anniversary)
+  // Navigate to anniversary detail view or open modal
 }
 
-const editAnniversary = (anniversary: Anniversary) => {
-  // Use global dialog system for editing anniversaries
-  dialogsStore.openBaseDialog(
-    'EditAnniversaryDialog',
-    { anniversary },
-    { maxWidth: '700', scrollable: true, persistent: true },
-    {
-      onConfirm: (updatedAnniversary) => {
-        console.log('Anniversary updated:', updatedAnniversary)
-        // Refresh anniversaries list
-        loadAnniversaries()
-      }
-    }
-  )
+const handleEditAnniversary = (anniversary: Anniversary) => {
+  router.push({ name: 'edit-anniversary', params: { id: anniversary.id } })
 }
 
-const deleteAnniversary = async (anniversary: Anniversary) => {
+const handleDeleteAnniversary = async (anniversary: Anniversary) => {
   dialogsStore.openConfirmDialog({
-    title: t('anniversaries.confirmDeleteTitle') || 'Xác nhận xóa',
-    message: t('anniversaries.confirmDelete', { title: anniversary.title }) || `Bạn có chắc chắn muốn xóa "${anniversary.title}"?`,
-    confirmText: t('common.delete') || 'Xóa',
-    cancelText: t('common.cancel') || 'Hủy',
+    title: 'Confirm Delete',
+    message: `Are you sure you want to delete "${anniversary.title}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
     onConfirm: async () => {
       try {
         await anniversariesStore.deleteAnniversary(anniversary.id)
         
         dialogsStore.openAlertDialog({
-          title: t('common.deleted') || 'Đã xóa!',
-          message: t('anniversaries.deleteSuccess') || 'Ngày kỷ niệm đã được xóa thành công!'
+          title: 'Deleted!',
+          message: 'Anniversary has been deleted successfully!'
         })
       } catch (error) {
         console.error('Delete failed:', error)
         
         dialogsStore.openAlertDialog({
-          title: t('common.error') || 'Lỗi!',
-          message: t('anniversaries.deleteError') || 'Có lỗi xảy ra khi xóa ngày kỷ niệm. Vui lòng thử lại.'
+          title: 'Error!',
+          message: 'Failed to delete anniversary. Please try again.'
         })
       }
     }
   })
 }
 
-const saveAnniversary = async () => {
-  if (!valid.value) return
+const handleCelebrate = (anniversary: Anniversary) => {
+  console.log('Celebrate anniversary:', anniversary)
+  // Add celebration animation or effect
+}
 
-  try {
-    if (editingAnniversary.value) {
-      await anniversariesStore.updateAnniversary(editingAnniversary.value.id, {
-        title: anniversaryForm.value.title,
-        description: anniversaryForm.value.description,
-        date: anniversaryForm.value.date,
-        type: anniversaryForm.value.type as any,
-        isRecurring: anniversaryForm.value.isRecurring,
-        frequency: anniversaryForm.value.isRecurring ? anniversaryForm.value.frequency as any : undefined
-      })
-    } else {
-      await anniversariesStore.createAnniversary({
-        title: anniversaryForm.value.title,
-        description: anniversaryForm.value.description,
-        date: anniversaryForm.value.date,
-        type: anniversaryForm.value.type as any,
-        isRecurring: anniversaryForm.value.isRecurring,
-        frequency: anniversaryForm.value.isRecurring ? anniversaryForm.value.frequency as any : undefined
-      })
-    }
-    
-    createDialog.value = false
-    editingAnniversary.value = null
-    anniversaryForm.value = {
-      title: '',
-      description: '',
-      date: '',
-      type: 'other',
-      isRecurring: false,
-      frequency: 'yearly'
-    }
-  } catch (error) {
-    console.error('Save failed:', error)
-  }
+const handleQuickFilter = (value: string) => {
+  selectedType.value = value
+  selectedQuickFilter.value = value
+}
+
+const getTypeCount = (type: string) => {
+  if (!type) return anniversaries.value.length
+  return anniversaries.value.filter(anniversary => anniversary.type === type).length
 }
 
 const getTypeColor = (type: string) => {
@@ -465,60 +531,399 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* SweetAlert2 Custom Styles */
-:deep(.swal2-popup-custom) {
-  border-radius: 16px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+.anniversaries-view {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fdfbfb 0%, #f7f3f0 100%);
 }
 
-:deep(.swal2-title-custom) {
-  color: #2c3e50 !important;
-  font-weight: 600 !important;
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)));
+  color: white;
+  padding: 80px 0 60px;
+  position: relative;
+  overflow: hidden;
 }
 
-:deep(.swal2-confirm-custom) {
-  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%) !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
-  padding: 10px 24px !important;
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
-  transition: all 0.3s ease !important;
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
-:deep(.swal2-confirm-custom:hover) {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+.hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
 }
 
-:deep(.swal2-cancel-custom) {
-  background: #f5f5f5 !important;
-  color: #666 !important;
-  border: 1px solid #ddd !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
-  padding: 10px 24px !important;
-  transition: all 0.3s ease !important;
+.hero-text {
+  flex: 1;
 }
 
-:deep(.swal2-cancel-custom:hover) {
-  background: #e0e0e0 !important;
-  border-color: #bbb !important;
-  transform: translateY(-1px) !important;
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  line-height: 1.2;
 }
 
-:deep(.swal2-icon.swal2-warning) {
-  border-color: #FF8A65 !important;
-  color: #FF6B35 !important;
+.hero-icon {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-:deep(.swal2-icon.swal2-success) {
-  border-color: #4CAF50 !important;
-  color: #4CAF50 !important;
+.hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  margin: 0;
+  line-height: 1.5;
 }
 
-:deep(.swal2-icon.swal2-error) {
-  border-color: #F44336 !important;
-  color: #F44336 !important;
+.hero-countdown {
+  flex: 1;
+  max-width: 400px;
+}
+
+/* Stats Section */
+.stats-section {
+  padding: 40px 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  margin-top: -30px;
+  position: relative;
+  z-index: 2;
+}
+
+.stat-card {
+  height: 100%;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  margin-bottom: 12px;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-primary));
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.6;
+  font-weight: 500;
+}
+
+/* Filter Section */
+.filter-section {
+  padding: 40px 0;
+  background: linear-gradient(135deg, 
+    rgba(var(--v-theme-primary), 0.05) 0%, 
+    rgba(var(--v-theme-secondary), 0.03) 100%);
+}
+
+.filter-card {
+  background: rgba(var(--v-theme-surface), 0.9) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(var(--v-theme-outline), 0.12);
+  transition: all 0.3s ease;
+}
+
+.filter-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+.filter-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.filter-title h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.filter-title p {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.create-btn {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary))) !important;
+  color: white !important;
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 24px rgba(var(--v-theme-primary), 0.3);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(var(--v-theme-primary), 0.4);
+}
+
+.filter-controls {
+  margin: 0;
+}
+
+.search-field :deep(.v-field) {
+  transition: all 0.3s ease;
+}
+
+.search-field :deep(.v-field:hover) {
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.15);
+}
+
+.view-toggle {
+  background: rgba(var(--v-theme-surface), 0.9);
+  border: 1px solid rgba(var(--v-theme-outline), 0.12);
+  overflow: hidden;
+}
+
+.view-toggle .v-btn {
+  transition: all 0.3s ease;
+}
+
+.view-toggle .v-btn:hover {
+  background: rgba(var(--v-theme-primary), 0.1);
+}
+
+.quick-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.quick-filters-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.quick-filter-chips {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-filter-chip {
+  transition: all 0.3s ease;
+  margin: 2px;
+}
+
+.quick-filter-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.2);
+}
+
+.quick-filter-chip.v-chip--selected {
+  background: rgba(var(--v-theme-primary), 0.15) !important;
+  border-color: rgb(var(--v-theme-primary)) !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+/* Content Section */
+.content-section {
+  padding: 20px 0 80px;
+}
+
+/* Loading */
+.loading-container {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.loading-text {
+  margin-top: 24px;
+  font-size: 1.125rem;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.6;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.empty-icon {
+  margin-bottom: 32px;
+}
+
+.empty-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 16px;
+}
+
+.empty-subtitle {
+  font-size: 1.125rem;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.6;
+  margin-bottom: 32px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Grid View */
+.anniversaries-grid {
+  margin-top: 20px;
+}
+
+/* List View */
+.anniversaries-list {
+  margin-top: 20px;
+}
+
+.anniversary-list-item {
+  padding: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.anniversary-list-item:hover {
+  background: rgba(var(--v-theme-primary), 0.02);
+}
+
+.anniversary-list-item:last-child {
+  border-bottom: none;
+}
+
+.anniversary-list-title {
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.anniversary-list-subtitle {
+  margin-top: 8px;
+}
+
+.list-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.anniversary-list-item:hover .list-actions {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .controls-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .section-title {
+    text-align: center;
+  }
+
+  .filter-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .filter-title h2 {
+    font-size: 1.75rem;
+  }
+  
+  .create-btn {
+    width: 100%;
+    margin-top: 16px;
+  }
+  
+  .quick-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .quick-filters-label {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: 2rem;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .view-toggle {
+    justify-self: center;
+  }
+  
+  .filter-title h2 {
+    font-size: 1.5rem;
+  }
+  
+  .filter-controls {
+    gap: 16px;
+  }
+  
+  .quick-filter-chips {
+    justify-content: center;
+  }
 }
 </style>

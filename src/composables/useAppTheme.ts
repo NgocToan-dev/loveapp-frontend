@@ -9,16 +9,11 @@ export function useAppTheme() {
   // Computed properties for easy access
   const currentTheme = computed(() => themeStore.currentTheme)
   const currentThemeInfo = computed(() => themeStore.currentThemeInfo)
-  const isDarkMode = computed(() => themeStore.isDarkMode)
   const availableThemes = computed(() => themeStore.availableThemes)
   
   // Methods
   const setTheme = (themeKey: string) => {
     themeStore.setTheme(themeKey)
-  }
-  
-  const toggleDarkMode = () => {
-    themeStore.toggleDarkMode()
   }
   
   const initializeTheme = () => {
@@ -49,21 +44,18 @@ export function useAppTheme() {
     }
   }
   
-  const applyThemeToVuetify = (theme: string, isDark: boolean) => {
-    const themeName = isDark ? `dark${theme.charAt(0).toUpperCase() + theme.slice(1)}` : theme
-    vuetifyTheme.global.name.value = themeName
+  const applyThemeToVuetify = (theme: string) => {
+    vuetifyTheme.global.name.value = theme
   }
   
   return {
     // State
     currentTheme,
     currentThemeInfo,
-    isDarkMode,
     availableThemes,
     
     // Actions
     setTheme,
-    toggleDarkMode,
     initializeTheme,
     
     // Utilities

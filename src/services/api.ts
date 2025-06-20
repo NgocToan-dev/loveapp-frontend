@@ -147,8 +147,7 @@ api.interceptors.response.use(
         
         if (typeof window !== 'undefined' &&
             !window.location.pathname.includes('/login') &&
-            !window.location.pathname.includes('/register') &&
-            !window.location.pathname.includes('/about')) { // Allow about page
+            !window.location.pathname.includes('/register')) { // Allow about page
           console.log('Redirecting to login - no refresh token')
           window.location.href = '/login'
         }

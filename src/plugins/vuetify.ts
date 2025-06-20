@@ -16,13 +16,14 @@ const springTheme = {
     warning: '#ff9800',
     info: '#2196f3',
     success: '#4caf50',
-    background: '#f8fffe',        // Very light green background
+    background: '#ffffff',        // Pure white background
     surface: '#ffffff',
-    'surface-variant': '#f1f8e9',
+    'surface-variant': '#f5f5f5',
     'on-primary': '#ffffff',      // White text on primary buttons
-    'on-secondary': '#000000',    // Black text on light green buttons (better contrast)
-    'on-background': '#1b5e20',   // Dark green text on light background
-    'on-surface': '#2e7d32',      // Dark green text on surface
+    'on-secondary': '#ffffff',    // White text on secondary buttons
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#388e3c',
     'secondary-darken-1': '#66bb6a',
@@ -39,13 +40,14 @@ const darkSpringTheme = {
     warning: '#ff9800',
     info: '#2196f3',
     success: '#4caf50',
-    background: '#0d1f0f',
-    surface: '#1b2a1d',
-    'surface-variant': '#2e3f2f',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
     'on-primary': '#ffffff',
-    'on-secondary': '#ffffff',
-    'on-background': '#c8e6c9',   // Light green text on dark background
-    'on-surface': '#a5d6a7',     // Light green text on dark surface
+    'on-secondary': '#000000',
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#388e3c',
     'secondary-darken-1': '#66bb6a',
@@ -63,13 +65,14 @@ const summerTheme = {
     warning: '#ff9800',
     info: '#03a9f4',
     success: '#4caf50',
-    background: '#fffef7',        // Light yellow background
+    background: '#ffffff',        // Pure white background
     surface: '#ffffff',
-    'surface-variant': '#fff8e1',
+    'surface-variant': '#f5f5f5',
     'on-primary': '#ffffff',      // White text on orange buttons
-    'on-secondary': '#000000',    // Black text on yellow buttons (better contrast)
-    'on-background': '#e65100',   // Dark orange text on light background
-    'on-surface': '#ef6c00',      // Dark orange text on surface
+    'on-secondary': '#2e2e2e',    // Dark text on yellow buttons
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#f57c00',
     'secondary-darken-1': '#ffb300',
@@ -86,13 +89,14 @@ const darkSummerTheme = {
     warning: '#ff9800',
     info: '#03a9f4',
     success: '#4caf50',
-    background: '#1f1b0a',
-    surface: '#2a1f0d',
-    'surface-variant': '#3f2f1a',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
     'on-primary': '#ffffff',
     'on-secondary': '#000000',
-    'on-background': '#ffe0b2',   // Light orange text on dark background
-    'on-surface': '#ffcc80',     // Light orange text on dark surface
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#f57c00',
     'secondary-darken-1': '#ffb300',
@@ -110,13 +114,14 @@ const autumnTheme = {
     warning: '#f57c00',
     info: '#1976d2',
     success: '#388e3c',
-    background: '#fff9f5',        // Light orange background
+    background: '#ffffff',        // Pure white background
     surface: '#ffffff',
-    'surface-variant': '#fbe9e7',
+    'surface-variant': '#f5f5f5',
     'on-primary': '#ffffff',      // White text on red-orange buttons
-    'on-secondary': '#000000',    // Black text on light orange buttons (better contrast)
-    'on-background': '#bf360c',   // Dark red-orange text on light background
-    'on-surface': '#d84315',      // Dark orange text on surface
+    'on-secondary': '#ffffff',    // White text on orange buttons
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#e64a19',
     'secondary-darken-1': '#ff7043',
@@ -133,13 +138,14 @@ const darkAutumnTheme = {
     warning: '#f57c00',
     info: '#1976d2',
     success: '#388e3c',
-    background: '#1f170d',
-    surface: '#2a1a15',
-    'surface-variant': '#3f2a20',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
     'on-primary': '#ffffff',
     'on-secondary': '#ffffff',
-    'on-background': '#ffccbc',   // Light orange text on dark background
-    'on-surface': '#ffab91',     // Light orange text on dark surface
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#e64a19',
     'secondary-darken-1': '#ff7043',
@@ -157,13 +163,14 @@ const winterTheme = {
     warning: '#ff9800',
     info: '#2196f3',
     success: '#4caf50',
-    background: '#f8fbff',        // Very light blue background
+    background: '#ffffff',        // Pure white background
     surface: '#ffffff',
-    'surface-variant': '#e3f2fd',
+    'surface-variant': '#f5f5f5',
     'on-primary': '#ffffff',      // White text on blue buttons
-    'on-secondary': '#000000',    // Black text on light blue buttons (better contrast)
-    'on-background': '#0d47a1',   // Dark blue text on light background
-    'on-surface': '#1565c0',      // Dark blue text on surface
+    'on-secondary': '#ffffff',    // White text on light blue buttons
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#1976d2',
     'secondary-darken-1': '#42a5f5',
@@ -180,13 +187,14 @@ const darkWinterTheme = {
     warning: '#ff9800',
     info: '#2196f3',
     success: '#4caf50',
-    background: '#0a1220',
-    surface: '#0d1421',
-    'surface-variant': '#162537',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
     'on-primary': '#ffffff',
     'on-secondary': '#ffffff',
-    'on-background': '#bbdefb',   // Light blue text on dark background
-    'on-surface': '#90caf9',     // Light blue text on dark surface
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#1976d2',
     'secondary-darken-1': '#42a5f5',
@@ -204,13 +212,14 @@ const loveTheme = {
     warning: '#ff9800',           // Orange - Warning states
     info: '#2196f3',              // Blue - Info states
     success: '#4caf50',           // Green - Success states
-    background: '#fff8fb',        // Very light pink - Page background
+    background: '#ffffff',        // Pure white background
     surface: '#ffffff',           // White - Card/surface background
-    'surface-variant': '#fce4ec', // Light pink variant
+    'surface-variant': '#f5f5f5', // Light gray variant
     'on-primary': '#ffffff',      // White text on primary
     'on-secondary': '#ffffff',    // White text on secondary
-    'on-background': '#880e4f',   // Dark pink text on background
-    'on-surface': '#ad1457',      // Dark pink text on surface
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
     'on-error': '#ffffff',        // White text on error
     'primary-darken-1': '#d81b60', // Darker pink
     'secondary-darken-1': '#c2185b', // Darker deep pink
@@ -227,16 +236,164 @@ const darkLoveTheme = {
     warning: '#ff9800',
     info: '#2196f3',
     success: '#4caf50',
-    background: '#1f0d18',
-    surface: '#2a1420',
-    'surface-variant': '#3f2535',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
     'on-primary': '#ffffff',
     'on-secondary': '#ffffff',
-    'on-background': '#f8bbd9',   // Light pink text on dark background
-    'on-surface': '#f48fb1',     // Light pink text on dark surface
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
     'on-error': '#ffffff',
     'primary-darken-1': '#d81b60',
     'secondary-darken-1': '#c2185b',
+  }
+}
+
+// 🌸 Pastel Romance Theme - Minimalist and elegant
+const pastelRomanceTheme = {
+  dark: false,
+  colors: {
+    primary: '#e91e63',           // Deep pink for better contrast
+    secondary: '#9c27b0',         // Purple for better contrast
+    accent: '#f3e5f5',            // Light purple accent
+    error: '#ef5350',
+    warning: '#ffa726',
+    info: '#42a5f5',
+    success: '#66bb6a',
+    background: '#ffffff',        // Pure white background
+    surface: '#ffffff',
+    'surface-variant': '#f5f5f5',
+    'on-primary': '#ffffff',      // White text on deep pink
+    'on-secondary': '#ffffff',    // White text on purple
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
+    'on-error': '#ffffff',
+    'primary-darken-1': '#c2185b',
+    'secondary-darken-1': '#7b1fa2',
+  }
+}
+
+const darkPastelRomanceTheme = {
+  dark: true,
+  colors: {
+    primary: '#e91e63',
+    secondary: '#9c27b0',
+    accent: '#f3e5f5',
+    error: '#ef5350',
+    warning: '#ffa726',
+    info: '#42a5f5',
+    success: '#66bb6a',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
+    'on-primary': '#ffffff',
+    'on-secondary': '#ffffff',
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
+    'on-error': '#ffffff',
+    'primary-darken-1': '#c2185b',
+    'secondary-darken-1': '#7b1fa2',
+  }
+}
+
+// 🌿 Mint Elegance Theme - Fresh and tranquil
+const mintEleganceTheme = {
+  dark: false,
+  colors: {
+    primary: '#26a69a',           // Teal for better contrast
+    secondary: '#66bb6a',         // Green for better contrast
+    accent: '#fff9c4',            // Light yellow accent
+    error: '#ef5350',
+    warning: '#ffa726',
+    info: '#42a5f5',
+    success: '#66bb6a',
+    background: '#ffffff',        // Pure white background
+    surface: '#ffffff',
+    'surface-variant': '#f5f5f5',
+    'on-primary': '#ffffff',      // White text on teal
+    'on-secondary': '#ffffff',    // White text on green
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
+    'on-error': '#ffffff',
+    'primary-darken-1': '#00796b',
+    'secondary-darken-1': '#4caf50',
+  }
+}
+
+const darkMintEleganceTheme = {
+  dark: true,
+  colors: {
+    primary: '#26a69a',
+    secondary: '#66bb6a',
+    accent: '#fff9c4',
+    error: '#ef5350',
+    warning: '#ffa726',
+    info: '#42a5f5',
+    success: '#66bb6a',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
+    'on-primary': '#ffffff',
+    'on-secondary': '#ffffff',
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
+    'on-error': '#ffffff',
+    'primary-darken-1': '#00796b',
+    'secondary-darken-1': '#4caf50',
+  }
+}
+
+// ✨ Golden Hour Theme - Warm and luxurious
+const goldenHourTheme = {
+  dark: false,
+  colors: {
+    primary: '#ff9800',           // Orange for better contrast
+    secondary: '#ff5722',         // Deep orange for better contrast
+    accent: '#fff3e0',            // Light orange accent
+    error: '#ef5350',
+    warning: '#ffa726',
+    info: '#42a5f5',
+    success: '#66bb6a',
+    background: '#ffffff',        // Pure white background
+    surface: '#ffffff',
+    'surface-variant': '#f5f5f5',
+    'on-primary': '#ffffff',      // White text on orange
+    'on-secondary': '#ffffff',    // White text on deep orange
+    'on-background': '#2e2e2e',   // Dark gray text on white background
+    'on-surface': '#424242',      // Dark gray text on surface
+    'on-surface-variant': '#616161', // Medium gray text for surface variant
+    'on-error': '#ffffff',
+    'primary-darken-1': '#f57c00',
+    'secondary-darken-1': '#e64a19',
+  }
+}
+
+const darkGoldenHourTheme = {
+  dark: true,
+  colors: {
+    primary: '#ff9800',
+    secondary: '#ff5722',
+    accent: '#fff3e0',
+    error: '#ef5350',
+    warning: '#ffa726',
+    info: '#42a5f5',
+    success: '#66bb6a',
+    background: '#121212',        // Standard dark background
+    surface: '#1e1e1e',          // Dark surface
+    'surface-variant': '#2e2e2e',
+    'on-primary': '#ffffff',      // White text on orange
+    'on-secondary': '#ffffff',    // White text on deep orange
+    'on-background': '#ffffff',   // White text on dark background
+    'on-surface': '#ffffff',      // White text on dark surface
+    'on-surface-variant': '#e0e0e0', // Light gray text for dark surface variant
+    'on-error': '#ffffff',
+    'primary-darken-1': '#f57c00',
+    'secondary-darken-1': '#e64a19',
   }
 }
 
@@ -252,18 +409,25 @@ export default createVuetify({
   theme: {
     defaultTheme: 'love',
     themes: {
-      // Light themes
+      // Original 5 themes (PRESERVED)
       spring: springTheme,
       summer: summerTheme,
       autumn: autumnTheme,
       winter: winterTheme,
       love: loveTheme,
+      // NEW: 3 Minimalist themes
+      pastelRomance: pastelRomanceTheme,
+      mintElegance: mintEleganceTheme,
+      goldenHour: goldenHourTheme,
       // Dark themes
       darkSpring: darkSpringTheme,
       darkSummer: darkSummerTheme,
       darkAutumn: darkAutumnTheme,
       darkWinter: darkWinterTheme,
-      darkLove: darkLoveTheme
+      darkLove: darkLoveTheme,
+      darkPastelRomance: darkPastelRomanceTheme,
+      darkMintElegance: darkMintEleganceTheme,
+      darkGoldenHour: darkGoldenHourTheme
     },
     variations: {
       colors: ['primary', 'secondary', 'accent'],
@@ -274,23 +438,28 @@ export default createVuetify({
   defaults: {
     VBtn: {
       variant: 'elevated',
-      rounded: 'lg'
+      rounded: 'lg',
+      style: 'font-family: "Montserrat", sans-serif; text-transform: none; letter-spacing: 0.5px;'
     },
     VCard: {
       variant: 'elevated',
-      rounded: 'lg'
+      rounded: 'xl',
+      style: 'transition: all 0.3s ease;'
     },
     VTextField: {
       variant: 'outlined',
-      rounded: 'lg'
+      rounded: 'lg',
+      style: 'font-family: "Montserrat", sans-serif;'
     },
     VTextarea: {
       variant: 'outlined',
-      rounded: 'lg'
+      rounded: 'lg',
+      style: 'font-family: "Montserrat", sans-serif;'
     },
     VSelect: {
       variant: 'outlined',
-      rounded: 'lg'
+      rounded: 'lg',
+      style: 'font-family: "Montserrat", sans-serif;'
     }
   }
 })

@@ -11,37 +11,6 @@
     <v-divider class="soft-divider"></v-divider>
 
     <v-card-text class="pa-6">
-      <!-- Dark Mode Toggle -->
-      <div class="mb-8">
-        <div class="gentle-section-card pa-4">
-          <div class="d-flex align-center justify-space-between">
-            <div class="d-flex align-center">
-              <v-icon 
-                :icon="themeStore.isDarkMode ? 'mdi-weather-night' : 'mdi-weather-sunny'" 
-                size="24" 
-                :color="themeStore.isDarkMode ? 'indigo-lighten-1' : 'orange-lighten-1'"
-                class="me-3"
-              ></v-icon>
-              <div>
-                <div class="text-subtitle-1 font-weight-medium text-high-emphasis">
-                  {{ themeStore.isDarkMode ? 'Ánh nến lung linh' : getThemeMoodText() }}
-                </div>
-                <div class="text-caption text-medium-emphasis">
-                  {{ themeStore.isDarkMode ? 'Không gian riêng tư, ấm cúng' : 'Tươi sáng, tràn đầy năng lượng' }}
-                </div>
-              </div>
-            </div>
-            <v-switch
-              v-model="themeStore.isDarkMode"
-              @change="handleDarkModeToggle"
-              color="primary"
-              hide-details
-              inset
-            ></v-switch>
-          </div>
-        </div>
-      </div>
-
       <!-- Theme Selection -->
       <div class="mb-6">
         <h3 class="text-h6 font-weight-medium mb-2 text-high-emphasis d-flex align-center">
@@ -176,27 +145,13 @@ themeStore.initializeTheme()
 watch(
   () => themeStore.currentTheme,
   (newTheme) => {
-    const themeName = themeStore.isDarkMode ? `dark${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)}` : newTheme
-    vuetifyTheme.global.name.value = themeName
+    vuetifyTheme.global.name.value = newTheme
   },
   { immediate: true }
 )
 
-watch(
-  () => themeStore.isDarkMode,
-  (isDark) => {
-    const currentTheme = themeStore.currentTheme
-    const themeName = isDark ? `dark${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}` : currentTheme
-    vuetifyTheme.global.name.value = themeName
-  }
-)
-
 const selectTheme = (themeKey: string) => {
   themeStore.setTheme(themeKey)
-}
-
-const handleDarkModeToggle = () => {
-  themeStore.toggleDarkMode()
 }
 
 const getLoveThemeCardStyle = (theme: any) => {
@@ -313,19 +268,6 @@ const getThemeMoodText = () => {
 .love-current-theme {
   .gentle-section-card {
     transition: all 0.5s cubic-bezier(0.4, 0, 0.6, 1);
-  }
-}
-
-// Dark theme adjustments
-.v-theme--dark {
-  .theme-settings-card {
-    background: rgba(30, 30, 30, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .gentle-section-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 }
 

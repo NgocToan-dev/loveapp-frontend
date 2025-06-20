@@ -7,6 +7,8 @@ import { useThemeStore } from '@/stores/theme'
 import ServerOfflineNotice from '@/components/ServerOfflineNotice.vue'
 import NotificationBell from '@/components/NotificationBell.vue'
 import GlobalDialogContainer from '@/components/GlobalDialogContainer.vue'
+import MobileNavigation from '@/components/ui/MobileNavigation.vue'
+import BottomNavigation from '@/components/ui/BottomNavigation.vue'
 
 const { t, locale } = useI18n()
 const theme = useTheme()
@@ -23,24 +25,10 @@ onMounted(() => {
 watch(
   () => themeStore.currentTheme,
   (newTheme) => {
-    const themeName = themeStore.isDarkMode ? `dark${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)}` : newTheme
-    theme.global.name.value = themeName
+    theme.global.name.value = newTheme
   },
   { immediate: true }
 )
-
-watch(
-  () => themeStore.isDarkMode,
-  (isDark) => {
-    const currentTheme = themeStore.currentTheme
-    const themeName = isDark ? `dark${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}` : currentTheme
-    theme.global.name.value = themeName
-  }
-)
-
-const toggleDarkMode = () => {
-  themeStore.toggleDarkMode()
-}
 
 const toggleLanguage = () => {
   locale.value = locale.value === 'vi' ? 'en' : 'vi'
@@ -52,6 +40,25 @@ const logout = async () => {
   } catch (error) {
     console.error('Logout failed:', error)
   }
+}
+
+// Page transition logic
+const getTransitionName = (route: any) => {
+  // Define transition mapping based on route depth or specific routes
+  const transitions: Record<string, string> = {
+    '/login': 'fade',
+    '/register': 'fade',
+    '/dashboard': 'slideRight',
+    '/memories': 'slideLeft',
+    '/notes': 'slideLeft',
+    '/reminders': 'slideLeft',
+    '/anniversaries': 'slideLeft',
+    '/files': 'slideLeft',
+    '/profile': 'slideUp',
+    '/settings': 'slideUp'
+  }
+  
+  return transitions[route.path] || 'fade'
 }
 </script>
 
@@ -113,20 +120,9 @@ const logout = async () => {
             value="files"
             to="/files"
           />
-          <v-list-item
-            prepend-icon="mdi-bell"
-            :title="t('nav.notifications') || 'Notifications'"
-            value="notifications"
-            to="/notifications"
-          />
+
         </template>
         
-        <v-list-item
-          prepend-icon="mdi-information"
-          :title="t('nav.about')"
-          value="about"
-          to="/about"
-        />
         <v-list-item
           prepend-icon="mdi-palette"
           title="Cài Đặt Giao Diện"
@@ -198,17 +194,6 @@ const logout = async () => {
         :icon="locale === 'vi' ? 'mdi-translate' : 'mdi-translate-variant'"
       />
 
-      <!-- Theme Toggle -->
-      <v-btn
-        variant="text"
-        size="small"
-        color="on-primary"
-        class="mr-2"
-        @click="toggleDarkMode"
-        :title="themeStore.isDarkMode ? t('theme.toggleLight') : t('theme.toggleDark')"
-        :icon="themeStore.isDarkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-      />
-
       <!-- Settings Button -->
       <v-btn
         variant="text"
@@ -246,13 +231,23 @@ const logout = async () => {
 
     <!-- Main Content -->
     <v-main class="bg-background">
-      <RouterView />
+      <router-view v-slot="{ Component, route }">
+        <transition :name="getTransitionName(route)" mode="out-in">
+          <component :is="Component" :key="route.path" />
+        </transition>
+      </router-view>
     </v-main>
+
+    <!-- Mobile Navigation -->
+    <MobileNavigation />
+    
+    <!-- Bottom Navigation for Mobile -->
+    <BottomNavigation />
 
     <!-- Footer -->
     <v-footer
       color="surface"
-      class="border-t"
+      class="border-t footer-desktop"
       height="60"
     >
       <v-row justify="center" no-gutters>
@@ -272,5 +267,80 @@ const logout = async () => {
 <style scoped>
 .v-toolbar-title {
   letter-spacing: 0.5px;
+}
+
+/* Page Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slideRight-enter-active,
+.slideRight-leave-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slideRight-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.slideRight-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.slideLeft-enter-active,
+.slideLeft-leave-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slideLeft-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.slideLeft-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.slideUp-enter-active,
+.slideUp-leave-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slideUp-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.slideUp-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+/* Mobile Responsive Styles */
+.footer-desktop {
+  @media (max-width: 767px) {
+    display: none !important;
+  }
+}
+
+/* Hide desktop navigation on mobile */
+@media (max-width: 767px) {
+  .v-navigation-drawer,
+  .v-app-bar {
+    display: none !important;
+  }
+  
+  .v-main {
+    padding-bottom: 80px !important; /* Space for bottom navigation */
+  }
 }
 </style>

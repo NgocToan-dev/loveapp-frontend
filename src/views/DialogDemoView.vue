@@ -13,23 +13,23 @@
       <v-row>
         <v-col cols="12" md="6">
           <v-card>
-            <v-card-title>Timeline Event Dialogs</v-card-title>
+            <v-card-title>Create Dialogs</v-card-title>
             <v-card-text>
               <div class="d-flex flex-column ga-3">
                 <v-btn
                   color="primary"
-                  @click="openCreateEventDialog"
-                  prepend-icon="mdi-plus"
+                  @click="openCreateMemoryDialog"
+                  prepend-icon="mdi-heart-plus"
                 >
-                  Tạo sự kiện mới
+                  Tạo kỷ niệm mới
                 </v-btn>
                 
                 <v-btn
                   color="secondary"
-                  @click="openEditEventDialog"
-                  prepend-icon="mdi-pencil"
+                  @click="openCreateNoteDialog"
+                  prepend-icon="mdi-note-plus"
                 >
-                  Chỉnh sửa sự kiện
+                  Tạo ghi chú mới
                 </v-btn>
               </div>
             </v-card-text>
@@ -150,36 +150,13 @@ import { useDialogsStore } from '@stores/dialogs'
 
 const dialogsStore = useDialogsStore()
 
-// Timeline Event Dialogs
-const openCreateEventDialog = () => {
-  dialogsStore.openBaseDialog(
-    'TimelineEventForm',
-    {},
-    { maxWidth: '600', persistent: true }
-  )
+// Create Dialogs
+const openCreateMemoryDialog = () => {
+  dialogsStore.openBaseDialog('CreateMemoryDialog')
 }
 
-const openEditEventDialog = () => {
-  // Fake event data for demo
-  const fakeEvent = {
-    id: '1',
-    title: 'Ngày hẹn đầu tiên',
-    description: 'Đây là mô tả cho sự kiện demo',
-    date: new Date(),
-    type: 'memory' as const,
-    priority: 'high' as const,
-    tags: ['romantic', 'special'],
-    images: ['https://via.placeholder.com/300x200'],
-    isRecurring: false,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-  
-  dialogsStore.openBaseDialog(
-    'TimelineEventForm',
-    { event: fakeEvent },
-    { maxWidth: '600', persistent: true }
-  )
+const openCreateNoteDialog = () => {
+  dialogsStore.openBaseDialog('CreateNoteDialog')
 }
 
 // Other Dialogs

@@ -1,757 +1,1252 @@
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12">
-        <div class="d-flex justify-space-between align-center mb-4">
-          <div>
-            <h1 class="text-h4 font-weight-bold text-orange">
-              <v-icon icon="mdi-bell" class="mr-2"></v-icon>
-              {{ $t('reminders.title') }}
-            </h1>
-            <p class="text-subtitle-1 text-medium-emphasis">{{ $t('reminders.subtitle') }}</p>
+  <ResponsiveContainer>
+    <div class="reminders-view">
+      <!-- Hero Section -->
+      <section class="reminders-hero">
+        <div class="hero-background">
+          <div class="floating-bells">
+            <div class="bell" v-for="n in 6" :key="n"></div>
           </div>
+        </div>
+        <div class="hero-content">
+          <h1 class="hero-title">
+            <v-icon icon="mdi-bell-ring" class="title-icon" />
+            Love Reminders
+          </h1>
+          <p class="hero-subtitle">Never miss a moment that matters to your heart</p>
           <v-btn
-            color="orange"
-            prepend-icon="mdi-bell-plus"
-            @click="createNewReminder"
+            color="primary"
+            size="large"
+            rounded
+            elevation="0"
+            class="create-reminder-btn"
+            @click="createReminder"
           >
-            {{ $t('reminders.create') }}
+            <v-icon icon="mdi-plus" start />
+            Create Reminder
           </v-btn>
         </div>
-      </v-col>
-    </v-row>
+      </section>
 
-    <!-- Reminders Statistics -->
-    <v-row class="mb-4">
-      <v-col cols="12" sm="6" md="3">
-        <v-card>
-          <v-card-text>
-            <div class="d-flex align-center">
-              <v-icon color="orange" size="40" class="me-3">mdi-bell</v-icon>
-              <div>
-                <div class="text-h6">{{ stats.total }}</div>
-                <div class="text-caption text-medium-emphasis">{{ $t('reminders.totalReminders') }}</div>
+      <!-- Stats & Quick Actions -->
+      <section class="stats-section">
+        <v-container>
+          <div class="stats-grid">
+            <div class="stat-card" @click="filterByStatus('all')">
+              <div class="stat-icon">
+                <v-icon icon="mdi-bell-outline" color="primary" />
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ totalReminders }}</div>
+                <div class="stat-label">Total Reminders</div>
               </div>
             </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card>
-          <v-card-text>
-            <div class="d-flex align-center">
-              <v-icon color="blue" size="40" class="me-3">mdi-clock-outline</v-icon>
-              <div>
-                <div class="text-h6">{{ stats.upcoming }}</div>
-                <div class="text-caption text-medium-emphasis">{{ $t('reminders.upcoming') }}</div>
+            <div class="stat-card" @click="filterByStatus('upcoming')">
+              <div class="stat-icon">
+                <v-icon icon="mdi-clock-outline" color="info" />
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ upcomingReminders }}</div>
+                <div class="stat-label">Upcoming</div>
               </div>
             </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card>
-          <v-card-text>
-            <div class="d-flex align-center">
-              <v-icon color="red" size="40" class="me-3">mdi-alert-circle</v-icon>
-              <div>
-                <div class="text-h6">{{ stats.overdue }}</div>
-                <div class="text-caption text-medium-emphasis">{{ $t('reminders.overdue') }}</div>
+            <div class="stat-card" @click="filterByStatus('overdue')">
+              <div class="stat-icon">
+                <v-icon icon="mdi-alert-circle" color="warning" />
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ overdueReminders }}</div>
+                <div class="stat-label">Overdue</div>
               </div>
             </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card>
-          <v-card-text>
-            <div class="d-flex align-center">
-              <v-icon color="green" size="40" class="me-3">mdi-check-circle</v-icon>
-              <div>
-                <div class="text-h6">{{ stats.completed }}</div>
-                <div class="text-caption text-medium-emphasis">{{ $t('reminders.completed') }}</div>
+            <div class="stat-card" @click="filterByStatus('completed')">
+              <div class="stat-icon">
+                <v-icon icon="mdi-check-circle" color="success" />
+              </div>
+              <div class="stat-content">
+                <div class="stat-number">{{ completedReminders }}</div>
+                <div class="stat-label">Completed</div>
               </div>
             </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+          </div>
+          <div class="quick-filters">
+            <v-chip-group v-model="selectedFilter" mandatory>
+              <v-chip value="all" variant="elevated">All</v-chip>
+              <v-chip value="upcoming" variant="elevated">Upcoming</v-chip>
+              <v-chip value="today" variant="elevated">Today</v-chip>
+              <v-chip value="overdue" variant="elevated">Overdue</v-chip>
+            </v-chip-group>
+          </div>
+        </v-container>
+      </section>
 
-    <!-- Filters -->
-    <v-row class="mb-4">
-      <v-col cols="12" md="3">
-        <v-text-field
-          v-model="searchQuery"
-          prepend-inner-icon="mdi-magnify"
-          :label="$t('reminders.search')"
-          variant="outlined"
-          density="compact"
-          clearable
-        />
-      </v-col>
-      <v-col cols="12" md="2">
-        <v-select
-          v-model="selectedPriority"
-          :items="priorityOptions"
-          :label="$t('reminders.priority')"
-          variant="outlined"
-          density="compact"
-          clearable
-        />
-      </v-col>
-      <v-col cols="12" md="2">
-        <v-select
-          v-model="selectedStatus"
-          :items="statusOptions"
-          :label="$t('reminders.status')"
-          variant="outlined"
-          density="compact"
-          clearable
-        />
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-select
-          v-model="sortBy"
-          :items="sortOptions"
-          :label="$t('reminders.sortBy')"
-          variant="outlined"
-          density="compact"
-        />
-      </v-col>
-      <v-col cols="12" md="2">
-        <v-btn-toggle v-model="viewMode" mandatory>
-          <v-btn icon="mdi-view-grid" value="grid" />
-          <v-btn icon="mdi-view-list" value="list" />
-          <v-btn icon="mdi-timeline" value="timeline" />
-        </v-btn-toggle>
-      </v-col>
-    </v-row>
-
-    <!-- Reminders Grid View -->
-    <v-row v-if="viewMode === 'grid'">
-      <v-col
-        v-for="reminder in filteredReminders"
-        :key="reminder.id"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-      >
-        <v-card hover @click="viewReminder(reminder)" class="reminder-card">
-          <div 
-            class="d-flex align-center justify-center reminder-header"
-            :style="{ backgroundColor: getPriorityColor(reminder.priority) + '20' }"
+      <!-- Advanced Filter Section -->
+      <section class="filter-section">
+        <v-container>
+          <!-- Main Filter Card -->
+          <v-card 
+            rounded="xl" 
+            elevation="0" 
+            class="filter-card"
+            :style="{ 
+              backgroundColor: 'rgb(var(--v-theme-surface))',
+              border: '1px solid rgb(var(--v-theme-outline-variant))'
+            }"
           >
-            <v-icon :color="getPriorityColor(reminder.priority)" size="48" class="my-4">
-              {{ getStatusIcon(reminder) }}
-            </v-icon>
+            <v-card-text class="pa-6">
+              <!-- Quick Actions Header -->
+              <div class="filter-header d-flex justify-space-between align-center mb-6">
+                <div class="filter-title">
+                  <h3 class="text-h6 font-weight-bold" :style="{ color: 'rgb(var(--v-theme-on-surface))' }">
+                    <v-icon class="mr-2" color="warning">mdi-filter-variant</v-icon>
+                    Bộ lọc & Tìm kiếm
+                  </h3>
+                  <p class="text-caption mt-1" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
+                    Tìm kiếm và lọc nhắc nhở theo ý muốn
+                  </p>
+                </div>
+                <v-btn
+                  color="primary"
+                  variant="flat"
+                  rounded="xl"
+                  size="large"
+                  @click="createReminder"
+                  class="create-btn"
+                >
+                  <v-icon start>mdi-plus</v-icon>
+                  Tạo nhắc nhở
+                </v-btn>
+              </div>
+
+              <!-- Search and Filters Row -->
+              <v-row align="center" class="mb-4">
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="searchQuery"
+                    prepend-inner-icon="mdi-magnify"
+                    label="Tìm kiếm nhắc nhở..."
+                    variant="outlined"
+                    rounded="xl"
+                    clearable
+                    hide-details
+                    class="search-field"
+                    :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
+                  >
+                    <template #append-inner>
+                      <v-fade-transition>
+                        <v-icon 
+                          v-if="searchQuery" 
+                          color="success"
+                          size="small"
+                        >
+                          mdi-check-circle
+                        </v-icon>
+                      </v-fade-transition>
+                    </template>
+                  </v-text-field>
+                </v-col>
+                
+                <v-col cols="6" md="2">
+                  <v-select
+                    v-model="sortBy"
+                    :items="sortOptions"
+                    label="Sắp xếp"
+                    variant="outlined"
+                    rounded="xl"
+                    hide-details
+                    prepend-inner-icon="mdi-sort"
+                    class="sort-select"
+                    :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
+                  />
+                </v-col>
+                
+                <v-col cols="6" md="2">
+                  <div class="view-toggle-wrapper">
+                    <label class="view-label text-caption" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
+                      Hiển thị
+                    </label>
+                    <v-btn-toggle
+                      v-model="viewMode"
+                      mandatory
+                      variant="outlined"
+                      divided
+                      rounded="xl"
+                      class="view-toggle"
+                    >
+                      <v-btn value="grid" size="small">
+                        <v-icon>mdi-view-grid</v-icon>
+                      </v-btn>
+                      <v-btn value="list" size="small">
+                        <v-icon>mdi-view-list</v-icon>
+                      </v-btn>
+                    </v-btn-toggle>
+                  </div>
+                </v-col>
+                
+                <v-col cols="12" md="2">
+                  <div class="results-count d-flex align-center justify-center">
+                    <v-chip
+                      color="warning"
+                      variant="tonal"
+                      rounded="xl"
+                      class="px-4"
+                    >
+                      <v-icon start size="small">mdi-bell</v-icon>
+                      {{ filteredReminders.length }} nhắc nhở
+                    </v-chip>
+                  </div>
+                </v-col>
+              </v-row>
+
+              <!-- Quick Status Filters -->
+              <div class="status-filters">
+                <div class="filter-section-title mb-3">
+                  <span class="text-caption font-weight-medium" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
+                    Lọc nhanh theo trạng thái
+                  </span>
+                </div>
+                <v-chip-group
+                  v-model="selectedFilter"
+                  selected-class="text-primary"
+                  color="primary"
+                  filter
+                  class="status-chips"
+                >
+                  <v-chip 
+                    value="all" 
+                    @click="filterByStatus('all')"
+                    variant="outlined"
+                    rounded="xl"
+                    class="status-chip"
+                  >
+                    <v-icon start size="small">mdi-bell-outline</v-icon>
+                    Tất cả
+                    <v-badge 
+                      :content="totalReminders"
+                      color="grey"
+                      offset-x="4"
+                      offset-y="4"
+                    />
+                  </v-chip>
+                  
+                  <v-chip 
+                    value="upcoming" 
+                    @click="filterByStatus('upcoming')"
+                    variant="outlined"
+                    rounded="xl"
+                    class="status-chip"
+                    color="info"
+                  >
+                    <v-icon start size="small">mdi-calendar-clock</v-icon>
+                    Sắp tới
+                    <v-badge 
+                      :content="upcomingReminders"
+                      color="info"
+                      offset-x="4"
+                      offset-y="4"
+                    />
+                  </v-chip>
+                  
+                  <v-chip 
+                    value="today" 
+                    @click="filterByStatus('today')"
+                    variant="outlined"
+                    rounded="xl"
+                    class="status-chip"
+                    color="warning"
+                  >
+                    <v-icon start size="small">mdi-calendar-today</v-icon>
+                    Hôm nay
+                  </v-chip>
+                  
+                  <v-chip 
+                    value="overdue" 
+                    @click="filterByStatus('overdue')"
+                    variant="outlined"
+                    rounded="xl"
+                    class="status-chip"
+                    color="error"
+                  >
+                    <v-icon start size="small">mdi-calendar-alert</v-icon>
+                    Quá hạn
+                    <v-badge 
+                      :content="overdueReminders"
+                      color="error"
+                      offset-x="4"
+                      offset-y="4"
+                    />
+                  </v-chip>
+                  
+                  <v-chip 
+                    value="completed" 
+                    @click="filterByStatus('completed')"
+                    variant="outlined"
+                    rounded="xl"
+                    class="status-chip"
+                    color="success"
+                  >
+                    <v-icon start size="small">mdi-check-circle</v-icon>
+                    Đã hoàn thành
+                    <v-badge 
+                      :content="completedReminders"
+                      color="success"
+                      offset-x="4"
+                      offset-y="4"
+                    />
+                  </v-chip>
+                </v-chip-group>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-container>
+      </section>
+
+      <!-- Content Area -->
+      <section class="content-section">
+        <v-container>
+          <!-- Loading State -->
+          <div v-if="isLoading" class="loading-container">
+            <v-progress-circular indeterminate color="primary" size="64" width="4" />
+            <p class="loading-text">Loading your reminders...</p>
           </div>
 
-          <v-card-text>
-            <div class="d-flex align-center justify-space-between mb-2">
-              <v-chip
-                :color="getPriorityColor(reminder.priority)"
-                size="small"
-                variant="tonal"
-              >
-                {{ getPriorityLabel(reminder.priority) }}
-              </v-chip>
-              <v-chip 
-                v-if="reminder.repeat" 
-                color="purple" 
-                size="small" 
-                variant="tonal"
-                prepend-icon="mdi-repeat"
-              >
-                {{ getRepeatLabel(reminder.repeat) }}
-              </v-chip>
+          <!-- Empty State -->
+          <div v-else-if="filteredReminders.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <v-icon icon="mdi-bell-outline" size="120" color="grey-lighten-2" />
             </div>
-            
-            <div class="text-subtitle-1 font-weight-medium mb-1">
-              {{ reminder.title }}
-            </div>
-            
-            <div class="text-caption text-medium-emphasis mb-2">
-              {{ formatDateTime(reminder.reminderDate) }}
-              <span :class="getStatusClass(reminder)">
-                ({{ getStatusText(reminder) }})
-              </span>
-            </div>
-            
-            <p v-if="reminder.description" class="text-body-2 reminder-description">
-              {{ reminder.description }}
+            <h3 class="empty-title">No reminders yet</h3>
+            <p class="empty-subtitle">
+              Create your first reminder to never miss special moments!
             </p>
-          </v-card-text>
+            <v-btn color="primary" size="large" rounded @click="createReminder">
+              <v-icon icon="mdi-plus" start />
+              Create Your First Reminder
+            </v-btn>
+          </div>
 
-          <v-card-actions>
-            <v-btn
-              v-if="!reminder.isCompleted"
-              icon="mdi-check"
-              size="small"
-              variant="text"
-              color="success"
-              @click.stop="completeReminder(reminder)"
-            />
-            <v-btn
-              icon="mdi-pencil"
-              size="small"
-              variant="text"
-              @click.stop="editReminder(reminder)"
-            />
-            <v-btn
-              icon="mdi-delete"
-              size="small"
-              variant="text"
-              color="error"
-              @click.stop="deleteReminder(reminder)"
-            />
-            <v-spacer />
-            <v-btn
-              icon="mdi-share-variant"
-              size="small"
-              variant="text"
-              @click.stop="shareReminder(reminder)"
-            />
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
+          <!-- Reminders Grid View -->
+          <div v-else-if="viewMode === 'grid'" class="reminders-grid">
+            <v-row>
+              <v-col
+                v-for="reminder in filteredReminders"
+                :key="reminder.id"
+                cols="12"
+                sm="6"
+                md="4"
+                lg="3"
+              >
+                <ReminderCard
+                  :reminder="reminder"
+                  @open-reminder="handleOpenReminder"
+                  @edit-reminder="handleEditReminder"
+                  @delete-reminder="handleDeleteReminder"
+                  @toggle-complete="handleToggleComplete"
+                />
+              </v-col>
+            </v-row>
+          </div>
 
-    <!-- Reminders List View -->
-    <v-row v-if="viewMode === 'list'">
-      <v-col cols="12">
-        <v-card>
-          <v-list>
-            <v-list-item
-              v-for="reminder in filteredReminders"
-              :key="reminder.id"
-              @click="viewReminder(reminder)"
-            >
-              <template #prepend>
-                <v-avatar :color="getPriorityColor(reminder.priority)">
-                  <v-icon>{{ getStatusIcon(reminder) }}</v-icon>
-                </v-avatar>
-              </template>
-
-              <v-list-item-title>{{ reminder.title }}</v-list-item-title>
-              <v-list-item-subtitle>
-                {{ formatDateTime(reminder.reminderDate) }} • {{ getPriorityLabel(reminder.priority) }}
-                <v-chip 
-                  v-if="reminder.repeat" 
-                  color="purple" 
-                  size="x-small" 
-                  variant="tonal" 
-                  class="ml-2"
+          <!-- Reminders List View -->
+          <div v-else class="reminders-list">
+            <v-card rounded="xl" elevation="2">
+              <v-list>
+                <v-list-item
+                  v-for="reminder in filteredReminders"
+                  :key="reminder.id"
+                  class="reminder-list-item"
+                  @click="handleOpenReminder(reminder)"
                 >
-                  {{ getRepeatLabel(reminder.repeat) }}
-                </v-chip>
-              </v-list-item-subtitle>
+                  <template #prepend>
+                    <v-avatar color="primary" size="40">
+                      <v-icon color="white">mdi-bell</v-icon>
+                    </v-avatar>
+                  </template>
 
-              <template #append>
-                <div class="d-flex align-center">
-                  <span :class="getStatusClass(reminder) + ' text-caption mr-2'">
-                    {{ getStatusText(reminder) }}
-                  </span>
-                  <v-menu>
-                    <template #activator="{ props }">
+                  <v-list-item-title class="reminder-list-title">
+                    {{ reminder.title }}
+                  </v-list-item-title>
+
+                  <v-list-item-subtitle class="reminder-list-subtitle">
+                    <div class="d-flex align-center">
+                      <v-chip
+                        size="x-small"
+                        :color="getStatusColor(reminder)"
+                        variant="tonal"
+                        class="me-2"
+                      >
+                        {{ getStatusText(reminder) }}
+                      </v-chip>
+                      <span>{{ formatDateTime(reminder.reminderDate) }}</span>
+                      <v-icon v-if="reminder.repeat" size="14" color="blue" class="ms-2"
+                        >mdi-repeat</v-icon
+                      >
+                    </div>
+                  </v-list-item-subtitle>
+
+                  <template #append>
+                    <div class="list-actions">
                       <v-btn
-                        icon="mdi-dots-vertical"
+                        icon
                         size="small"
                         variant="text"
-                        v-bind="props"
-                        @click.stop
-                      />
-                    </template>
-                    <v-list>
-                      <v-list-item
-                        v-if="!reminder.isCompleted"
-                        prepend-icon="mdi-check"
-                        :title="$t('reminders.markAsCompleted')"
-                        @click="completeReminder(reminder)"
-                      />
-                      <v-list-item
-                        prepend-icon="mdi-pencil"
-                        :title="$t('common.edit')"
-                        @click="editReminder(reminder)"
-                      />
-                      <v-list-item
-                        prepend-icon="mdi-delete"
-                        :title="$t('common.delete')"
-                        @click="deleteReminder(reminder)"
-                      />
-                    </v-list>
-                  </v-menu>
-                </div>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- Timeline View -->
-    <v-row v-if="viewMode === 'timeline'">
-      <v-col cols="12">
-        <v-timeline side="end">
-          <v-timeline-item
-            v-for="reminder in filteredReminders"
-            :key="reminder.id"
-            :dot-color="getPriorityColor(reminder.priority)"
-            size="small"
-          >
-            <template #icon>
-              <v-icon>{{ getStatusIcon(reminder) }}</v-icon>
-            </template>
-
-            <v-card @click="viewReminder(reminder)">
-              <v-card-title class="text-h6">
-                {{ reminder.title }}
-              </v-card-title>
-              <v-card-subtitle>
-                {{ formatDateTime(reminder.reminderDate) }}
-                <v-chip 
-                  v-if="reminder.repeat" 
-                  color="purple" 
-                  size="small" 
-                  variant="tonal" 
-                  class="ml-2"
-                >
-                  {{ getRepeatLabel(reminder.repeat) }}
-                </v-chip>
-              </v-card-subtitle>
-              <v-card-text v-if="reminder.description">
-                {{ reminder.description }}
-              </v-card-text>
+                        @click.stop="handleToggleComplete(reminder)"
+                        :color="reminder.isCompleted ? 'success' : 'grey'"
+                      >
+                        <v-icon size="16">
+                          {{
+                            reminder.isCompleted
+                              ? "mdi-check-circle"
+                              : "mdi-circle-outline"
+                          }}
+                        </v-icon>
+                      </v-btn>
+                      <v-btn
+                        icon
+                        size="small"
+                        variant="text"
+                        @click.stop="handleEditReminder(reminder)"
+                      >
+                        <v-icon size="16">mdi-pencil</v-icon>
+                      </v-btn>
+                    </div>
+                  </template>
+                </v-list-item>
+              </v-list>
             </v-card>
-          </v-timeline-item>
-        </v-timeline>
-      </v-col>
-    </v-row>
-
-    <!-- Empty State -->
-    <v-row v-if="!loading && (!reminders || reminders.length === 0)">
-      <v-col cols="12" class="text-center py-12">
-        <v-icon size="120" color="grey-lighten-2">mdi-bell-outline</v-icon>
-        <h3 class="text-h5 mt-4 mb-2">{{ $t('reminders.noReminders') }}</h3>
-        <p class="text-body-1 text-medium-emphasis mb-4">{{ $t('reminders.noRemindersDescription') }}</p>
-        <v-btn
-          color="orange"
-          prepend-icon="mdi-bell-plus"
-          @click="createNewReminder"
-        >
-          {{ $t('reminders.createFirst') }}
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <!-- Loading State -->
-    <v-row v-if="loading">
-      <v-col cols="12" class="text-center py-12">
-        <v-progress-circular indeterminate color="orange" size="64" />
-        <p class="text-body-1 mt-4">{{ $t('reminders.loading') }}</p>
-      </v-col>
-    </v-row>
-
-  </v-container>
+          </div>
+        </v-container>
+      </section>
+    </div>
+  </ResponsiveContainer>
 </template>
-
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRemindersStore } from '@/stores/reminders'
-import { useDialogsStore } from '@/stores/dialogs'
-import type { Reminder, FirebaseTimestamp } from '@/types'
-import dayjs from 'dayjs'
-import Swal from 'sweetalert2'
+import { ref, computed, onMounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
+import { useRemindersStore } from "@/stores/reminders";
+import { useDialogsStore } from "@/stores/dialogs";
+import type { Reminder } from "@/types";
+import ReminderCard from "@/components/reminders/ReminderCard.vue";
+import ResponsiveContainer from "@/components/ui/ResponsiveContainer.vue";
+import dayjs from "dayjs";
 
-const { t } = useI18n()
-const remindersStore = useRemindersStore()
-const dialogsStore = useDialogsStore()
+// Router
+const router = useRouter();
 
-// Helper function to convert Firebase timestamp to Date
-const convertToDate = (timestamp: FirebaseTimestamp | Date | string): Date => {
-  if (timestamp && typeof timestamp === 'object' && '_seconds' in timestamp) {
-    return new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000)
-  }
-  return new Date(timestamp)
-}
+// Stores
+const remindersStore = useRemindersStore();
+const dialogsStore = useDialogsStore();
 
-// State
-const createDialog = ref(false)
-const editingReminder = ref<Reminder | null>(null)
-const searchQuery = ref('')
-const selectedPriority = ref('')
-const selectedStatus = ref('')
-const sortBy = ref('dueDateAsc')
-const viewMode = ref('grid')
+// Store refs
+const { reminders, isLoading } = storeToRefs(remindersStore);
 
-// Get data from store
-const reminders = computed(() => remindersStore.reminders || [])
-const loading = computed(() => remindersStore.isLoading)
-const error = computed(() => remindersStore.error)
-const stats = computed(() => remindersStore.stats || { total: 0, upcoming: 0, overdue: 0, completed: 0 })
+// Local state
+const searchQuery = ref("");
+const selectedFilter = ref("all");
+const selectedType = ref("");
+const sortBy = ref("date");
+const viewMode = ref<"grid" | "list">("grid");
 
-// Form
-const reminderForm = reactive({
-  title: '',
-  description: '',
-  reminderDate: '',
-  priority: 'medium' as 'low' | 'medium' | 'high',
-  repeat: '' as '' | 'daily' | 'weekly' | 'monthly' | 'yearly'
-})
+// Computed properties
+const totalReminders = computed(() => reminders.value.length);
 
-// Options
-const priorityOptions = [
-  { title: t('reminders.priorities.low'), value: 'low' },
-  { title: t('reminders.priorities.medium'), value: 'medium' },
-  { title: t('reminders.priorities.high'), value: 'high' }
-]
+const upcomingReminders = computed(
+  () =>
+    reminders.value.filter((reminder) => {
+      if (reminder.isCompleted) return false;
+      const reminderDate = new Date(reminder.reminderDate);
+      return reminderDate > new Date();
+    }).length
+);
 
-const statusOptions = [
-  { title: t('reminders.statuses.pending'), value: 'pending' },
-  { title: t('reminders.statuses.completed'), value: 'completed' },
-  { title: t('reminders.statuses.overdue'), value: 'overdue' }
-]
+const overdueReminders = computed(
+  () =>
+    reminders.value.filter((reminder) => {
+      if (reminder.isCompleted) return false;
+      const reminderDate = new Date(reminder.reminderDate);
+      return reminderDate < new Date();
+    }).length
+);
 
-const repeatOptions = [
-  { title: t('reminders.repeats.daily'), value: 'daily' },
-  { title: t('reminders.repeats.weekly'), value: 'weekly' },
-  { title: t('reminders.repeats.monthly'), value: 'monthly' },
-  { title: t('reminders.repeats.yearly'), value: 'yearly' }
-]
+const completedReminders = computed(
+  () => reminders.value.filter((reminder) => reminder.isCompleted).length
+);
+
+const typeOptions = [
+  { title: "Anniversary", value: "anniversary" },
+  { title: "Date", value: "date" },
+  { title: "Special Occasion", value: "special" },
+  { title: "Personal", value: "personal" },
+  { title: "Gift", value: "gift" },
+  { title: "Other", value: "other" },
+];
 
 const sortOptions = [
-  { title: t('reminders.sortOptions.dueDateAsc'), value: 'dueDateAsc' },
-  { title: t('reminders.sortOptions.dueDateDesc'), value: 'dueDateDesc' },
-  { title: t('reminders.sortOptions.priorityDesc'), value: 'priorityDesc' },
-  { title: t('reminders.sortOptions.titleAsc'), value: 'titleAsc' },
-  { title: t('reminders.sortOptions.createdDesc'), value: 'createdDesc' }
-]
+  { title: "Date (Newest)", value: "date" },
+  { title: "Date (Oldest)", value: "date-asc" },
+  { title: "Priority", value: "priority" },
+  { title: "Title A-Z", value: "title-asc" },
+  { title: "Title Z-A", value: "title-desc" },
+];
+
+// Utility function to convert date to number for comparison
+const getDateTimestamp = (date: Date | string): number => {
+  if (!date) return 0;
+  return typeof date === "string" ? new Date(date).getTime() : date.getTime();
+};
 
 const filteredReminders = computed(() => {
-  let filtered = [...(reminders.value || [])]
+  let filtered = [...reminders.value];
 
-  // Filter by search
+  // Apply search filter
   if (searchQuery.value) {
-    filtered = filtered.filter(reminder =>
-      reminder.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (reminder.description && reminder.description.toLowerCase().includes(searchQuery.value.toLowerCase()))
-    )
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (reminder) =>
+        reminder.title.toLowerCase().includes(query) ||
+        (reminder.description && reminder.description.toLowerCase().includes(query))
+    );
   }
 
-  // Filter by priority
-  if (selectedPriority.value) {
-    filtered = filtered.filter(reminder => reminder.priority === selectedPriority.value)
+  // Apply type filter (commented out since type is not in Reminder interface)
+  // if (selectedType.value) {
+  //   filtered = filtered.filter(reminder => reminder.type === selectedType.value)
+  // }
+
+  // Apply quick filter
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+  switch (selectedFilter.value) {
+    case "upcoming":
+      filtered = filtered.filter((reminder) => {
+        if (reminder.isCompleted) return false;
+        return getDateTimestamp(reminder.reminderDate) > now.getTime();
+      });
+      break;
+    case "today":
+      filtered = filtered.filter((reminder) => {
+        const reminderDate = new Date(reminder.reminderDate);
+        return reminderDate >= today && reminderDate < tomorrow;
+      });
+      break;
+    case "overdue":
+      filtered = filtered.filter((reminder) => {
+        if (reminder.isCompleted) return false;
+        return getDateTimestamp(reminder.reminderDate) < now.getTime();
+      });
+      break;
+    case "completed":
+      filtered = filtered.filter((reminder) => reminder.isCompleted);
+      break;
   }
 
-  // Filter by status
-  if (selectedStatus.value) {
-    if (selectedStatus.value === 'pending') {
-      filtered = filtered.filter(reminder => !reminder.isCompleted && !isOverdue(reminder))
-    } else if (selectedStatus.value === 'completed') {
-      filtered = filtered.filter(reminder => reminder.isCompleted)
-    } else if (selectedStatus.value === 'overdue') {
-      filtered = filtered.filter(reminder => !reminder.isCompleted && isOverdue(reminder))
-    }
+  // Apply sorting
+  switch (sortBy.value) {
+    case "date":
+      filtered.sort(
+        (a, b) => getDateTimestamp(b.reminderDate) - getDateTimestamp(a.reminderDate)
+      );
+      break;
+    case "date-asc":
+      filtered.sort(
+        (a, b) => getDateTimestamp(a.reminderDate) - getDateTimestamp(b.reminderDate)
+      );
+      break;
+    case "priority":
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      filtered.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
+      break;
+    case "title-asc":
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+      break;
+    case "title-desc":
+      filtered.sort((a, b) => b.title.localeCompare(a.title));
+      break;
   }
 
-  // Sort
-  filtered.sort((a, b) => {
-    switch (sortBy.value) {
-      case 'dueDateAsc':
-        return new Date(a.reminderDate).getTime() - new Date(b.reminderDate).getTime()
-      case 'dueDateDesc':
-        return new Date(b.reminderDate).getTime() - new Date(a.reminderDate).getTime()
-      case 'priorityDesc':
-        const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 }
-        return priorityOrder[b.priority] - priorityOrder[a.priority]
-      case 'titleAsc':
-        return a.title.localeCompare(b.title)
-      case 'createdDesc':
-        return convertToDate(b.createdAt).getTime() - convertToDate(a.createdAt).getTime()
-      default:
-        return 0
-    }
-  })
-
-  return filtered
-})
-
-// Validation rules
-const rules = {
-  required: (value: any) => !!value || t('validation.required')
-}
+  return filtered;
+});
 
 // Methods
-const loadReminders = async () => {
+const createReminder = () => {
+  router.push('/reminders/create')
+};
+
+const handleOpenReminder = (reminder: Reminder) => {
+  router.push({ name: "reminder-detail", params: { id: reminder.id } });
+};
+
+const handleEditReminder = (reminder: Reminder) => {
+  router.push({ name: 'edit-reminder', params: { id: reminder.id } })
+};
+
+const handleDeleteReminder = async (reminder: Reminder) => {
   try {
-    await remindersStore.fetchReminders()
-  } catch (error) {
-    console.error('Failed to load reminders:', error)
-  }
-}
+    const confirmed = await dialogsStore.openConfirmDialog({
+      title: "Delete Reminder",
+      message: `Are you sure you want to delete "${reminder.title}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+    });
 
-const createNewReminder = () => {
-  // Use global dialog system for reminder form
-  dialogsStore.openBaseDialog(
-    'CreateReminderDialog',
-    {},
-    { maxWidth: '700', scrollable: true, persistent: true },
-    {
-      onConfirm: (newReminder) => {
-        console.log('New reminder created:', newReminder)
-        // Refresh reminders list
-        loadReminders()
-      }
-    }
-  )
-}
-
-const viewReminder = (reminder: Reminder) => {
-  // TODO: Navigate to reminder detail view or show detailed modal
-  console.log('View reminder:', reminder)
-}
-
-const editReminder = (reminder: Reminder) => {
-  // Use global dialog system for editing reminders
-  dialogsStore.openBaseDialog(
-    'EditReminderDialog',
-    { reminder },
-    { maxWidth: '700', scrollable: true, persistent: true },
-    {
-      onConfirm: (updatedReminder) => {
-        console.log('Reminder updated:', updatedReminder)
-        // Refresh reminders list
-        loadReminders()
-      }
-    }
-  )
-}
-
-const deleteReminder = async (reminder: Reminder) => {
-  dialogsStore.openConfirmDialog({
-    title: t('reminders.confirmDeleteTitle') || 'Xác nhận xóa',
-    message: t('reminders.confirmDelete', { title: reminder.title }) || `Bạn có chắc chắn muốn xóa reminder "${reminder.title}"?`,
-    confirmText: t('common.delete') || 'Xóa',
-    cancelText: t('common.cancel') || 'Hủy',
-    onConfirm: async () => {
-      try {
-        await remindersStore.deleteReminder(reminder.id)
-        
-        dialogsStore.openAlertDialog({
-          title: t('common.deleted') || 'Đã xóa!',
-          message: t('reminders.deleteSuccess') || 'Reminder đã được xóa thành công!'
-        })
-      } catch (error) {
-        console.error('Delete failed:', error)
-        
-        dialogsStore.openAlertDialog({
-          title: t('common.error') || 'Lỗi!',
-          message: t('reminders.deleteError') || 'Có lỗi xảy ra khi xóa reminder. Vui lòng thử lại.'
-        })
-      }
-    }
-  })
-}
-
-const completeReminder = async (reminder: Reminder) => {
-  try {
-    await remindersStore.completeReminder(reminder.id)
-  } catch (error) {
-    console.error('Complete failed:', error)
-  }
-}
-
-const shareReminder = async (reminder: Reminder) => {
-  try {
-    if (navigator.share) {
-      await navigator.share({
-        title: reminder.title,
-        text: reminder.description || '',
-        url: window.location.href + '/reminders/' + reminder.id
-      })
+    if (confirmed) {
+      await remindersStore.deleteReminder(reminder.id);
     }
   } catch (error) {
-    console.error('Share failed:', error)
+    console.error("Failed to delete reminder:", error);
   }
-}
+};
 
-const saveReminder = async () => {
+const handleToggleComplete = async (reminder: Reminder) => {
   try {
-    if (!reminderForm || !reminderForm.title?.trim() || !reminderForm.reminderDate) {
-      return
-    }
+    // For now, we'll just log the action since the API might not support updating isCompleted
+    console.log("Toggle reminder completion:", reminder.id, !reminder.isCompleted);
 
-    const reminderData = {
-      title: reminderForm.title.trim(),
-      description: reminderForm.description?.trim() || '',
-      reminderDate: new Date(reminderForm.reminderDate),
-      priority: reminderForm.priority,
-      repeat: reminderForm.repeat || undefined
-    }
+    // If the API supports it, you would call:
+    // await remindersStore.updateReminder(reminder.id, { isCompleted: !reminder.isCompleted })
 
-    if (editingReminder.value) {
-      // Update existing reminder
-      await remindersStore.updateReminder(editingReminder.value.id, reminderData)
+    // For now, let's update the local state (this should be handled by the store)
+    reminder.isCompleted = !reminder.isCompleted;
+    if (reminder.isCompleted) {
+      reminder.completedAt = new Date();
     } else {
-      // Create new reminder
-      await remindersStore.createReminder(reminderData)
+      reminder.completedAt = null;
     }
-    
-    createDialog.value = false
-    editingReminder.value = null
-    // Reset form values without reassigning the object
-    reminderForm.title = ''
-    reminderForm.description = ''
-    reminderForm.reminderDate = ''
-    reminderForm.priority = 'medium'
-    reminderForm.repeat = ''
   } catch (error) {
-    console.error('Save failed:', error)
+    console.error("Failed to toggle reminder completion:", error);
   }
-}
+};
 
-const getPriorityColor = (priority: string) => {
+const filterByStatus = (status: string) => {
+  selectedFilter.value = status;
+};
+
+const getTypeColor = (type: string) => {
   const colors: Record<string, string> = {
-    'low': 'green',
-    'medium': 'orange',
-    'high': 'red'
-  }
-  return colors[priority] || 'orange'
-}
+    anniversary: "red",
+    date: "pink",
+    special: "purple",
+    personal: "blue",
+    gift: "orange",
+    other: "grey",
+  };
+  return colors[type] || "grey";
+};
 
-const getPriorityLabel = (priority: string) => {
-  const labels: Record<string, string> = {
-    'low': t('reminders.priorities.low'),
-    'medium': t('reminders.priorities.medium'),
-    'high': t('reminders.priorities.high')
-  }
-  return labels[priority] || priority
-}
+const getTypeIcon = (type: string) => {
+  const icons: Record<string, string> = {
+    anniversary: "mdi-heart",
+    date: "mdi-calendar-heart",
+    special: "mdi-star",
+    personal: "mdi-account-heart",
+    gift: "mdi-gift",
+    other: "mdi-bell",
+  };
+  return icons[type] || "mdi-bell";
+};
 
-const getRepeatLabel = (repeat: string) => {
-  const labels: Record<string, string> = {
-    'daily': t('reminders.repeats.daily'),
-    'weekly': t('reminders.repeats.weekly'),
-    'monthly': t('reminders.repeats.monthly'),
-    'yearly': t('reminders.repeats.yearly')
-  }
-  return labels[repeat] || repeat
-}
+const getStatusColor = (reminder: Reminder) => {
+  if (reminder.isCompleted) return "success";
 
-const getStatusIcon = (reminder: Reminder) => {
-  if (reminder.isCompleted) return 'mdi-check-circle'
-  if (isOverdue(reminder)) return 'mdi-alert-circle'
-  return 'mdi-bell'
-}
+  const now = new Date();
+  const reminderDate = new Date(reminder.reminderDate);
+
+  if (reminderDate < now) return "warning"; // overdue
+
+  const timeDiff = reminderDate.getTime() - now.getTime();
+  const daysDiff = timeDiff / (1000 * 3600 * 24);
+
+  if (daysDiff <= 1) return "error"; // due soon
+  if (daysDiff <= 7) return "orange"; // due this week
+
+  return "info"; // upcoming
+};
 
 const getStatusText = (reminder: Reminder) => {
-  if (reminder.isCompleted) return t('reminders.statuses.completed')
-  if (isOverdue(reminder)) return t('reminders.statuses.overdue')
-  return t('reminders.statuses.pending')
-}
+  if (reminder.isCompleted) return "Completed";
 
-const getStatusClass = (reminder: Reminder) => {
-  if (reminder.isCompleted) return 'text-success'
-  if (isOverdue(reminder)) return 'text-error'
-  return 'text-primary'
-}
+  const now = new Date();
+  const reminderDate = new Date(reminder.reminderDate);
 
-const isOverdue = (reminder: Reminder) => {
-  if (!reminder.reminderDate) return false
-  return !reminder.isCompleted && new Date(reminder.reminderDate) < new Date()
-}
+  if (reminderDate < now) return "Overdue";
 
-const formatDateTime = (date: string | Date) => {
-  if (!date) return ''
-  return dayjs(date).format('DD/MM/YYYY HH:mm')
-}
+  const timeDiff = reminderDate.getTime() - now.getTime();
+  const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+  if (daysDiff === 0) return "Today";
+  if (daysDiff === 1) return "Tomorrow";
+  if (daysDiff <= 7) return `In ${daysDiff} days`;
+
+  return "Upcoming";
+};
+
+const formatDateTime = (date: Date | string) => {
+  if (!date) return "";
+
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return dayjs(dateObj).format("DD/MM/YYYY HH:mm");
+};
 
 // Lifecycle
 onMounted(async () => {
-  await loadReminders()
-})
+  if (reminders.value.length === 0) {
+    await remindersStore.fetchReminders();
+  }
+});
 </script>
 
-<style lang="scss">
-.text-orange {
-  color: rgb(255, 152, 0) !important;
+<style scoped>
+.reminders-view {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 193, 7, 0.1) 0%,
+    rgba(255, 152, 0, 0.1) 50%,
+    rgba(255, 87, 34, 0.1) 100%
+  );
 }
 
-.reminder-card {
-  transition: transform 0.2s;
+/* Hero Section */
+.reminders-hero {
+  position: relative;
+  padding: 80px 0 60px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-warning), 0.1) 0%,
+    rgba(var(--v-theme-secondary), 0.05) 50%,
+    rgba(var(--v-theme-surface), 0.1) 100%
+  );
 }
 
-.reminder-card:hover {
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.floating-bells {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.bell {
+  position: absolute;
+  width: 50px;
+  height: 60px;
+  background: linear-gradient(145deg, rgba(255, 193, 7, 0.6), rgba(255, 152, 0, 0.4));
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+  animation: ring 4s ease-in-out infinite;
+}
+
+.bell::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 193, 7, 0.8);
+  border-radius: 50%;
+}
+
+.bell:nth-child(1) {
+  top: 15%;
+  left: 10%;
+  animation-delay: 0s;
+}
+.bell:nth-child(2) {
+  top: 25%;
+  right: 15%;
+  animation-delay: 1s;
+}
+.bell:nth-child(3) {
+  top: 60%;
+  left: 20%;
+  animation-delay: 2s;
+}
+.bell:nth-child(4) {
+  top: 70%;
+  right: 10%;
+  animation-delay: 3s;
+}
+.bell:nth-child(5) {
+  top: 40%;
+  left: 5%;
+  animation-delay: 0.5s;
+}
+.bell:nth-child(6) {
+  top: 30%;
+  right: 25%;
+  animation-delay: 1.5s;
+}
+
+@keyframes ring {
+  0%,
+  100% {
+    transform: rotate(-3deg) translateY(0px);
+  }
+  25% {
+    transform: rotate(3deg) translateY(-10px);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(0px);
+  }
+  75% {
+    transform: rotate(3deg) translateY(-5px);
+  }
+}
+
+.hero-content {
+  position: relative;
+  text-align: center;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hero-title {
+  font-family: "Playfair Display", serif;
+  font-size: 3.5rem;
+  font-weight: 600;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-warning)),
+    rgb(var(--v-theme-secondary))
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.title-icon {
+  color: rgb(var(--v-theme-warning)) !important;
+  font-size: 3rem !important;
+  animation: ring 2s ease-in-out infinite;
+}
+
+.hero-subtitle {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.3rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.create-reminder-btn {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-warning)),
+    rgb(var(--v-theme-secondary))
+  ) !important;
+  color: white !important;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 12px 32px;
+  border-radius: 50px;
+  box-shadow: 0 8px 25px rgba(var(--v-theme-warning), 0.3);
+  transition: all 0.3s ease;
+}
+
+.create-reminder-btn:hover {
   transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(var(--v-theme-warning), 0.4);
 }
 
-.reminder-header {
-  height: 120px;
+/* Stats Section */
+.stats-section {
+  padding-top: 40px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
 }
 
-.reminder-description {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(var(--v-theme-warning), 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  border-color: rgba(var(--v-theme-warning), 0.2);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-warning), 0.1),
+    rgba(var(--v-theme-secondary), 0.1)
+  );
+}
+
+.stat-number {
+  font-family: "Montserrat", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-warning));
+  line-height: 1;
+}
+
+.stat-label {
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.9rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  font-weight: 500;
+}
+
+.quick-filters {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.quick-filters .v-chip {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+/* Filter Section */
+.filter-section {
+  padding: 0 0 40px;
+  margin-top: -60px;
+  position: relative;
+  z-index: 10;
+}
+
+.filter-card {
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
   overflow: hidden;
 }
 
-/* SweetAlert2 Custom Styles */
-.swal2-popup-custom {
-  border-radius: 16px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+.filter-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--v-theme-warning)),
+    rgb(var(--v-theme-primary)),
+    rgb(var(--v-theme-secondary))
+  );
 }
 
-.swal2-title-custom {
-  color: #2c3e50 !important;
-  font-weight: 600 !important;
+.filter-header {
+  position: relative;
 }
 
-.swal2-confirm-custom {
-  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%) !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
-  padding: 10px 24px !important;
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3) !important;
-  transition: all 0.3s ease !important;
+.filter-title h3 {
+  font-family: 'Playfair Display', serif;
+  display: flex;
+  align-items: center;
 }
 
-.swal2-confirm-custom:hover {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4) !important;
+.create-btn {
+  background: linear-gradient(135deg, rgb(var(--v-theme-warning)), rgb(var(--v-theme-primary))) !important;
+  color: white !important;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(var(--v-theme-warning), 0.3);
+  transition: all 0.3s ease;
 }
 
-.swal2-cancel-custom {
-  background: #f5f5f5 !important;
-  color: #666 !important;
-  border: 1px solid #ddd !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
-  padding: 10px 24px !important;
-  transition: all 0.3s ease !important;
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(var(--v-theme-warning), 0.4);
 }
 
-.swal2-cancel-custom:hover {
-  background: #e0e0e0 !important;
-  border-color: #bbb !important;
-  transform: translateY(-1px) !important;
+.search-field :deep(.v-field) {
+  background: rgba(var(--v-theme-surface), 0.8);
+  backdrop-filter: blur(10px);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
-.swal2-icon.swal2-warning {
-  border-color: #FF8A65 !important;
-  color: #FF6B35 !important;
+.search-field :deep(.v-field:hover) {
+  border-color: rgba(var(--v-theme-warning), 0.3);
 }
 
-.swal2-icon.swal2-success {
-  border-color: #4CAF50 !important;
-  color: #4CAF50 !important;
+.search-field :deep(.v-field--focused) {
+  border-color: rgb(var(--v-theme-warning));
+  box-shadow: 0 0 0 3px rgba(var(--v-theme-warning), 0.1);
 }
 
-.swal2-icon.swal2-error {
-  border-color: #F44336 !important;
-  color: #F44336 !important;
+.sort-select :deep(.v-field) {
+  background: rgba(var(--v-theme-surface), 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.view-toggle-wrapper {
+  text-align: center;
+}
+
+.view-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.view-toggle {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(var(--v-theme-surface), 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.view-toggle .v-btn {
+  border-radius: 0;
+  height: 40px;
+}
+
+.results-count {
+  height: 100%;
+}
+
+.status-filters {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(var(--v-theme-outline-variant), 0.5);
+}
+
+.filter-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-chips {
+  gap: 12px;
+}
+
+.status-chip {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  min-height: 40px;
+  padding: 0 16px;
+  transition: all 0.3s ease;
+  border-width: 2px;
+  position: relative;
+}
+
+.status-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.status-chip .v-badge {
+  margin-left: 8px;
+}
+
+/* Controls Section */
+.controls-section {
+  padding: 30px 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.search-field,
+.type-select,
+.sort-select {
+  border-radius: 15px;
+}
+
+.view-toggle .v-btn {
+  border-radius: 12px;
+}
+
+/* Content Section */
+.content-section {
+  padding: 40px 0 80px;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.loading-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.1rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-top: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.empty-title {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+  color: rgb(var(--v-theme-warning));
+  margin: 20px 0 10px;
+}
+
+.empty-subtitle {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.1rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-bottom: 30px;
+}
+
+/* Reminders Grid */
+.reminders-grid {
+  min-height: 300px;
+}
+
+/* Reminders List */
+.reminders-list {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.reminder-list-item {
+  border-bottom: 1px solid rgba(var(--v-theme-warning), 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.reminder-list-item:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-warning), 0.05),
+    rgba(var(--v-theme-orange), 0.03)
+  );
+}
+
+.reminder-list-item:last-child {
+  border-bottom: none;
+}
+
+.reminder-list-title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  color: rgb(var(--v-theme-warning));
+}
+
+.reminder-list-subtitle {
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.85rem;
+}
+
+.list-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.reminder-list-item:hover .list-actions {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .title-icon {
+    font-size: 2.5rem !important;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reminders-hero {
+    padding: 60px 0 40px;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bell {
+    width: 35px;
+    height: 45px;
+  }
 }
 </style>

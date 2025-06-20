@@ -1,4 +1,4 @@
-// Love Theme Colors
+// Love Theme Colors (Original)
 $love-primary: #ff4081;
 $love-secondary: #e91e63;
 $love-accent: #ff80ab;
@@ -15,9 +15,81 @@ $love-dark-secondary: #e91e63;
 $love-dark-background: #121212;
 $love-dark-surface: #1e1e1e;
 
-// Typography
-$font-family-primary: 'Roboto', sans-serif;
-$font-family-secondary: 'Roboto Slab', serif;
+// 🌸 NEW MINIMALIST THEMES 🌸
+
+// Pastel Romance Theme
+$pastel-primary: #f8bbd9;        // Hồng pastel
+$pastel-secondary: #e1bee7;      // Tím lavender
+$pastel-accent: #fff3e0;         // Be nhạt
+$pastel-background: #fefefe;     // Trắng kem
+$pastel-surface: #ffffff;
+$pastel-gold: #ffd54f;          // Vàng nhạt
+
+// Pastel Romance Dark
+$pastel-dark-primary: #f8bbd9;
+$pastel-dark-secondary: #e1bee7;
+$pastel-dark-background: #2d1b2e; // Tím đậm
+$pastel-dark-surface: #3d2a3e;
+
+// Mint Elegance Theme
+$mint-primary: #b2dfdb;          // Xanh mint
+$mint-secondary: #c8e6c9;        // Xanh lá nhạt
+$mint-accent: #fff8e1;           // Vàng nhạt
+$mint-background: #f9fffe;       // Trắng mint
+$mint-surface: #ffffff;
+$mint-gold: #ffecb3;            // Kem vàng
+
+// Mint Elegance Dark
+$mint-dark-primary: #b2dfdb;
+$mint-dark-secondary: #c8e6c9;
+$mint-dark-background: #1a2e2a;
+$mint-dark-surface: #254d47;
+
+// Golden Hour Theme
+$golden-primary: #ffcc80;        // Vàng đồng
+$golden-secondary: #ffab91;      // Cam nhạt
+$golden-accent: #f3e5ab;         // Kem vàng
+$golden-background: #fffdf5;     // Trắng vàng
+$golden-surface: #ffffff;
+$golden-bronze: #d4af37;        // Đồng
+
+// Golden Hour Dark
+$golden-dark-primary: #ffcc80;
+$golden-dark-secondary: #ffab91;
+$golden-dark-background: #2e2419;
+$golden-dark-surface: #3e3224;
+
+// Typography System
+$font-family-primary: 'Montserrat', 'Roboto', sans-serif;
+$font-family-heading: 'Playfair Display', 'Georgia', serif;
+$font-family-script: 'Dancing Script', 'Cursive', cursive;
+
+// Font Weights
+$font-light: 300;
+$font-regular: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+
+// Responsive Font Sizes
+$text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+$text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+$text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+$text-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+$text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+$text-2xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+$text-3xl: clamp(2rem, 1.7rem + 1.5vw, 3rem);
+
+// Line Heights
+$leading-tight: 1.25;
+$leading-normal: 1.5;
+$leading-relaxed: 1.75;
+
+// Letter Spacing
+$tracking-tight: -0.025em;
+$tracking-normal: 0em;
+$tracking-wide: 0.025em;
+$tracking-wider: 0.05em;
 
 // Spacing
 $spacing-xs: 4px;
@@ -39,11 +111,38 @@ $shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
 $shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
 $shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.1);
 
+// Minimalist Shadows (Softer)
+$soft-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+$soft-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+$soft-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.07);
+$soft-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
+$soft-shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.09);
+
+// Romantic Shadows
+$romantic-shadow-sm: 0 2px 8px rgba(255, 182, 193, 0.15);
+$romantic-shadow-md: 0 4px 12px rgba(255, 182, 193, 0.2);
+$romantic-shadow-lg: 0 8px 20px rgba(255, 182, 193, 0.25);
+
 // Love theme shadows
 $love-shadow-sm: 0 2px 4px rgba(255, 64, 129, 0.1);
 $love-shadow-md: 0 4px 8px rgba(255, 64, 129, 0.1);
 $love-shadow-lg: 0 8px 16px rgba(255, 64, 129, 0.2);
 $love-shadow-xl: 0 16px 32px rgba(255, 64, 129, 0.2);
+
+// Animation Variables
+$transition-fast: 0.15s ease-in-out;
+$transition-normal: 0.3s ease-in-out;
+$transition-slow: 0.5s ease-in-out;
+$transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+// Border Radius (More romantic curves)
+$border-radius-xs: 2px;
+$border-radius-sm: 6px;
+$border-radius-md: 12px;
+$border-radius-lg: 18px;
+$border-radius-xl: 24px;
+$border-radius-2xl: 32px;
+$border-radius-full: 9999px;
 
 // Breakpoints
 $breakpoint-xs: 0;

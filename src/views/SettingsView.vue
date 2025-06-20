@@ -16,20 +16,12 @@
           <ThemeSettings />
         </v-col>
       </v-row>
-
-      <!-- Theme Demo Section -->
-      <v-row justify="center" class="mt-8">
-        <v-col cols="12">
-          <ThemeDemo />
-        </v-col>
-      </v-row>
     </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
 import ThemeSettings from '@/components/ThemeSettings.vue'
-import ThemeDemo from '@/components/ThemeDemo.vue'
 </script>
 
 <style scoped lang="scss">

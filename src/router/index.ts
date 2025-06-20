@@ -8,11 +8,11 @@ const routes: RouteRecordRaw[] = [
     redirect: '/login'
   },
   {
-    path: '/about',
-    name: 'about',
-    component: () => import('@views/AboutView.vue'),
+    path: '/theme-showcase',
+    name: 'theme-showcase',
+    component: () => import('@/components/ThemeShowcase.vue'),
     meta: {
-      title: 'About',
+      title: '🎨 Theme Showcase',
       requiresAuth: false
     }
   },
@@ -95,6 +95,15 @@ const routes: RouteRecordRaw[] = [
   //   }
   // },
   {
+    path: '/memories/create',
+    name: 'create-memory',
+    component: () => import('@views/memories/CreateMemoryView.vue'),
+    meta: {
+      title: 'Create Memory',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/memories/:id',
     name: 'memory-detail',
     component: () => import('@views/memories/MemoryDetailView.vue'),
@@ -131,11 +140,47 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/notes/:id/edit',
+    name: 'edit-note',
+    component: () => import('@views/notes/EditNoteView.vue'),
+    meta: {
+      title: 'Edit Note',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/reminders/create',
+    name: 'create-reminder',
+    component: () => import('@/views/reminders/CreateReminderView.vue'),
+    meta: {
+      title: 'Create Reminder',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/reminders',
     name: 'reminders',
     component: () => import('@views/reminders/RemindersView.vue'),
     meta: {
       title: 'Reminders',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/reminders/:id/edit',
+    name: 'edit-reminder',
+    component: () => import('@views/reminders/EditReminderView.vue'),
+    meta: {
+      title: 'Edit Reminder',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/anniversaries/create',
+    name: 'create-anniversary',
+    component: () => import('@/views/anniversaries/CreateAnniversaryView.vue'),
+    meta: {
+      title: 'Create Anniversary',
       requiresAuth: true
     }
   },
@@ -149,11 +194,11 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/notifications',
-    name: 'notifications',
-    component: () => import('@views/notifications/NotificationsView.vue'),
+    path: '/anniversaries/:id/edit',
+    name: 'edit-anniversary',
+    component: () => import('@views/anniversaries/EditAnniversaryView.vue'),
     meta: {
-      title: 'Notifications',
+      title: 'Edit Anniversary',
       requiresAuth: true
     }
   },

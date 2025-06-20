@@ -156,7 +156,7 @@
       </v-card>
     </v-form>
 
-    <!-- Floating Action Button for Preview -->
+  <!-- Floating Action Button for Preview -->
     <v-fab
       icon="mdi-eye"
       location="bottom end"

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useTheme } from 'vuetify'
 
 export interface ThemeOption {
   key: string
@@ -71,6 +70,39 @@ export const useThemeStore = defineStore('theme', () => {
         secondary: '#e91e63',
         accent: '#ff80ab'
       }
+    },
+    {
+      key: 'pastelRomance',
+      name: 'Lãng Mạn Pastel',
+      description: 'Nhẹ nhàng như sương mai',
+      icon: 'mdi-flower-tulip',
+      colors: {
+        primary: '#f8bbd9',
+        secondary: '#e1bee7',
+        accent: '#fff3e0'
+      }
+    },
+    {
+      key: 'mintElegance', 
+      name: 'Thanh Lịch Mint',
+      description: 'Tươi mát như gió biển',
+      icon: 'mdi-leaf-circle',
+      colors: {
+        primary: '#a8e6cf',
+        secondary: '#c8e6c9',
+        accent: '#fff9c4'
+      }
+    },
+    {
+      key: 'goldenHour',
+      name: 'Giờ Vàng',
+      description: 'Ấm áp như hoàng hôn',
+      icon: 'mdi-weather-sunset',
+      colors: {
+        primary: '#ffcc80',
+        secondary: '#ffab91', 
+        accent: '#f3e5ab'
+      }
     }
   ]
 
@@ -106,38 +138,21 @@ export const useThemeStore = defineStore('theme', () => {
     return availableThemes.find(t => t.key === currentTheme.value) || availableThemes[4] // Default to love
   })
 
-  const isDarkMode = ref(false)
-
-  const toggleDarkMode = () => {
-    isDarkMode.value = !isDarkMode.value
-    localStorage.setItem('loveapp-dark-mode', isDarkMode.value.toString())
-  }
-
-  const loadDarkMode = () => {
-    const savedDarkMode = localStorage.getItem('loveapp-dark-mode')
-    if (savedDarkMode !== null) {
-      isDarkMode.value = savedDarkMode === 'true'
-    }
-  }
-
   // Initialize theme
   const initializeTheme = () => {
     loadTheme()
-    loadDarkMode()
   }
 
   return {
     // State
     availableThemes,
     currentTheme,
-    isDarkMode,
     
     // Getters
     currentThemeInfo,
     
     // Actions
     setTheme,
-    toggleDarkMode,
     initializeTheme,
     loadTheme,
     saveTheme

@@ -149,13 +149,13 @@
             
             <div class="d-flex justify-center align-center flex-wrap gap-3">
               <v-chip
-                :color="isDarkMode ? 'indigo-lighten-1' : 'orange-lighten-1'"
+                color="orange-lighten-1"
                 variant="elevated"
                 class="ma-1"
                 elevation="0"
               >
-                <v-icon start size="16">{{ isDarkMode ? 'mdi-weather-night' : 'mdi-weather-sunny' }}</v-icon>
-                {{ isDarkMode ? 'Ánh nến lung linh' : getThemeMoodText() }}
+                <v-icon start size="16">mdi-weather-sunny</v-icon>
+                {{ getThemeMoodText() }}
               </v-chip>
               
               <v-chip
@@ -181,7 +181,6 @@ import { useAppTheme } from '@/composables/useAppTheme'
 const {
   currentTheme,
   currentThemeInfo,
-  isDarkMode,
   availableThemes,
   setTheme,
   getThemeClass,

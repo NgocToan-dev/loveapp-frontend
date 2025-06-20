@@ -10,7 +10,6 @@ const vi = {
     anniversaries: 'Ngày kỷ niệm',
     messages: 'Tin nhắn',
     photos: 'Ảnh của chúng ta',
-    about: 'Câu chuyện tình yêu',
     login: 'Đăng nhập',
     dashboard: 'Bảng điều khiển',
     files: 'Tệp tin',
@@ -58,60 +57,6 @@ const vi = {
       title: 'Sẵn sàng bắt đầu?',
       subtitle: 'Hãy cùng nhau tạo ra những kỷ niệm đẹp và xây dựng tình yêu mỗi ngày',
       signUp: 'Bắt đầu ngay'
-    }
-  },
-  about: {
-    title: 'Câu chuyện tình yêu của chúng ta',
-    subtitle: 'Nơi lưu giữ những khoảnh khắc đẹp nhất 💕',
-    ourStory: {
-      title: 'Câu chuyện của chúng ta',
-      content: 'Đây là không gian riêng tư được tạo ra đặc biệt cho tình yêu của chúng ta. Nơi chúng ta có thể chia sẻ những khoảnh khắc đẹp, lưu giữ kỷ niệm và xây dựng tình yêu mỗi ngày.'
-    },
-    features: {
-      title: 'Những tính năng đặc biệt',
-      subtitle: 'Được thiết kế dành riêng cho chúng ta',
-      memories: {
-        title: 'Lưu giữ kỷ niệm',
-        description: 'Lưu trữ những hình ảnh, video và ghi chú về những khoảnh khắc đẹp của chúng ta.'
-      },
-      messages: {
-        title: 'Tin nhắn tình yêu',
-        description: 'Gửi những lời nhắn ngọt ngào và chia sẻ cảm xúc mỗi ngày.'
-      },
-      timeline: {
-        title: 'Dòng thời gian',
-        description: 'Theo dõi hành trình tình yêu của chúng ta qua từng mốc thời gian.'
-      },
-      private: {
-        title: 'Hoàn toàn riêng tư',
-        description: 'Chỉ có chúng ta mới có thể truy cập và xem những nội dung này.'
-      }
-    },
-    values: {
-      title: 'Giá trị cốt lõi',
-      subtitle: 'Những điều chúng ta tin tưởng',
-      love: {
-        title: 'Tình yêu chân thành',
-        description: 'Tình yêu là nền tảng của mọi thứ chúng ta xây dựng.'
-      },
-      trust: {
-        title: 'Tin tưởng tuyệt đối',
-        description: 'Sự tin tưởng là chìa khóa cho một mối quan hệ bền vững.'
-      },
-      growth: {
-        title: 'Cùng nhau phát triển',
-        description: 'Chúng ta cùng nhau học hỏi và trưởng thành mỗi ngày.'
-      },
-      joy: {
-        title: 'Niềm vui chia sẻ',
-        description: 'Hạnh phúc được nhân đôi khi chúng ta chia sẻ với nhau.'
-      }
-    },
-    contact: {
-      title: 'Luôn kết nối',
-      subtitle: 'Luôn sẵn sàng lắng nghe và chia sẻ với nhau',
-      support: 'Gửi tin nhắn tình yêu',
-      faq: 'Những câu hỏi dành cho nhau'
     }
   },
   files: {
@@ -352,10 +297,6 @@ const vi = {
     error: 'Lỗi!',
     ok: 'OK'
   },
-  theme: {
-    toggleDark: 'Chuyển sang chế độ tối',
-    toggleLight: 'Chuyển sang chế độ sáng'
-  },
   auth: {
     login: {
       title: 'Đăng nhập',
@@ -490,7 +431,6 @@ const en = {
     anniversaries: 'Anniversaries',
     messages: 'Messages',
     photos: 'Our Photos',
-    about: 'Our Love Story',
     login: 'Login',
     dashboard: 'Dashboard',
     files: 'Files',
@@ -538,60 +478,6 @@ const en = {
       title: 'Ready to Start?',
       subtitle: 'Let\'s create beautiful memories together and build our love every day',
       signUp: 'Start Now'
-    }
-  },
-  about: {
-    title: 'Our Love Story',
-    subtitle: 'Where we keep our most beautiful moments 💕',
-    ourStory: {
-      title: 'Our Story',
-      content: 'This is a private space created especially for our love. Where we can share beautiful moments, preserve memories and build our love every day.'
-    },
-    features: {
-      title: 'Special Features',
-      subtitle: 'Designed exclusively for us',
-      memories: {
-        title: 'Preserve Memories',
-        description: 'Store photos, videos and notes about our beautiful moments.'
-      },
-      messages: {
-        title: 'Love Messages',
-        description: 'Send sweet messages and share emotions every day.'
-      },
-      timeline: {
-        title: 'Timeline',
-        description: 'Track our love journey through each milestone.'
-      },
-      private: {
-        title: 'Completely Private',
-        description: 'Only we can access and view this content.'
-      }
-    },
-    values: {
-      title: 'Core Values',
-      subtitle: 'What we believe in',
-      love: {
-        title: 'True Love',
-        description: 'Love is the foundation of everything we build.'
-      },
-      trust: {
-        title: 'Absolute Trust',
-        description: 'Trust is the key to a lasting relationship.'
-      },
-      growth: {
-        title: 'Growing Together',
-        description: 'We learn and grow together every day.'
-      },
-      joy: {
-        title: 'Shared Joy',
-        description: 'Happiness is doubled when we share it with each other.'
-      }
-    },
-    contact: {
-      title: 'Stay Connected',
-      subtitle: 'Always ready to listen and share with each other',
-      support: 'Send Love Messages',
-      faq: 'Questions for Each Other'
     }
   },
   files: {
@@ -822,10 +708,6 @@ const en = {
     deleted: 'Deleted!',
     error: 'Error!',
     ok: 'OK'
-  },
-  theme: {
-    toggleDark: 'Switch to dark mode',
-    toggleLight: 'Switch to light mode'
   },
   auth: {
     login: {
