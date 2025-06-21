@@ -21,28 +21,10 @@
           <div class="action-text">
             <h4 class="action-title">Create Memory</h4>
             <p class="action-description">Capture a special moment</p>
-          </div>
-        </div>
-
-        <!-- Add Note -->
+          </div>        </div>        <!-- Set Reminder -->
         <div 
           class="action-item loveClick cardLift slideInUp"
           style="animation-delay: 0.2s;"
-          @click="handleAction('note')"
-        >
-          <div class="action-icon note-icon">
-            <v-icon size="32" color="secondary">mdi-note-plus</v-icon>
-          </div>
-          <div class="action-text">
-            <h4 class="action-title">Add Note</h4>
-            <p class="action-description">Write a sweet message</p>
-          </div>
-        </div>
-
-        <!-- Set Reminder -->
-        <div 
-          class="action-item loveClick cardLift slideInUp"
-          style="animation-delay: 0.3s;"
           @click="handleAction('reminder')"
         >
           <div class="action-icon reminder-icon">
@@ -52,12 +34,10 @@
             <h4 class="action-title">Set Reminder</h4>
             <p class="action-description">Never forget important dates</p>
           </div>
-        </div>
-
-        <!-- Upload Files -->
+        </div>        <!-- Upload Files -->
         <div 
           class="action-item loveClick cardLift slideInUp"
-          style="animation-delay: 0.4s;"
+          style="animation-delay: 0.3s;"
           @click="handleAction('files')"
         >
           <div class="action-icon files-icon">
@@ -67,12 +47,10 @@
             <h4 class="action-title">Upload Files</h4>
             <p class="action-description">Share photos and videos</p>
           </div>
-        </div>
-
-        <!-- Plan Anniversary -->
+        </div>        <!-- Plan Anniversary -->
         <div 
           class="action-item loveClick cardLift slideInUp"
-          style="animation-delay: 0.5s;"
+          style="animation-delay: 0.4s;"
           @click="handleAction('anniversary')"
         >
           <div class="action-icon anniversary-icon">
@@ -82,12 +60,10 @@
             <h4 class="action-title">Plan Anniversary</h4>
             <p class="action-description">Celebrate your milestones</p>
           </div>
-        </div>
-
-        <!-- Send Invitation -->
+        </div>        <!-- Send Invitation -->
         <div 
           class="action-item loveClick cardLift slideInUp"
-          style="animation-delay: 0.6s;"
+          style="animation-delay: 0.5s;"
           @click="handleAction('invite')"
         >
           <div class="action-icon invite-icon">
@@ -125,11 +101,7 @@ const handleAction = (actionType: string) => {
   }, 1000)
   // Handle the action
   switch (actionType) {
-    case 'memory':
-      router.push('/memories/create')
-      break
-    case 'note':
-      router.push('/notes/create')
+    case 'memory':      router.push('/memories/create')
       break
     case 'reminder':
       router.push('/reminders/create')
@@ -238,12 +210,6 @@ const handleAction = (actionType: string) => {
   background: linear-gradient(135deg, 
     rgba(var(--primary-rgb), 0.15), 
     rgba(var(--primary-rgb), 0.1));
-}
-
-.note-icon {
-  background: linear-gradient(135deg, 
-    rgba(var(--secondary-rgb), 0.15), 
-    rgba(var(--secondary-rgb), 0.1));
 }
 
 .reminder-icon {

@@ -2,14 +2,13 @@
   <div class="memory-gallery">
     <!-- Gallery Header -->
     <div class="gallery-header">
-      <div class="d-flex justify-space-between align-center mb-4">
-        <div>
+      <div class="d-flex justify-space-between align-center mb-4">        <div>
           <h3 class="font-heading text-h5 mb-1">
             <v-icon start color="primary" size="24">mdi-view-gallery</v-icon>
-            Bộ sưu tập kỷ niệm
+            {{ $t('memories.gallery.title') }}
           </h3>
           <p class="text-body-2 text-medium-emphasis">
-            {{ memories.length }} kỷ niệm • {{ totalPhotos }} hình ảnh
+            {{ $t('memories.gallery.stats', { count: memories.length, photos: totalPhotos }) }}
           </p>
         </div>
         
@@ -38,15 +37,15 @@
       <!-- Filters -->
       <div class="gallery-filters mb-6">
         <v-row>
-          <v-col cols="12" md="4">
-            <v-select
+          <v-col cols="12" md="4">            <v-select
               v-model="selectedType"
               :items="memoryTypes"
-              label="Loại kỷ niệm"
+              :label="$t('memories.gallery.filters.type')"
               density="compact"
               variant="outlined"
               hide-details
               clearable
+            >
             >
               <template #item="{ props, item }">
                 <v-list-item v-bind="props">
@@ -60,11 +59,10 @@
             </v-select>
           </v-col>
           
-          <v-col cols="12" md="4">
-            <v-select
+          <v-col cols="12" md="4">            <v-select
               v-model="selectedYear"
               :items="yearOptions"
-              label="Năm"
+              :label="$t('memories.gallery.filters.year')"
               density="compact"
               variant="outlined"
               hide-details
@@ -72,10 +70,9 @@
             ></v-select>
           </v-col>
           
-          <v-col cols="12" md="4">
-            <v-text-field
+          <v-col cols="12" md="4">            <v-text-field
               v-model="searchText"
-              label="Tìm kiếm..."
+              :label="$t('memories.gallery.filters.search')"
               density="compact"
               variant="outlined"
               hide-details
@@ -155,39 +152,38 @@
             size="64"
             color="grey-lighten-2"
             class="mb-4"
-          ></v-icon>
-          <h4 class="text-h6 mb-2">Không tìm thấy kỷ niệm nào</h4>
+          ></v-icon>          <h4 class="text-h6 mb-2">{{ $t('memories.gallery.empty.title') }}</h4>
           <p class="text-body-2 text-medium-emphasis mb-4">
-            Hãy thử thay đổi bộ lọc hoặc tạo kỷ niệm mới
+            {{ $t('memories.gallery.empty.description') }}
           </p>
           <v-btn
             color="primary"
             variant="outlined"
             @click="$emit('createMemory')"
           >
-            Tạo kỷ niệm đầu tiên
+            {{ $t('memories.gallery.empty.action') }}
           </v-btn>
         </div>
       </div>
     </div>
 
     <!-- Load More Button -->
-    <div v-if="hasMore && filteredMemories.length > 0" class="gallery-load-more text-center mt-8">
-      <v-btn
-        color="primary"
-        variant="outlined"
-        size="large"
-        :loading="loading"
-        @click="$emit('loadMore')"
-      >
-        Xem thêm kỷ niệm
-      </v-btn>
+    <div v-if="hasMore && filteredMemories.length > 0" class="gallery-load-more text-center mt-8">        <v-btn
+          color="primary"
+          variant="outlined"
+          size="large"
+          :loading="loading"
+          @click="$emit('loadMore')"
+        >
+          {{ $t('memories.gallery.loadMore') }}
+        </v-btn>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import MemoryCard from './MemoryCard.vue'
 import type { Memory } from '@/types'
 
@@ -214,6 +210,8 @@ const emit = defineEmits<{
   loadMore: []
 }>()
 
+const { t } = useI18n()
+
 // View state
 const viewMode = ref<'grid' | 'masonry' | 'list'>('grid')
 const selectedType = ref<string | null>(null)
@@ -221,14 +219,14 @@ const selectedYear = ref<number | null>(null)
 const searchText = ref('')
 
 // Memory categories for filter
-const memoryTypes = [
-  { title: 'Lần đầu gặp', value: 'first-meet', icon: 'mdi-heart-flash', color: 'pink' },
-  { title: 'Hẹn hò', value: 'date', icon: 'mdi-heart', color: 'purple' },
-  { title: 'Du lịch', value: 'travel', icon: 'mdi-airplane-takeoff', color: 'indigo' },
-  { title: 'Cột mốc', value: 'milestone', icon: 'mdi-trophy', color: 'success' },
-  { title: 'Kỷ niệm', value: 'celebration', icon: 'mdi-party-popper', color: 'orange' },
-  { title: 'Khác', value: 'general', icon: 'mdi-camera', color: 'primary' }
-]
+const memoryTypes = computed(() => [
+  { title: t('memories.gallery.types.first-meet'), value: 'first-meet', icon: 'mdi-heart-flash', color: 'pink' },
+  { title: t('memories.gallery.types.date'), value: 'date', icon: 'mdi-heart', color: 'purple' },
+  { title: t('memories.gallery.types.travel'), value: 'travel', icon: 'mdi-airplane-takeoff', color: 'indigo' },
+  { title: t('memories.gallery.types.milestone'), value: 'milestone', icon: 'mdi-trophy', color: 'success' },
+  { title: t('memories.gallery.types.celebration'), value: 'celebration', icon: 'mdi-party-popper', color: 'orange' },
+  { title: t('memories.gallery.types.general'), value: 'general', icon: 'mdi-camera', color: 'primary' }
+])
 
 // Year options for filter
 const yearOptions = computed(() => {

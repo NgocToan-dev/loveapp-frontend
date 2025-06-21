@@ -21,9 +21,7 @@
           muted
           @mouseover="playVideo"
           @mouseleave="pauseVideo"
-        />
-        
-        <!-- Media Overlay -->
+        />          <!-- Media Overlay -->
         <div class="media-overlay">
           <div class="media-actions">
             <v-btn
@@ -40,6 +38,54 @@
                 {{ memory.isFavorite ? 'mdi-heart' : 'mdi-heart-outline' }}
               </v-icon>
             </v-btn>
+            
+            <!-- Action Menu -->
+            <v-menu>
+              <template #activator="{ props: menuProps }">
+                <v-btn
+                  icon
+                  variant="text"
+                  size="small"
+                  class="media-btn loveClick"
+                  v-bind="menuProps"
+                  @click.stop
+                >
+                  <v-icon color="white">mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
+              
+              <v-list>
+                <v-list-item @click.stop="handleConvertToAnniversary">
+                  <template #prepend>
+                    <v-icon icon="mdi-calendar-star" color="primary" />
+                  </template>
+                  <v-list-item-title>{{ $t('memories.convertToAnniversary') }}</v-list-item-title>
+                </v-list-item>
+                
+                <v-list-item @click.stop="handleEdit">
+                  <template #prepend>
+                    <v-icon icon="mdi-pencil" />
+                  </template>
+                  <v-list-item-title>{{ $t('common.edit') }}</v-list-item-title>
+                </v-list-item>
+                
+                <v-list-item @click.stop="handleShare">
+                  <template #prepend>
+                    <v-icon icon="mdi-share" />
+                  </template>
+                  <v-list-item-title>{{ $t('common.share') }}</v-list-item-title>
+                </v-list-item>
+                
+                <v-divider />
+                
+                <v-list-item @click.stop="handleDelete">
+                  <template #prepend>
+                    <v-icon icon="mdi-delete" color="error" />
+                  </template>
+                  <v-list-item-title class="text-error">{{ $t('common.delete') }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </div>
           
           <!-- Date Badge -->
@@ -110,6 +156,10 @@ const emit = defineEmits<{
   'favorite': [memory: Memory]
   'swipe-left': [memory: Memory]
   'swipe-right': [memory: Memory]
+  'convert-to-anniversary': [memory: Memory]
+  'edit': [memory: Memory]
+  'delete': [memory: Memory]
+  'share': [memory: Memory]
 }>()
 
 const showFavoriteHearts = ref(false)
@@ -168,10 +218,27 @@ const toggleFavorite = () => {
     showFavoriteHearts.value = true
     setTimeout(() => {
       showFavoriteHearts.value = false
-    }, 1500)
+    }, 2000)
   }
   
   emit('favorite', props.memory)
+}
+
+// Action handlers
+const handleConvertToAnniversary = () => {
+  emit('convert-to-anniversary', props.memory)
+}
+
+const handleEdit = () => {
+  emit('edit', props.memory)
+}
+
+const handleShare = () => {
+  emit('share', props.memory)
+}
+
+const handleDelete = () => {
+  emit('delete', props.memory)
 }
 
 const formatDate = (date: string | Date) => {

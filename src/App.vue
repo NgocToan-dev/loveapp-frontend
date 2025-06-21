@@ -51,7 +51,6 @@ const getTransitionName = (route: any) => {
     '/register': 'fade',
     '/dashboard': 'slideRight',
     '/memories': 'slideLeft',
-    '/notes': 'slideLeft',
     '/reminders': 'slideLeft',
     '/anniversaries': 'slideLeft',
     '/files': 'slideLeft',
@@ -96,12 +95,6 @@ const getTransitionName = (route: any) => {
             :title="t('nav.memories') || 'Memories'"
             value="memories"
             to="/memories"
-          />
-          <v-list-item
-            prepend-icon="mdi-note-text"
-            :title="t('nav.notes') || 'Notes'"
-            value="notes"
-            to="/notes"
           />
           <v-list-item
             prepend-icon="mdi-bell"

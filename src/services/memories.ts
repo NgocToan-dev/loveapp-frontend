@@ -177,6 +177,16 @@ class MemoriesService {
     const response = await ApiService.get<{ success: boolean; data: MemoryStatsResponse }>(`${this.baseUrl}/stats`)
     return response.data
   }
+
+  async convertToAnniversary(memoryId: string, anniversaryData: {
+    title: string
+    description?: string
+    date: string
+    isRecurring: boolean
+  }) {
+    const response = await ApiService.post(`${this.baseUrl}/${memoryId}/convert-to-anniversary`, anniversaryData)
+    return response
+  }
 }
 
 export const memoriesService = new MemoriesService()

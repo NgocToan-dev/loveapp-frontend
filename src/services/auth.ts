@@ -69,13 +69,21 @@ export class AuthService {
       const refreshToken = this.getRefreshToken()
       if (!refreshToken) return false
 
-      const response = await ApiService.post<AuthResponse>('/auth/refresh-token', {
+      const response = await ApiService.post<any>('/auth/refresh-token', {
         refreshToken,
       })
 
-      // ApiService already extracts .data, so response is the clean data
-      if (response.data.tokens) {
-        this.setTokens(response.data.tokens)
+      console.log('Refresh token response:', response) // Debug log
+
+      // Handle response structure: { success: true, data: { accessToken, expiresIn } }
+      if (response.data && response.data.accessToken) {
+        const tokens: AuthTokens = {
+          accessToken: response.data.accessToken,
+          refreshToken: refreshToken, // Keep existing refresh token
+          expiresIn: response.data.expiresIn || 900, // Default 15 minutes
+          tokenType: 'Bearer'
+        }
+        this.setTokens(tokens)
         return true
       }
 

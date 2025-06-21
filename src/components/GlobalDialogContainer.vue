@@ -33,8 +33,6 @@ import CouplePreferencesDialog from './CouplePreferencesDialog.vue'
 import ConfirmDialog from '@components/ConfirmDialog.vue'
 import AlertDialog from '@components/AlertDialog.vue'
 import CreateMemoryDialog from '@components/CreateMemoryDialog.vue'
-import CreateNoteDialog from '@components/CreateNoteDialog.vue'
-import EditNoteDialog from '@components/EditNoteDialog.vue'
 import CreateReminderDialog from '@components/CreateReminderDialog.vue'
 import CreateAnniversaryDialog from '@components/CreateAnniversaryDialog.vue'
 import ShareMemoryDialog from '@components/ShareMemoryDialog.vue'
@@ -50,8 +48,6 @@ const getDialogComponent = (componentName: string) => {
     ConfirmDialog,
     AlertDialog,
     CreateMemoryDialog,
-    CreateNoteDialog,
-    EditNoteDialog,
     CreateReminderDialog,
     CreateAnniversaryDialog,
     ShareMemoryDialog

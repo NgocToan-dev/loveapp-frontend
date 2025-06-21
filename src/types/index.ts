@@ -70,23 +70,6 @@ export interface Memory {
   sharedAt?: string
 }
 
-export interface Note {
-  id: string
-  title: string
-  content: string
-  category: string
-  tags: string[]
-  isPrivate: boolean
-  userId: string
-  createdBy?: string // Keep for backward compatibility
-  createdAt: Date | { _seconds: number; _nanoseconds: number }
-  updatedAt: Date | { _seconds: number; _nanoseconds: number }
-  isArchived: boolean
-  isDeleted: boolean
-  attachments: string[]
-  sharedWith: string[]
-}
-
 export interface Reminder {
   id: string
   title: string

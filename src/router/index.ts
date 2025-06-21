@@ -122,42 +122,6 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/notes',
-    name: 'notes',
-    component: () => import('@views/notes/NotesView.vue'),
-    meta: {
-      title: 'Notes',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/notes/create',
-    name: 'create-note',
-    component: () => import('@views/notes/CreateNoteView.vue'),
-    meta: {
-      title: 'Create Note',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/notes/:id',
-    name: 'note-detail',
-    component: () => import('@views/notes/NoteDetailView.vue'),
-    meta: {
-      title: 'Note Detail',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/notes/:id/edit',
-    name: 'edit-note',
-    component: () => import('@views/notes/EditNoteView.vue'),
-    meta: {
-      title: 'Edit Note',
-      requiresAuth: true
-    }
-  },
-  {
     path: '/reminders/create',
     name: 'create-reminder',
     component: () => import('@/views/reminders/CreateReminderView.vue'),

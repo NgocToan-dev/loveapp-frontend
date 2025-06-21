@@ -280,6 +280,32 @@ export const useMemoriesStore = defineStore('memories', () => {
     }
   }
 
+  const convertMemoryToAnniversary = async (memoryId: string, anniversaryData: {
+    title: string
+    description?: string
+    date: string
+    isRecurring: boolean
+  }) => {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      // Call the API to convert memory to anniversary
+      await memoriesService.convertToAnniversary(memoryId, anniversaryData)
+
+      // If successful, refresh memories to update the status
+      await fetchMemories()
+
+      return true
+    } catch (err: any) {
+      console.error('Failed to convert memory to anniversary:', err)
+      error.value = err.message || 'Failed to convert memory to anniversary'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const clearError = () => {
     error.value = null
   }
@@ -317,6 +343,7 @@ export const useMemoriesStore = defineStore('memories', () => {
     fetchSharedMemoriesWithDetails,
     fetchMemoryStats,
     addFileToMemory,
+    convertMemoryToAnniversary,
     updateFilters,
     resetFilters,
     clearError,

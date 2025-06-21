@@ -2,42 +2,34 @@
   <v-container fluid class="hero-section pa-0">
     <v-row no-gutters>
       <v-col cols="12">
-        <v-card 
+        <v-card
           class="hero-card position-relative overflow-hidden"
           :height="heroHeight"
           rounded="xl"
           elevation="0"
         >
           <!-- Background Image with Overlay -->
-          <div 
-            class="hero-background"
-            :style="backgroundStyle"
-          >
+          <div class="hero-background" :style="backgroundStyle">
             <div class="hero-overlay"></div>
           </div>
 
           <!-- Content -->
-          <v-card-text class="hero-content d-flex flex-column justify-center align-center text-center pa-8">
+          <v-card-text
+            class="hero-content d-flex flex-column justify-center align-center text-center pa-8"
+          >
             <!-- Couple Image -->
             <div class="couple-avatar-container mb-6 animate-romantic-fade-in">
-              <v-avatar
-                size="120"
-                class="couple-avatar elevation-8"
-              >
+              <v-avatar size="120" class="couple-avatar elevation-8">
                 <v-img
                   :src="coupleImage || defaultCoupleImage"
                   :alt="`${userName} & ${partnerName}`"
                   cover
                 />
               </v-avatar>
-              
+
               <!-- Love Icon -->
               <div class="love-icon-container">
-                <v-icon 
-                  size="24" 
-                  color="white"
-                  class="love-icon animate-gentle-pulse"
-                >
+                <v-icon size="24" color="white" class="love-icon animate-gentle-pulse">
                   mdi-heart
                 </v-icon>
               </div>
@@ -58,7 +50,9 @@
               <v-row justify="center" no-gutters>
                 <v-col cols="auto" class="mx-2">
                   <div class="stat-item text-center">
-                    <div class="stat-number font-heading text-white">{{ daysTogether }}</div>
+                    <div class="stat-number font-heading text-white">
+                      {{ daysTogether }}
+                    </div>
                     <div class="stat-label text-white opacity-75">Ngày bên nhau</div>
                   </div>
                 </v-col>
@@ -67,19 +61,13 @@
                 </v-col>
                 <v-col cols="auto" class="mx-2">
                   <div class="stat-item text-center">
-                    <div class="stat-number font-heading text-white">{{ totalMemories }}</div>
+                    <div class="stat-number font-heading text-white">
+                      {{ totalMemories }}
+                    </div>
                     <div class="stat-label text-white opacity-75">Kỷ niệm</div>
                   </div>
                 </v-col>
-                <v-col cols="auto" class="mx-2">
-                  <div class="stat-divider"></div>
-                </v-col>
-                <v-col cols="auto" class="mx-2">
-                  <div class="stat-item text-center">
-                    <div class="stat-number font-heading text-white">{{ totalNotes }}</div>
-                    <div class="stat-label text-white opacity-75">Ghi chú</div>
-                  </div>
-                </v-col>
+                <v-col cols="auto" class="mx-2"> <div class="stat-divider"></div> </v-col>
               </v-row>
             </div>
 
@@ -99,16 +87,16 @@
 
           <!-- Floating Hearts Animation -->
           <div v-if="showFloatingHearts" class="floating-hearts-container">
-            <v-icon 
-              v-for="n in 6" 
+            <v-icon
+              v-for="n in 6"
               :key="n"
-              size="16" 
-              color="white" 
+              size="16"
+              color="white"
               class="floating-heart animate-floating-hearts"
-              :style="{ 
+              :style="{
                 left: `${Math.random() * 90 + 5}%`,
                 animationDelay: `${n * 1.5}s`,
-                opacity: 0.6
+                opacity: 0.6,
               }"
             >
               mdi-heart
@@ -121,120 +109,117 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { useMemoriesStore } from '@/stores/memories'
-import { useNotesStore } from '@/stores/notes'
-import dayjs from 'dayjs'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { useMemoriesStore } from "@/stores/memories";
+import dayjs from "dayjs";
+import { useRouter } from "vue-router";
 
 // Props
 interface Props {
-  coupleImage?: string
-  backgroundImage?: string
-  height?: string | number
+  coupleImage?: string;
+  backgroundImage?: string;
+  height?: string | number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  height: 400
-})
+  height: 400,
+});
 
 // Emits
 defineEmits<{
-  createMemory: []
-}>()
+  createMemory: [];
+}>();
 
 // Stores
-const authStore = useAuthStore()
-const memoriesStore = useMemoriesStore()
-const notesStore = useNotesStore()
+const authStore = useAuthStore();
+const memoriesStore = useMemoriesStore();
 
 // Router
-const router = useRouter()
+const router = useRouter();
 
 // Refs
-const showFloatingHearts = ref(false)
+const showFloatingHearts = ref(false);
 
 // Computed
 const heroHeight = computed(() => {
-  return typeof props.height === 'number' ? `${props.height}px` : props.height
-})
+  return typeof props.height === "number" ? `${props.height}px` : props.height;
+});
 
-const userName = computed(() => authStore.user?.displayName || 'Bạn')
-const partnerName = computed(() => 'Người ấy') // TODO: Get from couples store
+const userName = computed(() => authStore.user?.displayName || "Bạn");
+const partnerName = computed(() => "Người ấy"); // TODO: Get from couples store
 
 const welcomeMessage = computed(() => {
-  const hour = new Date().getHours()
-  let greeting = 'Chào buổi tối'
-  
-  if (hour < 12) greeting = 'Chào buổi sáng'
-  else if (hour < 18) greeting = 'Chào buổi chiều'
-  
-  return `${greeting}, ${userName.value}! 💕`
-})
+  const hour = new Date().getHours();
+  let greeting = "Chào buổi tối";
+
+  if (hour < 12) greeting = "Chào buổi sáng";
+  else if (hour < 18) greeting = "Chào buổi chiều";
+
+  return `${greeting}, ${userName.value}! 💕`;
+});
 
 const loveSubtitle = computed(() => {
   const messages = [
-    'Tình yêu của chúng ta là câu chuyện đẹp nhất',
-    'Mỗi ngày bên nhau là một món quà',
-    'Yêu thương là hạnh phúc lớn nhất',
-    'Kỷ niệm ngọt ngào, tương lai tươi sáng',
-    'Cùng nhau viết nên câu chuyện tình yêu'
-  ]
-  const today = new Date().getDate()
-  return messages[today % messages.length]
-})
+    "Tình yêu của chúng ta là câu chuyện đẹp nhất",
+    "Mỗi ngày bên nhau là một món quà",
+    "Yêu thương là hạnh phúc lớn nhất",
+    "Kỷ niệm ngọt ngào, tương lai tươi sáng",
+    "Cùng nhau viết nên câu chuyện tình yêu",
+  ];
+  const today = new Date().getDate();
+  return messages[today % messages.length];
+});
 
 const daysTogether = computed(() => {
   // TODO: Get from couples store - anniversary date
-  const startDate = dayjs('2024-01-01') // Placeholder
-  return dayjs().diff(startDate, 'day')
-})
+  const startDate = dayjs("2024-01-01"); // Placeholder
+  return dayjs().diff(startDate, "day");
+});
 
-const totalMemories = computed(() => memoriesStore.totalMemories || 0)
-const totalNotes = computed(() => notesStore.totalNotes || 0)
+const totalMemories = computed(() => memoriesStore.totalMemories || 0);
 
 const defaultCoupleImage = computed(() => {
-  return '/src/assets/images/default-couple.jpg' // Placeholder
-})
+  return "/src/assets/images/default-couple.jpg"; // Placeholder
+});
 
 const backgroundStyle = computed(() => {
-  const defaultBg = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-  
+  const defaultBg = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+
   if (props.backgroundImage) {
     return {
       backgroundImage: `url(${props.backgroundImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
-    }
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
   }
-  
+
   return {
-    background: defaultBg
-  }
-})
+    background: defaultBg,
+  };
+});
 
 // Methods
 const startFloatingHearts = () => {
-  showFloatingHearts.value = true
+  showFloatingHearts.value = true;
   setTimeout(() => {
-    showFloatingHearts.value = false
-  }, 8000)
-}
+    showFloatingHearts.value = false;
+  }, 8000);
+};
 
 const handleCreateMemory = () => {
-  router.push('/memories/create')
-}
+  router.push("/memories/create");
+};
 
 // Lifecycle
 onMounted(() => {
   // Start floating hearts animation periodically
   setInterval(() => {
     if (Math.random() > 0.7) {
-      startFloatingHearts()
+      startFloatingHearts();
     }
-  }, 15000)
-})
+  }, 15000);
+});
 </script>
 
 <style scoped>
@@ -410,7 +395,8 @@ onMounted(() => {
 
 /* Keyframes */
 @keyframes gentlePulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -453,23 +439,23 @@ onMounted(() => {
   .hero-content {
     padding: 32px 16px !important;
   }
-  
+
   .couple-avatar-container {
     margin-bottom: 24px !important;
   }
-  
+
   .quick-stats-container {
     padding: 12px 16px;
   }
-  
+
   .stat-divider {
     margin: 0 8px;
   }
-  
+
   .stat-number {
     font-size: 1.25rem;
   }
-  
+
   .stat-label {
     font-size: 0.75rem;
   }
@@ -479,16 +465,16 @@ onMounted(() => {
   .hero-title {
     font-size: 2rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1rem;
   }
-  
+
   .hero-btn {
     height: 48px;
     padding: 0 24px;
   }
-  
+
   .bg-circle-1,
   .bg-circle-2 {
     display: none;

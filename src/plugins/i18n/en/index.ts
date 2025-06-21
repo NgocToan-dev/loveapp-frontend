@@ -1,8 +1,6 @@
 const en = {
   nav: {
-    home: 'Home',
-    memories: 'Memories',
-    notes: 'Notes',
+    home: 'Home',    memories: 'Memories',
     reminders: 'Reminders',
     anniversaries: 'Anniversaries',
     messages: 'Messages',
@@ -88,44 +86,7 @@ const en = {
     confirmDelete: 'Are you sure you want to delete "{name}"?',
     confirmDeleteTitle: 'Confirm Delete',
     deleteSuccess: 'File has been deleted successfully!',
-    deleteError: 'An error occurred while deleting the file. Please try again.',
-  },
-  notes: {
-    title: 'Our Notes',
-    subtitle: 'Thoughts and feelings',
-    create: 'Create Note',
-    totalNotes: 'Total Notes',
-    total: 'Total',
-    categories: 'Categories',
-    private: 'Private',
-    public: 'Public',
-    privacy: 'Privacy',
-    search: 'Search notes...',
-    category: 'Category',
-    sortBy: 'Sort by',
-    newestFirst: 'Newest first',
-    oldestFirst: 'Oldest first',
-    titleAZ: 'Title A-Z',
-    favorites: 'Favorites',
-    noNotes: 'No notes yet',
-    noNotesDescription: 'Create your first note',
-    noSearchResults: 'No search results found',
-    tryDifferentSearch: 'Try a different search term',
-    createFirstNote: 'Create your first note',
-    createFirst: 'Create first note',
-    loading: 'Loading...',
-    editNote: 'Edit Note',
-    createNote: 'Create New Note',
-    noteTitle: 'Note Title',
-    content: 'Content',
-    markAsFavorite: 'Mark as favorite',
-    confirmDelete: 'Are you sure you want to delete note "{title}"?',
-    confirmDeleteTitle: 'Confirm Delete',
-    deleteConfirm: 'Confirm Delete',
-    deleteWarning: 'This action cannot be undone.',
-    deleteSuccess: 'Note has been deleted successfully!',
-    deleteError: 'An error occurred while deleting the note. Please try again.',
-  },
+    deleteError: 'An error occurred while deleting the file. Please try again.',  },
   reminders: {
     title: 'Our Reminders',
     subtitle: 'Important things to remember',
@@ -289,11 +250,40 @@ const en = {
     public: 'Public',
     private: 'Private',
     save: 'Save Memory',
-    markAsFavorite: 'Mark as favorite',
-    confirmDelete: 'Are you sure you want to delete memory "{title}"?',
+    markAsFavorite: 'Mark as favorite',    confirmDelete: 'Are you sure you want to delete memory "{title}"?',
     confirmDeleteTitle: 'Confirm Delete',
     deleteSuccess: 'Memory has been deleted successfully!',
     deleteError: 'An error occurred while deleting the memory. Please try again.',
+    
+    // Gallery specific keys  
+    gallery: {
+      title: 'Memory Collection',
+      stats: '{count} memories • {photos} photos',
+      viewModes: {
+        grid: 'Grid',
+        masonry: 'Masonry', 
+        list: 'List'
+      },
+      filters: {
+        type: 'Memory Type',
+        year: 'Year',
+        search: 'Search...'
+      },
+      types: {
+        'first-meet': 'First Meet',
+        'date': 'Date',
+        'travel': 'Travel', 
+        'milestone': 'Milestone',
+        'celebration': 'Celebration',
+        'general': 'General'
+      },
+      empty: {
+        title: 'No memories found',
+        description: 'Try changing filters or create a new memory',
+        action: 'Create first memory'
+      },
+      loadMore: 'Load more memories'
+    }
   },
   common: {
     comingSoon: 'Coming Soon',

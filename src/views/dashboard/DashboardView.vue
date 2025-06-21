@@ -3,7 +3,6 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useMemoriesStore } from "@/stores/memories";
-import { useNotesStore } from "@/stores/notes";
 
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
@@ -19,7 +18,6 @@ const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 const memoriesStore = useMemoriesStore();
-const notesStore = useNotesStore();
 
 
 // Helper function to safely convert dates
@@ -37,7 +35,6 @@ const safeDate = (
 // Get real stats from stores
 const stats = computed(() => ({
   memories: memoriesStore.totalMemories,
-  notes: notesStore.totalNotes,
   reminders: 0, // No reminders store yet
   anniversaries: 0, // No anniversaries store yet
 }));
@@ -72,25 +69,13 @@ const recentItems = computed(() => {
     });
   }
 
-  // Add recent notes (with null check)
-  if (notesStore.notes && Array.isArray(notesStore.notes)) {
-    notesStore.notes.slice(0, 3).forEach((note) => {
-      items.push({
-        id: note.id,
-        title: note.title,
-        type: "note",
-        updatedAt: safeDate(note.updatedAt),
-      });
-    });
-  }
-
   // Sort by updated date
   return items.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 5);
 });
 
 const upcomingEvents = ref<UpcomingEvent[]>([]); // Will be populated when reminders/anniversaries are available
 const isLoading = computed(
-  () => memoriesStore.isLoading || notesStore.isLoading
+  () => memoriesStore.isLoading
 );
 
 // Navigation methods
@@ -150,8 +135,7 @@ onMounted(async () => {
   // Load real data from APIs
   try {
     await Promise.all([
-      memoriesStore.fetchMemories({ limit: 10 }),
-      notesStore.fetchNotes({ limit: 10 }),
+      memoriesStore.fetchMemories({ limit: 10 })
     ]);
   } catch (error) {
     console.error("Failed to load dashboard data:", error);
@@ -201,19 +185,6 @@ onMounted(async () => {
                 <div class="stat-content">
                   <div class="stat-number">{{ isLoading ? "..." : stats.memories }}</div>
                   <div class="stat-label">Memories</div>
-                </div>
-              </div>
-
-              <div 
-                class="stat-card hover-lift"
-                @click="navigateTo('notes')"
-              >
-                <div class="stat-icon">
-                  <v-icon icon="mdi-note-text" color="primary" />
-                </div>
-                <div class="stat-content">
-                  <div class="stat-number">{{ isLoading ? "..." : stats.notes }}</div>
-                  <div class="stat-label">Notes</div>
                 </div>
               </div>
 
