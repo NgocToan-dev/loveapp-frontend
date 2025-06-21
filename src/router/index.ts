@@ -67,6 +67,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/files/:id',
+    name: 'file-detail',
+    component: () => import('@views/files/FileDetailView.vue'),
+    meta: {
+      title: 'File Detail',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/memories',
     name: 'memories',
     component: () => import('@views/memories/MemoriesView.vue'),
@@ -100,6 +109,15 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@views/memories/MemoryDetailView.vue'),
     meta: {
       title: 'Memory Detail',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/memories/:id/edit',
+    name: 'edit-memory',
+    component: () => import('@views/memories/EditMemoryView.vue'),
+    meta: {
+      title: 'Edit Memory',
       requiresAuth: true
     }
   },
@@ -158,6 +176,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/reminders/:id',
+    name: 'reminder-detail',
+    component: () => import('@views/reminders/ReminderDetailView.vue'),
+    meta: {
+      title: 'Reminder Detail',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/reminders/:id/edit',
     name: 'edit-reminder',
     component: () => import('@views/reminders/EditReminderView.vue'),
@@ -181,6 +208,15 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@views/anniversaries/AnniversariesView.vue'),
     meta: {
       title: 'Anniversaries',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/anniversaries/:id',
+    name: 'anniversary-detail',
+    component: () => import('@views/anniversaries/AnniversaryDetailView.vue'),
+    meta: {
+      title: 'Anniversary Detail',
       requiresAuth: true
     }
   },

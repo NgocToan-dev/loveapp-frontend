@@ -203,6 +203,70 @@ export const useMemoriesStore = defineStore('memories', () => {
     }
   }
 
+  const fetchSharedMemories = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      
+      const response = await memoriesService.getSharedMemories()
+      return response
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch shared memories'
+      console.error('Error fetching shared memories:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchSharedMemoriesWithDetails = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      
+      // Call the service directly to get full response with pagination and filters
+      const response = await memoriesService.getSharedMemoriesWithDetails()
+      return response
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch shared memories'
+      console.error('Error fetching shared memories:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchMemoryStats = async () => {
+    try {
+      isLoading.value = true
+      error.value = null
+      
+      const response = await memoriesService.getMemoryStats()
+      return response
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch memory statistics'
+      console.error('Error fetching memory statistics:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const addFileToMemory = async (memoryId: string, fileId: string, description?: string) => {
+    try {
+      await memoriesService.addFileToMemory(memoryId, fileId, description)
+      
+      // Optionally refresh the current memory to show the new file
+      if (currentMemory.value?.id === memoryId) {
+        await fetchMemoryById(memoryId)
+      }
+    } catch (err: any) {
+      error.value = err.message || 'Failed to add file to memory'
+      console.error('Error adding file to memory:', err)
+      throw err
+    }
+  }
+
   const updateFilters = (newFilters: Partial<MemoryFilters>) => {
     filters.value = { ...filters.value, ...newFilters }
   }
@@ -249,9 +313,13 @@ export const useMemoriesStore = defineStore('memories', () => {
     deleteMemory,
     toggleFavorite,
     shareMemory,
+    fetchSharedMemories,
+    fetchSharedMemoriesWithDetails,
+    fetchMemoryStats,
+    addFileToMemory,
     updateFilters,
     resetFilters,
     clearError,
     clearCurrentMemory
   }
-}) 
+})

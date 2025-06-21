@@ -429,13 +429,12 @@ const viewMode = ref<"grid" | "list">("grid");
 // Computed properties
 const totalReminders = computed(() => reminders.value.length);
 
-const upcomingReminders = computed(
-  () =>
-    reminders.value.filter((reminder) => {
-      if (reminder.isCompleted) return false;
-      const reminderDate = new Date(reminder.reminderDate);
-      return reminderDate > new Date();
-    }).length
+const upcomingReminders = computed(() =>
+  reminders.value.filter((reminder) => {
+    if (reminder.isCompleted) return false;
+    const reminderDate = new Date(reminder.reminderDate);
+    return reminderDate > new Date();
+  }).length
 );
 
 const overdueReminders = computed(
@@ -580,17 +579,14 @@ const handleDeleteReminder = async (reminder: Reminder) => {
 
 const handleToggleComplete = async (reminder: Reminder) => {
   try {
-    // For now, we'll just log the action since the API might not support updating isCompleted
-    console.log("Toggle reminder completion:", reminder.id, !reminder.isCompleted);
-
-    // If the API supports it, you would call:
-    // await remindersStore.updateReminder(reminder.id, { isCompleted: !reminder.isCompleted })
-
-    // For now, let's update the local state (this should be handled by the store)
-    reminder.isCompleted = !reminder.isCompleted;
-    if (reminder.isCompleted) {
-      reminder.completedAt = new Date();
+    if (!reminder.isCompleted) {
+      // Mark as complete using the store method
+      await remindersStore.completeReminder(reminder.id);
     } else {
+      // Mark as incomplete - for now just update local state
+      console.log("Marking reminder as incomplete:", reminder.id);
+      // Update local state since there's no uncomplete API
+      reminder.isCompleted = false;
       reminder.completedAt = null;
     }
   } catch (error) {

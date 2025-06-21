@@ -41,6 +41,7 @@ export interface Memory {
   id: string
   title: string
   description: string
+  content?: string // Keep for backward compatibility
   date: string // Changed from memoryDate to date to match backend
   memoryDate?: string // Keep for backward compatibility
   location?:
@@ -61,6 +62,12 @@ export interface Memory {
   createdBy: string
   createdAt: Date
   updatedAt: Date
+  sharedBy?: {
+    id: string
+    fullName: string
+    avatar?: string
+  }
+  sharedAt?: string
 }
 
 export interface Note {

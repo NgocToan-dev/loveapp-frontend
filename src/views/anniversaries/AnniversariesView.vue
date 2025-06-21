@@ -413,8 +413,7 @@ const createAnniversary = () => {
 };
 
 const handleOpenAnniversary = (anniversary: Anniversary) => {
-  console.log("View anniversary:", anniversary);
-  // Navigate to anniversary detail view or open modal
+  router.push({ name: "anniversary-detail", params: { id: anniversary.id } });
 };
 
 const handleEditAnniversary = (anniversary: Anniversary) => {

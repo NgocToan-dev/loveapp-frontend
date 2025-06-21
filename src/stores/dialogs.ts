@@ -125,6 +125,36 @@ export const useDialogsStore = defineStore('dialogs', () => {
     )
   }
 
+  // Share Memory Dialog State
+  const shareMemoryDialog = reactive({
+    isOpen: false,
+    memory: null as any
+  })
+
+  const openShareMemoryDialog = (memory: any) => {
+    shareMemoryDialog.memory = memory
+    shareMemoryDialog.isOpen = true
+  }
+
+  const closeShareMemoryDialog = () => {
+    shareMemoryDialog.isOpen = false
+    shareMemoryDialog.memory = null
+  }
+
+  // Alert helper
+  const showAlert = (options: {
+    type: 'success' | 'error' | 'warning' | 'info'
+    title: string
+    message: string
+    confirmText?: string
+  }) => {
+    return openAlertDialog({
+      title: options.title,
+      message: options.message,
+      buttonText: options.confirmText || 'OK'
+    })
+  }
+
   return {
     // State
     dialogs,
@@ -139,6 +169,14 @@ export const useDialogsStore = defineStore('dialogs', () => {
     
     // Essential helpers only
     openConfirmDialog,
-    openAlertDialog
+    openAlertDialog,
+
+    // Share Memory Dialog
+    shareMemoryDialog,
+    openShareMemoryDialog,
+    closeShareMemoryDialog,
+
+    // Alert helper
+    showAlert
   }
 })

@@ -2,6 +2,8 @@ import type { Memory, PaginationParams } from '@/types'
 import ApiService from './api'
 
 export interface MemoriesResponse {
+  success: boolean
+  message: string
   data: {
     memories: Memory[]
     pagination: PaginationParams
@@ -14,6 +16,39 @@ export interface MemoryStatsResponse {
   sharedMemories: number
   memoriesByCategory: Record<string, number>
   recentMemories: Memory[]
+  memoriesThisMonth?: number
+  memoriesThisYear?: number
+  averageMemoriesPerMonth?: number
+  mostUsedTags?: Array<{
+    tag: string
+    count: number
+  }>
+  memoryCountByMonth?: Record<string, number>
+}
+
+export interface SharedMemoriesResponse {
+  success: boolean
+  message: string
+  data: {
+    memories: Memory[]
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      totalPages: number
+      hasNext: boolean
+      hasPrev: boolean
+    }
+    filters: {
+      categories: string[]
+      moods: string[]
+      tags: string[]
+      dateRange: {
+        earliest: string
+        latest: string
+      }
+    }
+  }
 }
 
 export interface CreateMemoryData {
@@ -46,6 +81,7 @@ export interface UpdateMemoryData {
   category?: string  // Added category field
   tags?: string[]
   isPrivate?: boolean
+  isFavorite?: boolean  // Added isFavorite field
 }
 
 export interface MemoryFilters extends PaginationParams {
@@ -74,11 +110,13 @@ class MemoriesService {
       })
     }
 
-    return await ApiService.get<MemoriesResponse>(`${this.baseUrl}?${params.toString()}`)
+    const response = await ApiService.get<MemoriesResponse>(`${this.baseUrl}?${params.toString()}`)
+    return response
   }
 
   async getMemoryById(id: string): Promise<Memory> {
-    return await ApiService.get<Memory>(`${this.baseUrl}/${id}`)
+    const response = await ApiService.get<{ success: boolean; data: { memory: Memory } }>(`${this.baseUrl}/${id}`)
+    return response.data.memory
   }
 
   async createMemory(data: CreateMemoryData): Promise<Memory> {
@@ -93,39 +131,52 @@ class MemoriesService {
     
     console.log('Creating memory with data:', transformedData)
     
-    return await ApiService.post<Memory>(this.baseUrl, transformedData)
+    const response = await ApiService.post<{ success: boolean; data: { memory: Memory } }>(this.baseUrl, transformedData)
+    return response.data.memory
   }
 
   async updateMemory(id: string, data: UpdateMemoryData): Promise<Memory> {
-    return await ApiService.put<Memory>(`${this.baseUrl}/${id}`, data)
+    const response = await ApiService.put<{ success: boolean; data: { memory: Memory } }>(`${this.baseUrl}/${id}`, data)
+    return response.data.memory
   }
 
   async deleteMemory(id: string): Promise<void> {
-    return await ApiService.delete<void>(`${this.baseUrl}/${id}`)
+    await ApiService.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`)
   }
 
   async shareMemory(id: string, data: ShareMemoryData): Promise<void> {
-    return await ApiService.post<void>(`${this.baseUrl}/${id}/share`, data)
+    await ApiService.post<{ success: boolean; message: string }>(`${this.baseUrl}/${id}/share`, data)
   }
 
   async toggleFavorite(id: string): Promise<Memory> {
-    return await ApiService.post<Memory>(`${this.baseUrl}/${id}/favorite`)
+    const response = await ApiService.post<{ success: boolean; data: { isFavorite: boolean } }>(`${this.baseUrl}/${id}/favorite`)
+    // Note: This endpoint might return different structure, we may need to fetch the memory again
+    // For now, we'll assume it returns the updated memory
+    return await this.getMemoryById(id)
   }
 
   async addFileToMemory(memoryId: string, fileId: string, description?: string): Promise<void> {
-    return await ApiService.post<void>(`${this.baseUrl}/${memoryId}/files`, {
+    await ApiService.post<{ success: boolean; data: any }>(`${this.baseUrl}/${memoryId}/files`, {
       fileId,
       description
     })
   }
 
   async getSharedMemories(): Promise<Memory[]> {
-    return await ApiService.get<Memory[]>(`${this.baseUrl}/shared`)
+    const response = await ApiService.get<SharedMemoriesResponse>(`${this.baseUrl}/shared`)
+    // Extract memories array from the wrapped response
+    return response.data.memories
+  }
+
+  async getSharedMemoriesWithDetails(): Promise<SharedMemoriesResponse> {
+    const response = await ApiService.get<SharedMemoriesResponse>(`${this.baseUrl}/shared`)
+    return response
   }
 
   async getMemoryStats(): Promise<MemoryStatsResponse> {
-    return await ApiService.get<MemoryStatsResponse>(`${this.baseUrl}/stats`)
+    const response = await ApiService.get<{ success: boolean; data: MemoryStatsResponse }>(`${this.baseUrl}/stats`)
+    return response.data
   }
 }
 
-export const memoriesService = new MemoriesService() 
+export const memoriesService = new MemoriesService()

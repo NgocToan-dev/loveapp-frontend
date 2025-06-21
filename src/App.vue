@@ -7,6 +7,7 @@ import { useThemeStore } from '@/stores/theme'
 import ServerOfflineNotice from '@/components/ServerOfflineNotice.vue'
 import NotificationBell from '@/components/NotificationBell.vue'
 import GlobalDialogContainer from '@/components/GlobalDialogContainer.vue'
+import ShareMemoryDialog from '@/components/ShareMemoryDialog.vue'
 import MobileNavigation from '@/components/ui/MobileNavigation.vue'
 import BottomNavigation from '@/components/ui/BottomNavigation.vue'
 
@@ -261,6 +262,9 @@ const getTransitionName = (route: any) => {
 
     <!-- Global Dialog Container -->
     <GlobalDialogContainer />
+    
+    <!-- Share Memory Dialog -->
+    <ShareMemoryDialog />
   </v-app>
 </template>
 

@@ -37,6 +37,7 @@ import CreateNoteDialog from '@components/CreateNoteDialog.vue'
 import EditNoteDialog from '@components/EditNoteDialog.vue'
 import CreateReminderDialog from '@components/CreateReminderDialog.vue'
 import CreateAnniversaryDialog from '@components/CreateAnniversaryDialog.vue'
+import ShareMemoryDialog from '@components/ShareMemoryDialog.vue'
 
 const dialogsStore = useDialogsStore()
 
@@ -52,7 +53,8 @@ const getDialogComponent = (componentName: string) => {
     CreateNoteDialog,
     EditNoteDialog,
     CreateReminderDialog,
-    CreateAnniversaryDialog
+    CreateAnniversaryDialog,
+    ShareMemoryDialog
   }
   return components[componentName] || null
 }

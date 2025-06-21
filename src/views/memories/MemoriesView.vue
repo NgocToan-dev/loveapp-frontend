@@ -54,11 +54,10 @@
           <div class="stat-card hover-lift">
             <div class="stat-icon">
               <v-icon icon="mdi-star" color="accent" />
-            </div>
-            <div class="stat-content">
-              <div class="stat-number">{{ favoriteMemories }}</div>
-              <div class="stat-label">{{ t("memories.favorites") }}</div>
-            </div>
+            </div>              <div class="stat-content">
+                <div class="stat-number">{{ favoriteMemories.length }}</div>
+                <div class="stat-label">{{ t("memories.favorites") }}</div>
+              </div>
           </div>
         </div>
       </ResponsiveContainer>
@@ -121,52 +120,116 @@
           </div>
         </div>
       </ResponsiveContainer>
-    </section>
-
-    <!-- Main Content -->
+    </section>    <!-- Main Content -->
     <main class="main-content">
       <ResponsiveContainer>
-        <!-- Empty State -->
-        <div v-if="filteredMemories.length === 0 && !isLoading" class="empty-state">
-          <v-icon
-            icon="mdi-heart-outline"
-            size="64"
-            color="grey-lighten-2"
-            class="mb-4"
-          />
-          <h3 class="empty-state-title">{{ t("memories.noMemories") }}</h3>
-          <p class="empty-state-text">{{ t("memories.noMemoriesDescription") }}</p>
-          <v-btn
-            color="primary"
-            size="large"
-            rounded
-            @click="openCreateMemory"
-            class="mt-4"
-          >
-            <v-icon icon="mdi-plus" start />
-            {{ t("memories.createFirst") }}
-          </v-btn>
-        </div>
+        <!-- Memory Tabs -->
+        <v-tabs v-model="activeTab" color="primary" class="memory-tabs mb-6">
+          <v-tab value="all">
+            <v-icon start>mdi-heart-multiple</v-icon>
+            Tất Cả
+            <v-chip size="small" class="ml-2">{{ memories.length }}</v-chip>
+          </v-tab>
+          <v-tab value="favorites">
+            <v-icon start>mdi-heart</v-icon>
+            Yêu Thích
+            <v-chip size="small" class="ml-2">{{ favoriteMemories.length }}</v-chip>
+          </v-tab>
+          <v-tab value="shared">
+            <v-icon start>mdi-share-variant</v-icon>
+            Được Chia Sẻ
+          </v-tab>
+          <v-tab value="statistics">
+            <v-icon start>mdi-chart-bar</v-icon>
+            Thống Kê
+          </v-tab>
+        </v-tabs>
 
-        <!-- Loading State -->
-        <div v-else-if="isLoading" class="loading-state">
-          <v-progress-circular indeterminate color="primary" size="48" class="mb-4" />
-          <p class="loading-text">{{ t("memories.loading") }}</p>
-        </div>
+        <!-- Tab Content -->
+        <v-tabs-window v-model="activeTab">
+          <!-- All Memories Tab -->
+          <v-tabs-window-item value="all">
+            <!-- Empty State -->
+            <div v-if="filteredMemories.length === 0 && !isLoading" class="empty-state">
+              <v-icon
+                icon="mdi-heart-outline"
+                size="64"
+                color="grey-lighten-2"
+                class="mb-4"
+              />
+              <h3 class="empty-state-title">{{ t("memories.noMemories") }}</h3>
+              <p class="empty-state-text">{{ t("memories.noMemoriesDescription") }}</p>
+              <v-btn
+                color="primary"
+                size="large"
+                rounded
+                @click="openCreateMemory"
+                class="mt-4"
+              >
+                <v-icon icon="mdi-plus" start />
+                {{ t("memories.createFirst") }}
+              </v-btn>
+            </div>
 
-        <!-- Memories Grid -->
-        <div v-else class="memories-grid">
-          <MemoryCard
-            v-for="memory in filteredMemories"
-            :key="memory.id"
-            :memory="memory"
-            @click="openMemoryDetail(memory)"
-            @favorite="toggleFavorite(memory)"
-            @edit="editMemory(memory)"
-            @delete="deleteMemory(memory)"
-            class="memory-card-item hover-lift"
-          />
-        </div>
+            <!-- Loading State -->
+            <div v-else-if="isLoading" class="loading-state">
+              <v-progress-circular indeterminate color="primary" size="48" class="mb-4" />
+              <p class="loading-text">{{ t("memories.loading") }}</p>
+            </div>
+
+            <!-- Memories Grid -->
+            <div v-else class="memories-grid">
+              <MemoryCard
+                v-for="memory in filteredMemories"
+                :key="memory.id"
+                :memory="memory"
+                @click="openMemoryDetail(memory)"
+                @favorite="toggleFavorite(memory)"
+                @edit="editMemory(memory)"
+                @delete="deleteMemory(memory)"
+                @share="openShareDialog(memory)"
+                class="memory-card-item hover-lift"
+              />
+            </div>
+          </v-tabs-window-item>
+
+          <!-- Favorites Tab -->
+          <v-tabs-window-item value="favorites">
+            <div v-if="favoriteMemories.length === 0" class="empty-state">
+              <v-icon
+                icon="mdi-heart-outline"
+                size="64"
+                color="grey-lighten-2"
+                class="mb-4"
+              />
+              <h3 class="empty-state-title">Chưa có memories yêu thích</h3>
+              <p class="empty-state-text">Đánh dấu yêu thích những memories đặc biệt nhất</p>
+            </div>
+            <div v-else class="memories-grid">
+              <MemoryCard
+                v-for="memory in favoriteMemories"
+                :key="memory.id"
+                :memory="memory"
+                @click="openMemoryDetail(memory)"
+                @favorite="toggleFavorite(memory)"
+                @edit="editMemory(memory)"
+                @delete="deleteMemory(memory)"
+                @share="openShareDialog(memory)"
+                class="memory-card-item hover-lift"
+              />
+            </div>
+          </v-tabs-window-item>
+
+          <!-- Shared Memories Tab -->
+          <v-tabs-window-item value="shared">
+            <SharedMemoriesView @memory-click="openMemoryDetail" />
+          </v-tabs-window-item>
+
+          <!-- Statistics Tab -->
+          <v-tabs-window-item value="statistics">
+            <MemoryStatistics @memory-click="openMemoryDetail" />
+          </v-tabs-window-item>
+        </v-tabs-window>
       </ResponsiveContainer>
     </main>
   </div>
@@ -181,6 +244,8 @@ import { useDialogsStore } from "@/stores/dialogs";
 import type { Memory } from "@/types";
 import MemoryCard from "@/components/memories/MemoryCard.vue";
 import ResponsiveContainer from "@/components/ui/ResponsiveContainer.vue";
+import SharedMemoriesView from "@/components/memories/SharedMemoriesView.vue";
+import MemoryStatistics from "@/components/memories/MemoryStatistics.vue";
 
 // Composables
 const { t } = useI18n();
@@ -197,6 +262,7 @@ const { memories, isLoading } = storeToRefs(memoriesStore);
 const searchQuery = ref("");
 const selectedFilter = ref("all");
 const sortBy = ref("date-desc");
+const activeTab = ref("all");
 
 // Filter and sort options
 const filterOptions = computed(() => [
@@ -282,7 +348,7 @@ const monthsWithMemories = computed(() => {
 });
 
 const favoriteMemories = computed(() => {
-  return memories.value.filter((memory) => memory.isFavorite).length;
+  return memories.value.filter((memory) => memory.isFavorite);
 });
 
 // Methods
@@ -318,6 +384,10 @@ const deleteMemory = async (memory: Memory) => {
   }
 };
 
+const openShareDialog = (memory: Memory) => {
+  dialogStore.openShareMemoryDialog(memory);
+};
+
 // Lifecycle
 onMounted(async () => {
   try {
@@ -332,8 +402,8 @@ onMounted(async () => {
   min-height: 100vh;
   background: linear-gradient(
     135deg,
-    var(--v-theme-background) 0%,
-    var(--v-theme-surface) 100%
+    rgb(var(--v-theme-background)) 0%,
+    rgb(var(--v-theme-surface)) 100%
   );
 }
 
@@ -346,8 +416,8 @@ onMounted(async () => {
   overflow: hidden;
   background: linear-gradient(
     135deg,
-    var(--v-theme-primary-lighten-5) 0%,
-    var(--v-theme-surface) 100%
+    rgba(var(--v-theme-primary), 0.1) 0%,
+    rgb(var(--v-theme-surface)) 100%
   );
 }
 
@@ -586,12 +656,21 @@ onMounted(async () => {
 }
 
 .filters-section {
-  background: var(--v-theme-surface);
+  background: rgb(var(--v-theme-surface));
   padding: 32px 0;
-  border-bottom: 1px solid var(--v-theme-outline-variant);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
   position: sticky;
   top: 64px;
   z-index: 10;
+  backdrop-filter: blur(8px);
+  /* Fallback for browsers that don't support CSS variables */
+  background-color: #ffffff;
+}
+
+.v-theme--dark .filters-section {
+  background: rgb(var(--v-theme-surface-variant));
+  /* Fallback for dark theme */
+  background-color: #2e2e2e;
 }
 
 .filters-container {
@@ -669,13 +748,13 @@ onMounted(async () => {
 .empty-state-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--v-theme-on-surface);
+  color: rgb(var(--v-theme-on-surface));
   margin: 16px 0 8px 0;
 }
 
 .empty-state-text {
   font-size: 1rem;
-  color: var(--v-theme-on-surface-variant);
+  color: rgb(var(--v-theme-on-surface-variant));
   margin: 0;
 }
 
@@ -710,17 +789,17 @@ onMounted(async () => {
 .v-theme--dark .hero-section {
   background: linear-gradient(
     135deg,
-    var(--v-theme-surface-variant) 0%,
-    var(--v-theme-surface) 100%
+    rgb(var(--v-theme-surface-variant)) 0%,
+    rgb(var(--v-theme-surface)) 100%
   );
 }
 
 .v-theme--dark .stats-section {
-  background: var(--v-theme-surface-variant);
+  background: rgb(var(--v-theme-surface-variant));
 }
 
 .v-theme--dark .filters-section {
-  background: var(--v-theme-surface-variant);
+  background: rgb(var(--v-theme-surface-variant));
 }
 
 @media (prefers-reduced-motion: reduce) {

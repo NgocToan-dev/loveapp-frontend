@@ -215,6 +215,10 @@ const loveTheme = {
     background: '#ffffff',        // Pure white background
     surface: '#ffffff',           // White - Card/surface background
     'surface-variant': '#f5f5f5', // Light gray variant
+    'surface-bright': '#ffffff',  // Bright surface
+    'surface-dim': '#f8f8f8',     // Dim surface
+    outline: '#79747e',           // Outline color
+    'outline-variant': '#c7c5d0', // Outline variant
     'on-primary': '#ffffff',      // White text on primary
     'on-secondary': '#ffffff',    // White text on secondary
     'on-background': '#2e2e2e',   // Dark gray text on white background
@@ -239,6 +243,10 @@ const darkLoveTheme = {
     background: '#121212',        // Standard dark background
     surface: '#1e1e1e',          // Dark surface
     'surface-variant': '#2e2e2e',
+    'surface-bright': '#2a2a2a',  // Bright surface for dark theme
+    'surface-dim': '#1a1a1a',     // Dim surface for dark theme
+    outline: '#938f99',           // Outline color for dark theme
+    'outline-variant': '#49454f', // Outline variant for dark theme
     'on-primary': '#ffffff',
     'on-secondary': '#ffffff',
     'on-background': '#ffffff',   // White text on dark background
