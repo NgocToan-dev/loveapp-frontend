@@ -11,9 +11,9 @@
         <div class="hero-content">
           <h1 class="hero-title">
             <v-icon icon="mdi-heart" class="title-icon" />
-            Our Love Story
+            {{ t("memories.title") }}
           </h1>
-          <p class="hero-subtitle">Every moment together is a precious memory</p>
+          <p class="hero-subtitle">{{ t("memories.subtitle") }}</p>
           <v-btn
             color="primary"
             size="large"
@@ -23,7 +23,7 @@
             @click="openCreateMemory"
           >
             <v-icon icon="mdi-plus" start />
-            Create New Memory
+            {{ t("memories.createNew") }}
           </v-btn>
         </div>
       </ResponsiveContainer>
@@ -39,7 +39,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ memories.length }}</div>
-              <div class="stat-label">Total Memories</div>
+              <div class="stat-label">{{ t("memories.totalMemories") }}</div>
             </div>
           </div>
           <div class="stat-card hover-lift">
@@ -48,7 +48,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ monthsWithMemories }}</div>
-              <div class="stat-label">Months Together</div>
+              <div class="stat-label">{{ t("memories.monthsTogether") }}</div>
             </div>
           </div>
           <div class="stat-card hover-lift">
@@ -57,7 +57,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-number">{{ favoriteMemories }}</div>
-              <div class="stat-label">Favorites</div>
+              <div class="stat-label">{{ t("memories.favorites") }}</div>
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@
       <ResponsiveContainer>
         <div class="filters-container">
           <div class="filters-header">
-            <h2 class="filters-title">Memory Collection</h2>
+            <h2 class="filters-title">{{ t("memories.title") }}</h2>
             <v-btn
               color="primary"
               rounded
@@ -77,7 +77,7 @@
               @click="openCreateMemory"
             >
               <v-icon icon="mdi-plus" start />
-              Create Memory
+              {{ t("memories.create") }}
             </v-btn>
           </div>
 
@@ -85,7 +85,7 @@
             <v-text-field
               v-model="searchQuery"
               prepend-inner-icon="mdi-magnify"
-              placeholder="Search memories..."
+              :placeholder="t('memories.search')"
               variant="outlined"
               density="comfortable"
               hide-details
@@ -97,7 +97,7 @@
             <v-select
               v-model="sortBy"
               :items="sortOptions"
-              label="Sort by"
+              :label="t('common.sortBy')"
               variant="outlined"
               density="comfortable"
               hide-details
@@ -109,7 +109,7 @@
             <v-select
               v-model="selectedFilter"
               :items="filterOptions"
-              label="Filter by"
+              :label="t('common.filters')"
               variant="outlined"
               density="comfortable"
               hide-details
@@ -119,7 +119,6 @@
               class="filter-field"
             />
           </div>
-
         </div>
       </ResponsiveContainer>
     </section>
@@ -129,9 +128,14 @@
       <ResponsiveContainer>
         <!-- Empty State -->
         <div v-if="filteredMemories.length === 0 && !isLoading" class="empty-state">
-          <v-icon icon="mdi-heart-outline" size="64" color="grey-lighten-2" class="mb-4" />
-          <h3 class="empty-state-title">No memories found</h3>
-          <p class="empty-state-text">Start creating beautiful memories together</p>
+          <v-icon
+            icon="mdi-heart-outline"
+            size="64"
+            color="grey-lighten-2"
+            class="mb-4"
+          />
+          <h3 class="empty-state-title">{{ t("memories.noMemories") }}</h3>
+          <p class="empty-state-text">{{ t("memories.noMemoriesDescription") }}</p>
           <v-btn
             color="primary"
             size="large"
@@ -140,19 +144,14 @@
             class="mt-4"
           >
             <v-icon icon="mdi-plus" start />
-            Create Your First Memory
+            {{ t("memories.createFirst") }}
           </v-btn>
         </div>
 
         <!-- Loading State -->
         <div v-else-if="isLoading" class="loading-state">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-            size="48"
-            class="mb-4"
-          />
-          <p class="loading-text">Loading memories...</p>
+          <v-progress-circular indeterminate color="primary" size="48" class="mb-4" />
+          <p class="loading-text">{{ t("memories.loading") }}</p>
         </div>
 
         <!-- Memories Grid -->
@@ -171,158 +170,171 @@
       </ResponsiveContainer>
     </main>
   </div>
-</template><script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
-import { useMemoriesStore } from '@/stores/memories'
-import { useDialogsStore } from '@/stores/dialogs'
-import type { Memory } from '@/types'
-import MemoryCard from '@/components/memories/MemoryCard.vue'
-import ResponsiveContainer from '@/components/ui/ResponsiveContainer.vue'
+</template>
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { useMemoriesStore } from "@/stores/memories";
+import { useDialogsStore } from "@/stores/dialogs";
+import type { Memory } from "@/types";
+import MemoryCard from "@/components/memories/MemoryCard.vue";
+import ResponsiveContainer from "@/components/ui/ResponsiveContainer.vue";
+
+// Composables
+const { t } = useI18n();
 
 // Stores
-const memoriesStore = useMemoriesStore()
-const dialogStore = useDialogsStore()
-const router = useRouter()
+const memoriesStore = useMemoriesStore();
+const dialogStore = useDialogsStore();
+const router = useRouter();
 
 // Store refs
-const { memories, isLoading } = storeToRefs(memoriesStore)
+const { memories, isLoading } = storeToRefs(memoriesStore);
 
 // Local state
-const searchQuery = ref('')
-const selectedFilter = ref('all')
-const sortBy = ref('date-desc')
+const searchQuery = ref("");
+const selectedFilter = ref("all");
+const sortBy = ref("date-desc");
 
 // Filter and sort options
-const filterOptions = [
-  { title: 'All Memories', value: 'all' },
-  { title: 'Favorites', value: 'favorites' },
-  { title: 'Recent (30 days)', value: 'recent' },
-  { title: 'Private', value: 'private' },
-  { title: 'Shared', value: 'shared' }
-]
+const filterOptions = computed(() => [
+  { title: t("common.all"), value: "all" },
+  { title: t("memories.favorites"), value: "favorites" },
+  { title: t("common.recent"), value: "recent" },
+  { title: t("memories.private"), value: "private" },
+  { title: t("memories.public"), value: "shared" },
+]);
 
-const sortOptions = [
-  { title: 'Date (Newest)', value: 'date-desc' },
-  { title: 'Date (Oldest)', value: 'date-asc' },
-  { title: 'Title A-Z', value: 'title-asc' },
-  { title: 'Title Z-A', value: 'title-desc' }
-]
+const sortOptions = computed(() => [
+  { title: t("memories.newestFirst"), value: "date-desc" },
+  { title: t("memories.oldestFirst"), value: "date-asc" },
+  { title: t("memories.titleAZ"), value: "title-asc" },
+  { title: t("memories.titleAZ") + " (Z-A)", value: "title-desc" },
+]);
 
 // Computed properties
 const filteredMemories = computed(() => {
-  let filtered = [...memories.value]
+  let filtered = [...memories.value];
 
   // Search filter
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(memory => 
-      memory.title.toLowerCase().includes(query) ||
-      memory.description?.toLowerCase().includes(query) ||
-      memory.tags?.some(tag => tag.toLowerCase().includes(query))
-    )
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (memory) =>
+        memory.title.toLowerCase().includes(query) ||
+        memory.description?.toLowerCase().includes(query) ||
+        memory.tags?.some((tag) => tag.toLowerCase().includes(query))
+    );
   }
 
   // Category filter
-  if (selectedFilter.value !== 'all') {
+  if (selectedFilter.value !== "all") {
     switch (selectedFilter.value) {
-      case 'favorites':
-        filtered = filtered.filter(memory => memory.isFavorite)
-        break
-      case 'recent':
-        const thirtyDaysAgo = new Date()
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-        filtered = filtered.filter(memory => new Date(memory.createdAt) >= thirtyDaysAgo)
-        break
-      case 'private':
-        filtered = filtered.filter(memory => memory.isPrivate)
-        break
-      case 'shared':
-        filtered = filtered.filter(memory => !memory.isPrivate)
-        break
+      case "favorites":
+        filtered = filtered.filter((memory) => memory.isFavorite);
+        break;
+      case "recent":
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        filtered = filtered.filter(
+          (memory) => new Date(memory.createdAt) >= thirtyDaysAgo
+        );
+        break;
+      case "private":
+        filtered = filtered.filter((memory) => memory.isPrivate);
+        break;
+      case "shared":
+        filtered = filtered.filter((memory) => !memory.isPrivate);
+        break;
     }
   }
 
   // Sort
   filtered.sort((a, b) => {
     switch (sortBy.value) {
-      case 'date-desc':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      case 'date-asc':
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      case 'title-asc':
-        return a.title.localeCompare(b.title)
-      case 'title-desc':
-        return b.title.localeCompare(a.title)
+      case "date-desc":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "date-asc":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "title-asc":
+        return a.title.localeCompare(b.title);
+      case "title-desc":
+        return b.title.localeCompare(a.title);
       default:
-        return 0
+        return 0;
     }
-  })
+  });
 
-  return filtered
-})
+  return filtered;
+});
 
 // Stats
 const monthsWithMemories = computed(() => {
   const months = new Set(
-    memories.value.map(memory => {
-      const date = new Date(memory.createdAt)
-      return `${date.getFullYear()}-${date.getMonth()}`
+    memories.value.map((memory) => {
+      const date = new Date(memory.createdAt);
+      return `${date.getFullYear()}-${date.getMonth()}`;
     })
-  )
-  return months.size
-})
+  );
+  return months.size;
+});
 
 const favoriteMemories = computed(() => {
-  return memories.value.filter(memory => memory.isFavorite).length
-})
+  return memories.value.filter((memory) => memory.isFavorite).length;
+});
 
 // Methods
 const openCreateMemory = () => {
-  router.push({ name: 'create-memory' })
-}
+  router.push({ name: "create-memory" });
+};
 
 const openMemoryDetail = (memory: Memory) => {
-  router.push({ name: 'memory-detail', params: { id: memory.id } })
-}
+  router.push({ name: "memory-detail", params: { id: memory.id } });
+};
 
 const toggleFavorite = async (memory: Memory) => {
   try {
     await memoriesStore.updateMemory(memory.id, {
       ...memory,
-    })
+    });
   } catch (error) {
-    console.error('Failed to toggle favorite:', error)
+    console.error("Failed to toggle favorite:", error);
   }
-}
+};
 
 const editMemory = (memory: Memory) => {
-  router.push({ name: 'edit-memory', params: { id: memory.id } })
-}
+  router.push({ name: "edit-memory", params: { id: memory.id } });
+};
 
 const deleteMemory = async (memory: Memory) => {
-  if (confirm('Are you sure you want to delete this memory?')) {
+  if (confirm(t("memories.confirmDelete", { title: memory.title }))) {
     try {
-      await memoriesStore.deleteMemory(memory.id)
+      await memoriesStore.deleteMemory(memory.id);
     } catch (error) {
-      console.error('Failed to delete memory:', error)
+      console.error("Failed to delete memory:", error);
     }
   }
-}
+};
 
 // Lifecycle
 onMounted(async () => {
   try {
-    await memoriesStore.fetchMemories()
+    await memoriesStore.fetchMemories();
   } catch (error) {
-    console.error('Failed to load memories:', error)
+    console.error("Failed to load memories:", error);
   }
-})
-</script><style scoped>
+});
+</script>
+<style scoped>
 .memories-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--v-theme-background) 0%, var(--v-theme-surface) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--v-theme-background) 0%,
+    var(--v-theme-surface) 100%
+  );
 }
 
 .hero-section {
@@ -332,7 +344,11 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--v-theme-primary-lighten-5) 0%, var(--v-theme-surface) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--v-theme-primary-lighten-5) 0%,
+    var(--v-theme-surface) 100%
+  );
 }
 
 @media (max-width: 768px) {
@@ -347,9 +363,11 @@ onMounted(async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(var(--v-theme-primary), 0.1) 0%, 
-    rgba(var(--v-theme-secondary), 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-primary), 0.1) 0%,
+    rgba(var(--v-theme-secondary), 0.05) 100%
+  );
 }
 
 .floating-hearts {
@@ -371,7 +389,7 @@ onMounted(async () => {
 
 .heart::before,
 .heart::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 10px;
   height: 16px;
@@ -387,18 +405,55 @@ onMounted(async () => {
   transform-origin: 100% 100%;
 }
 
-.heart:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
-.heart:nth-child(2) { top: 20%; left: 80%; animation-delay: 2s; }
-.heart:nth-child(3) { top: 40%; left: 20%; animation-delay: 4s; }
-.heart:nth-child(4) { top: 60%; left: 90%; animation-delay: 6s; }
-.heart:nth-child(5) { top: 80%; left: 30%; animation-delay: 8s; }
-.heart:nth-child(6) { top: 30%; left: 70%; animation-delay: 10s; }
+.heart:nth-child(1) {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+.heart:nth-child(2) {
+  top: 20%;
+  left: 80%;
+  animation-delay: 2s;
+}
+.heart:nth-child(3) {
+  top: 40%;
+  left: 20%;
+  animation-delay: 4s;
+}
+.heart:nth-child(4) {
+  top: 60%;
+  left: 90%;
+  animation-delay: 6s;
+}
+.heart:nth-child(5) {
+  top: 80%;
+  left: 30%;
+  animation-delay: 8s;
+}
+.heart:nth-child(6) {
+  top: 30%;
+  left: 70%;
+  animation-delay: 10s;
+}
 
 @keyframes floatHeart {
-  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-  25% { transform: translateY(-20px) rotate(5deg); opacity: 0.5; }
-  50% { transform: translateY(-10px) rotate(-5deg); opacity: 0.3; }
-  75% { transform: translateY(-30px) rotate(3deg); opacity: 0.4; }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-10px) rotate(-5deg);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translateY(-30px) rotate(3deg);
+    opacity: 0.4;
+  }
 }
 
 .hero-container {
@@ -653,7 +708,11 @@ onMounted(async () => {
 }
 
 .v-theme--dark .hero-section {
-  background: linear-gradient(135deg, var(--v-theme-surface-variant) 0%, var(--v-theme-surface) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--v-theme-surface-variant) 0%,
+    var(--v-theme-surface) 100%
+  );
 }
 
 .v-theme--dark .stats-section {
@@ -668,13 +727,13 @@ onMounted(async () => {
   .heart {
     animation: none !important;
   }
-  
+
   .stat-card,
   .memory-card-item,
   .create-memory-btn {
     transition: none !important;
   }
-  
+
   .hover-lift:hover {
     transform: none !important;
   }

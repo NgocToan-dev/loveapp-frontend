@@ -11,10 +11,9 @@
         <div class="hero-content">
           <h1 class="hero-title">
             <v-icon icon="mdi-bell-ring" class="title-icon" />
-            Love Reminders
+            {{ t("reminders.title") }}
           </h1>
-          <p class="hero-subtitle">Never miss a moment that matters to your heart</p>
-          <v-btn
+          <p class="hero-subtitle">{{ t("reminders.subtitle") }}</p>            <v-btn
             color="primary"
             size="large"
             rounded
@@ -23,7 +22,7 @@
             @click="createReminder"
           >
             <v-icon icon="mdi-plus" start />
-            Create Reminder
+            {{ t("reminders.create") }}
           </v-btn>
         </div>
       </section>
@@ -38,7 +37,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ totalReminders }}</div>
-                <div class="stat-label">Total Reminders</div>
+                <div class="stat-label">{{ t("reminders.totalReminders") }}</div>
               </div>
             </div>
             <div class="stat-card" @click="filterByStatus('upcoming')">
@@ -47,7 +46,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ upcomingReminders }}</div>
-                <div class="stat-label">Upcoming</div>
+                <div class="stat-label">{{ t("reminders.upcoming") }}</div>
               </div>
             </div>
             <div class="stat-card" @click="filterByStatus('overdue')">
@@ -56,7 +55,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ overdueReminders }}</div>
-                <div class="stat-label">Overdue</div>
+                <div class="stat-label">{{ t("reminders.overdue") }}</div>
               </div>
             </div>
             <div class="stat-card" @click="filterByStatus('completed')">
@@ -65,7 +64,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ completedReminders }}</div>
-                <div class="stat-label">Completed</div>
+                <div class="stat-label">{{ t("reminders.completed") }}</div>
               </div>
             </div>
           </div>
@@ -94,13 +93,13 @@
                     :style="{ color: 'rgb(var(--v-theme-on-surface))' }"
                   >
                     <v-icon class="mr-2" color="warning">mdi-filter-variant</v-icon>
-                    Bộ lọc & Tìm kiếm
+                    {{ t("common.filters") }} & {{ t("common.search") }}
                   </h3>
                   <p
                     class="text-caption mt-1"
                     :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }"
                   >
-                    Tìm kiếm và lọc nhắc nhở theo ý muốn
+                    {{ t("reminders.featureDescription") }}
                   </p>
                 </div>
                 <v-btn
@@ -112,7 +111,7 @@
                   class="create-btn"
                 >
                   <v-icon start>mdi-plus</v-icon>
-                  Tạo nhắc nhở
+                  {{ t("reminders.create") }}
                 </v-btn>
               </div>
 
@@ -122,7 +121,7 @@
                   <v-text-field
                     v-model="searchQuery"
                     prepend-inner-icon="mdi-magnify"
-                    label="Tìm kiếm nhắc nhở..."
+                    :label="t('reminders.search')"
                     variant="outlined"
                     rounded="xl"
                     clearable
@@ -144,7 +143,7 @@
                   <v-select
                     v-model="sortBy"
                     :items="sortOptions"
-                    label="Sắp xếp"
+                    :label="t('common.sortBy')"
                     variant="outlined"
                     rounded="xl"
                     hide-details
@@ -182,7 +181,7 @@
                     class="text-caption font-weight-medium"
                     :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }"
                   >
-                    Lọc nhanh theo trạng thái
+                    {{ t("reminders.filterByStatus") }}
                   </span>
                 </div>
                 <v-chip-group
@@ -199,7 +198,7 @@
                     rounded="xl"
                     class="status-chip"
                   >
-                    <v-label class="mr-2">Tất cả</v-label>
+                    <v-label class="mr-2">{{ t("common.all") }}</v-label>
                     <v-badge
                       :content="totalReminders"
                       color="grey"
@@ -216,7 +215,7 @@
                     class="status-chip"
                     color="info"
                   >
-                    <v-label class="mr-2">Sắp tới</v-label>
+                    <v-label class="mr-2">{{ t("reminders.upcoming") }}</v-label>
                     <v-badge
                       :content="upcomingReminders"
                       color="info"
@@ -233,7 +232,7 @@
                     class="status-chip"
                     color="warning"
                   >
-                    <v-label class="mr-2">Hôm nay</v-label>
+                    <v-label class="mr-2">{{ t("reminders.today") }}</v-label>
                   </v-chip>
 
                   <v-chip
@@ -244,7 +243,7 @@
                     class="status-chip"
                     color="error"
                   >
-                    <v-label class="mr-2">Quá hạn</v-label>
+                    <v-label class="mr-2">{{ t("reminders.overdue") }}</v-label>
                     <v-badge
                       :content="overdueReminders"
                       color="error"
@@ -261,7 +260,7 @@
                     class="status-chip"
                     color="success"
                   >
-                    <v-label class="mr-2">Hoàn thành</v-label>
+                    <v-label class="mr-2">{{ t("reminders.completed") }}</v-label>
                     <v-badge
                       :content="completedReminders"
                       color="success"
@@ -282,7 +281,7 @@
           <!-- Loading State -->
           <div v-if="isLoading" class="loading-container">
             <v-progress-circular indeterminate color="primary" size="64" width="4" />
-            <p class="loading-text">Loading your reminders...</p>
+            <p class="loading-text">{{ t("reminders.loading") }}</p>
           </div>
 
           <!-- Empty State -->
@@ -290,13 +289,13 @@
             <div class="empty-icon">
               <v-icon icon="mdi-bell-outline" size="120" color="grey-lighten-2" />
             </div>
-            <h3 class="empty-title">No reminders yet</h3>
+            <h3 class="empty-title">{{ t("reminders.noReminders") }}</h3>
             <p class="empty-subtitle">
-              Create your first reminder to never miss special moments!
+              {{ t("reminders.noRemindersDescription") }}
             </p>
             <v-btn color="primary" size="large" rounded @click="createReminder">
               <v-icon icon="mdi-plus" start />
-              Create Your First Reminder
+              {{ t("reminders.createFirst") }}
             </v-btn>
           </div>
 
@@ -399,12 +398,16 @@
 import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useRemindersStore } from "@/stores/reminders";
 import { useDialogsStore } from "@/stores/dialogs";
 import type { Reminder } from "@/types";
 import ReminderCard from "@/components/reminders/ReminderCard.vue";
 import ResponsiveContainer from "@/components/ui/ResponsiveContainer.vue";
 import dayjs from "dayjs";
+
+// Composables
+const { t } = useI18n();
 
 // Router
 const router = useRouter();

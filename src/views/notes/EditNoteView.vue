@@ -1,11 +1,10 @@
 <template>
-  <v-container class="pa-6" max-width="800">
-    <div class="text-center mb-8">
+  <v-container class="pa-6" max-width="800">    <div class="text-center mb-8">
       <h1 class="font-heading text-3xl mb-4" :style="{ color: 'rgb(var(--v-theme-on-surface))' }">
-        ✏️ Chỉnh sửa Ghi chú
+        ✏️ {{ t('notes.editNote') }}
       </h1>
       <p class="text-lg font-script" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
-        "Những dòng nhật ký tình yêu..."
+        {{ t('notes.editSubtitle') }}
       </p>
     </div>
 
@@ -16,10 +15,10 @@
             <v-col cols="12">
               <v-text-field
                 v-model="noteData.title"
-                label="Tiêu đề ghi chú"
+                :label="t('notes.noteTitle')"
                 variant="outlined"
                 rounded="lg"
-                :rules="[v => !!v || 'Vui lòng nhập tiêu đề']"
+                :rules="[v => !!v || t('validation.titleRequired')]"
                 :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
               />
             </v-col>
@@ -27,17 +26,17 @@
             <v-col cols="12">
               <v-textarea
                 v-model="noteData.content"
-                label="Nội dung"
+                :label="t('notes.content')"
                 variant="outlined"
                 rounded="lg"
                 rows="8"
-                :rules="[v => !!v || 'Vui lòng nhập nội dung']"
+                :rules="[v => !!v || t('validation.contentRequired')]"
                 :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
               />
             </v-col>            <v-col cols="12" md="6">
               <v-text-field
                 v-model="noteData.category"
-                label="Danh mục"
+                :label="t('notes.category')"
                 variant="outlined"
                 rounded="lg"
                 :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
@@ -47,7 +46,7 @@
             <v-col cols="12" md="6">
               <v-switch
                 v-model="noteData.isPrivate"
-                label="Riêng tư"
+                :label="t('notes.private')"
                 color="primary"
                 hide-details
               />
@@ -78,9 +77,8 @@
               size="large"
               @click="goBack"
               :style="{ color: 'rgb(var(--v-theme-on-surface))' }"
-            >
-              <v-icon start>mdi-arrow-left</v-icon>
-              Hủy bỏ
+            >              <v-icon start>mdi-arrow-left</v-icon>
+              {{ t('common.cancel') }}
             </v-btn>
             
             <v-btn
@@ -90,9 +88,8 @@
               size="large"
               type="submit"
               :loading="loading"
-            >
-              <v-icon start>mdi-content-save</v-icon>
-              Cập nhật ghi chú
+            >              <v-icon start>mdi-content-save</v-icon>
+              {{ t('notes.update') }}
             </v-btn>
           </div>
         </v-form>
@@ -104,9 +101,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotesStore } from '@/stores/notes'
 import type { Note } from '@/types'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const notesStore = useNotesStore()

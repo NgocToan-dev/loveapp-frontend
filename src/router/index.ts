@@ -16,15 +16,6 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: false
     }
   },
-  {
-    path: '/dialog-demo',
-    name: 'dialog-demo',
-    component: () => import('@views/DialogDemoView.vue'),
-    meta: {
-      title: 'Dialog Demo',
-      requiresAuth: false
-    }
-  },
   // Auth routes
   {
     path: '/login',

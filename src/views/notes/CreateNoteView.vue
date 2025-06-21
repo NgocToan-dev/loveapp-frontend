@@ -27,7 +27,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="formData.title"
-                :label="$t('notes.title')"
+                :label="$t('notes.noteTitle')"
                 :rules="titleRules"
                 variant="outlined"
                 prepend-inner-icon="mdi-format-title"

@@ -27,7 +27,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="formData.title"
-                :label="$t('memories.title') || 'Memory Title'"
+            :label="$t('memories.memoryTitle') || 'Memory Title'"
                 :rules="titleRules"
                 variant="outlined"
                 prepend-inner-icon="mdi-format-title"

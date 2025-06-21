@@ -1,11 +1,10 @@
 <template>
   <v-container class="pa-6" max-width="800">
-    <div class="text-center mb-8">
-      <h1 class="font-heading text-3xl mb-4" :style="{ color: 'rgb(var(--v-theme-on-surface))' }">
-        ✏️ Chỉnh sửa Nhắc nhở
+    <div class="text-center mb-8">      <h1 class="font-heading text-3xl mb-4" :style="{ color: 'rgb(var(--v-theme-on-surface))' }">
+        ✏️ {{ t('reminders.editReminder') }}
       </h1>
       <p class="text-lg font-script" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
-        "Đừng để những điều quan trọng bị lãng quên..."
+        {{ t('reminders.editSubtitle') }}
       </p>
     </div>
 
@@ -16,10 +15,10 @@
             <v-col cols="12">
               <v-text-field
                 v-model="reminderData.title"
-                label="Tiêu đề nhắc nhở"
+                :label="t('reminders.reminderTitle')"
                 variant="outlined"
                 rounded="lg"
-                :rules="[v => !!v || 'Vui lòng nhập tiêu đề']"
+                :rules="[v => !!v || t('validation.titleRequired')]"
                 :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
               />
             </v-col>
@@ -27,7 +26,7 @@
             <v-col cols="12">
               <v-textarea
                 v-model="reminderData.description"
-                label="Mô tả"
+                :label="t('reminders.description')"
                 variant="outlined"
                 rounded="lg"
                 rows="4"
@@ -37,11 +36,11 @@
 
             <v-col cols="12" md="6">              <v-text-field
                 v-model="reminderData.reminderDate"
-                label="Ngày nhắc nhở"
+                :label="t('reminders.reminderDate')"
                 type="date"
                 variant="outlined"
                 rounded="lg"
-                :rules="[v => !!v || 'Vui lòng chọn ngày']"
+                :rules="[v => !!v || t('validation.dateRequired')]"
                 :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
               />
             </v-col>
@@ -110,9 +109,8 @@
               size="large"
               @click="goBack"
               :style="{ color: 'rgb(var(--v-theme-on-surface))' }"
-            >
-              <v-icon start>mdi-arrow-left</v-icon>
-              Hủy bỏ
+            >              <v-icon start>mdi-arrow-left</v-icon>
+              {{ t('common.cancel') }}
             </v-btn>
             
             <v-btn
@@ -122,9 +120,8 @@
               size="large"
               type="submit"
               :loading="loading"
-            >
-              <v-icon start>mdi-content-save</v-icon>
-              Cập nhật nhắc nhở
+            >              <v-icon start>mdi-content-save</v-icon>
+              {{ t('reminders.update') }}
             </v-btn>
           </div>
         </v-form>
@@ -136,9 +133,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useRemindersStore } from '@/stores/reminders'
 import type { Reminder } from '@/types'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const remindersStore = useRemindersStore()

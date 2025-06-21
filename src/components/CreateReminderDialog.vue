@@ -15,8 +15,8 @@
           <v-icon color="warning" size="32">mdi-bell-plus</v-icon>
         </div>
         <div class="header-text">
-          <h2 class="form-title">Tạo Lời Nhắc Mới</h2>
-          <p class="form-subtitle">Đặt lời nhắc cho những khoảnh khắc đặc biệt</p>
+          <h2 class="form-title">{{ t('reminders.createNew') }}</h2>
+          <p class="form-subtitle">{{ t('reminders.createSubtitle') }}</p>
         </div>
       </div>
     </v-card-title>
@@ -44,7 +44,7 @@
         <div class="form-section mb-6">
           <div class="section-header">
             <v-icon size="20" color="warning" class="mr-2">mdi-format-title</v-icon>
-            <h3 class="section-title">Chi tiết lời nhắc</h3>
+            <h3 class="section-title">{{ t('reminders.details') }}</h3>
           </div>
           <v-card variant="outlined" rounded="xl" class="section-card">
             <v-card-text class="pa-6">

@@ -11,10 +11,10 @@
         <div class="hero-content">
           <h1 class="hero-title">
             <v-icon icon="mdi-notebook" class="title-icon" />
-            My Love Journal
+            {{ t("notes.title") }}
           </h1>
           <p class="hero-subtitle">
-            Write down your thoughts, dreams, and precious moments
+            {{ t("notes.subtitle") }}
           </p>
           <v-btn
             color="primary"
@@ -25,7 +25,7 @@
             @click="createNote"
           >
             <v-icon icon="mdi-plus" start />
-            Write New Note
+            {{ t("notes.create") }}
           </v-btn>
         </div>
       </section>
@@ -40,7 +40,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ totalNotes }}</div>
-                <div class="stat-label">Total Notes</div>
+                <div class="stat-label">{{ t("notes.totalNotes") }}</div>
               </div>
             </div>
             <div class="stat-card" @click="filterByCategory('private')">
@@ -49,7 +49,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ privateNotesCount }}</div>
-                <div class="stat-label">Private Notes</div>
+                <div class="stat-label">{{ t("notes.private") }}</div>
               </div>
             </div>
             <div class="stat-card" @click="filterByCategory('shared')">
@@ -58,7 +58,7 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ sharedNotesCount }}</div>
-                <div class="stat-label">Shared Notes</div>
+                <div class="stat-label">{{ t("notes.shared") }}</div>
               </div>
             </div>
             <div class="stat-card">
@@ -67,16 +67,16 @@
               </div>
               <div class="stat-content">
                 <div class="stat-number">{{ allCategories.length }}</div>
-                <div class="stat-label">Categories</div>
+                <div class="stat-label">{{ t("notes.categories") }}</div>
               </div>
             </div>
           </div>
           <div class="quick-filters">
             <v-chip-group v-model="selectedFilter" mandatory>
-              <v-chip value="all" variant="elevated">All</v-chip>
-              <v-chip value="recent" variant="elevated">Recent</v-chip>
-              <v-chip value="favorites" variant="elevated">Favorites</v-chip>
-              <v-chip value="private" variant="elevated">Private</v-chip>
+              <v-chip value="all" variant="elevated">{{ t("common.all") }}</v-chip>
+              <v-chip value="recent" variant="elevated">{{ t("notes.recent") }}</v-chip>
+              <v-chip value="favorites" variant="elevated">{{ t("notes.favorites") }}</v-chip>
+              <v-chip value="private" variant="elevated">{{ t("notes.private") }}</v-chip>
             </v-chip-group>
           </div>
         </v-container>
@@ -101,10 +101,10 @@
                 <div class="filter-title">
                   <h3 class="text-h6 font-weight-bold" :style="{ color: 'rgb(var(--v-theme-on-surface))' }">
                     <v-icon class="mr-2" color="primary">mdi-filter-variant</v-icon>
-                    Bộ lọc & Tìm kiếm
+                    {{ t("common.filters") }} & {{ t("common.search") }}
                   </h3>
                   <p class="text-caption mt-1" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
-                    Tìm kiếm và phân loại ghi chú theo ý muốn
+                    {{ t("notes.filterDescription") }}
                   </p>
                 </div>
                 <v-btn
@@ -116,7 +116,7 @@
                   class="create-btn"
                 >
                   <v-icon start>mdi-plus</v-icon>
-                  Viết ghi chú
+                  {{ t("notes.create") }}
                 </v-btn>
               </div>
 
@@ -126,7 +126,7 @@
                   <v-text-field
                     v-model="searchQuery"
                     prepend-inner-icon="mdi-magnify"
-                    label="Tìm kiếm ghi chú..."
+                    :label="t('notes.search')"
                     variant="outlined"
                     rounded="xl"
                     clearable
@@ -155,7 +155,7 @@
                     :items="categoryOptions"
                     item-title="title"
                     item-value="value"
-                    label="Chọn danh mục"
+                    :label="t('notes.category')"
                     variant="outlined"
                     rounded="xl"
                     hide-details
@@ -169,7 +169,7 @@
                   <v-select
                     v-model="sortBy"
                     :items="sortOptions"
-                    label="Sắp xếp"
+                    :label="t('common.sortBy')"
                     variant="outlined"
                     rounded="xl"
                     hide-details
@@ -211,7 +211,7 @@
           <!-- Loading State -->
           <div v-if="isLoading" class="loading-container">
             <v-progress-circular indeterminate color="primary" size="64" width="4" />
-            <p class="loading-text">Loading your beautiful notes...</p>
+            <p class="loading-text">{{ t("notes.loading") }}</p>
           </div>
 
           <!-- Empty State -->
@@ -219,11 +219,11 @@
             <div class="empty-icon">
               <v-icon icon="mdi-notebook-outline" size="120" color="grey-lighten-2" />
             </div>
-            <h3 class="empty-title">No notes yet</h3>
-            <p class="empty-subtitle">Start writing your thoughts and memories!</p>
+            <h3 class="empty-title">{{ t("notes.noNotes") }}</h3>
+            <p class="empty-subtitle">{{ t("notes.noNotesDescription") }}</p>
             <v-btn color="primary" size="large" rounded @click="createNote">
               <v-icon icon="mdi-plus" start />
-              Write Your First Note
+              {{ t("notes.createFirst") }}
             </v-btn>
           </div>
 
@@ -328,12 +328,16 @@
 import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useNotesStore } from "@/stores/notes";
 import { useDialogsStore } from "@/stores/dialogs";
 import type { Note } from "@/types";
 import NoteCard from "@/components/notes/NoteCard.vue";
 import ResponsiveContainer from "@/components/ui/ResponsiveContainer.vue";
 import dayjs from "dayjs";
+
+// Composables
+const { t } = useI18n();
 
 // Router
 const router = useRouter();
@@ -368,16 +372,24 @@ const allCategories = computed(() => {
   return Array.from(categories).filter(Boolean);
 });
 
-const categoryOptions = computed(() =>
-  allCategories.value.map((cat) => ({ title: cat, value: cat }))
-);
+const categoryOptions = computed(() => {
+  const categories = [
+    { title: t('common.all'), value: '' },
+    ...allCategories.value.map((cat) => {
+      const translationKey = `notes.category${cat}`;
+      const translatedTitle = t(translationKey, cat); // fallback to original if no translation
+      return { title: translatedTitle, value: cat };
+    })
+  ];
+  return categories;
+});
 
-const sortOptions = [
-  { title: "Recently Updated", value: "updated" },
-  { title: "Recently Created", value: "created" },
-  { title: "Title A-Z", value: "title-asc" },
-  { title: "Title Z-A", value: "title-desc" },
-];
+const sortOptions = computed(() => [
+  { title: t("notes.recentlyUpdated"), value: "updated" },
+  { title: t("notes.recentlyCreated"), value: "created" },
+  { title: t("notes.titleAZ"), value: "title-asc" },
+  { title: t("notes.titleZA"), value: "title-desc" },
+]);
 
 // Utility function to convert date to number for comparison
 const getDateTimestamp = (
@@ -470,10 +482,10 @@ const handleEditNote = (note: Note) => {
 const handleDeleteNote = async (note: Note) => {
   try {
     const confirmed = await dialogsStore.openConfirmDialog({
-      title: "Delete Note",
-      message: `Are you sure you want to delete "${note.title}"? This action cannot be undone.`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: t("notes.confirmDeleteTitle"),
+      message: t("notes.confirmDelete", { title: note.title }),
+      confirmText: t("common.delete"),
+      cancelText: t("common.cancel"),
     });
 
     if (confirmed) {
