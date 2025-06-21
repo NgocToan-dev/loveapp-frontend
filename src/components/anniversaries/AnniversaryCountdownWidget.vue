@@ -11,10 +11,9 @@
       </div>
     </div>
     
-    <v-card-text class="countdown-content">
-      <!-- Title Section -->
+    <v-card-text class="countdown-content">      <!-- Title Section -->
       <div class="countdown-header">
-        <h2 class="countdown-title">{{ nextAnniversary?.title || 'Next Anniversary' }}</h2>
+        <h2 class="countdown-title">{{ nextAnniversary?.title || t('anniversaries.nextAnniversary') }}</h2>
         <p class="countdown-subtitle" v-if="nextAnniversary?.description">
           {{ nextAnniversary.description }}
         </p>
@@ -24,22 +23,22 @@
       <div class="countdown-display">
         <div class="time-unit" v-if="timeLeft.days > 0">
           <div class="time-number">{{ timeLeft.days }}</div>
-          <div class="time-label">{{ timeLeft.days === 1 ? 'Day' : 'Days' }}</div>
+          <div class="time-label">{{ timeLeft.days === 1 ? t('anniversaries.day') : t('anniversaries.days') }}</div>
         </div>
         
         <div class="time-unit" v-if="timeLeft.days > 0 || timeLeft.hours > 0">
           <div class="time-number">{{ timeLeft.hours.toString().padStart(2, '0') }}</div>
-          <div class="time-label">{{ timeLeft.hours === 1 ? 'Hour' : 'Hours' }}</div>
+          <div class="time-label">{{ timeLeft.hours === 1 ? t('anniversaries.hour') : t('anniversaries.hours') }}</div>
         </div>
         
         <div class="time-unit" v-if="timeLeft.days > 0 || timeLeft.hours > 0 || timeLeft.minutes > 0">
           <div class="time-number">{{ timeLeft.minutes.toString().padStart(2, '0') }}</div>
-          <div class="time-label">{{ timeLeft.minutes === 1 ? 'Minute' : 'Minutes' }}</div>
+          <div class="time-label">{{ timeLeft.minutes === 1 ? t('anniversaries.minute') : t('anniversaries.minutes') }}</div>
         </div>
         
         <div class="time-unit">
           <div class="time-number">{{ timeLeft.seconds.toString().padStart(2, '0') }}</div>
-          <div class="time-label">{{ timeLeft.seconds === 1 ? 'Second' : 'Seconds' }}</div>
+          <div class="time-label">{{ timeLeft.seconds === 1 ? t('anniversaries.second') : t('anniversaries.seconds') }}</div>
         </div>
       </div>
 
@@ -58,36 +57,34 @@
         >
           {{ getTypeLabel() }}
         </v-chip>
-      </div>
-
-      <!-- Special Message for Today -->
+      </div>      <!-- Special Message for Today -->
       <div v-if="isToday" class="celebration-message">
         <v-icon size="32" color="yellow" class="celebration-icon">mdi-party-popper</v-icon>
-        <h3 class="celebration-text">Happy Anniversary!</h3>
-        <p class="celebration-subtitle">🎉 Today is your special day! 🎉</p>
+        <h3 class="celebration-text">{{ t('anniversaries.happyAnniversary') }}</h3>
+        <p class="celebration-subtitle">{{ t('anniversaries.todaySpecialDay') }}</p>
       </div>
 
       <!-- Action Buttons -->
       <div class="countdown-actions">
         <v-btn
-          color="white"
+          color="primary"
           variant="elevated"
           rounded
           @click="$emit('celebrate')"
           v-if="isToday || timeLeft.days <= 3"
         >
           <v-icon start>mdi-party-popper</v-icon>
-          Celebrate
+          {{ t('anniversaries.celebrate') }}
         </v-btn>
         
         <v-btn
-          color="white"
+          color="info"
           variant="outlined"
           rounded
           @click="$emit('view-all')"
         >
           <v-icon start>mdi-calendar-multiple</v-icon>
-          View All
+          {{ t('anniversaries.viewAll') }}
         </v-btn>
       </div>
     </v-card-text>
@@ -96,8 +93,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 import type { Anniversary } from '@/types'
+
+const { t } = useI18n()
 
 // Props
 interface Props {
@@ -200,12 +200,12 @@ const getTypeLabel = () => {
   if (!nextAnniversary.value) return ''
   
   const labels: Record<string, string> = {
-    'relationship': 'Relationship',
-    'milestone': 'Milestone',
-    'birthday': 'Birthday',
-    'other': 'Other'
+    'relationship': t('anniversaries.types.relationship'),
+    'milestone': t('anniversaries.types.milestone'),
+    'birthday': t('anniversaries.types.birthday'),
+    'other': t('anniversaries.types.other')
   }
-  return labels[nextAnniversary.value.type] || 'Anniversary'
+  return labels[nextAnniversary.value.type] || t('anniversaries.anniversary')
 }
 
 const formatAnniversaryDate = () => {

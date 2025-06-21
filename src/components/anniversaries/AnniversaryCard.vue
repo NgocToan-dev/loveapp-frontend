@@ -11,7 +11,7 @@
       <div class="countdown-section">
         <div class="days-counter">
           <span class="days-number">{{ daysUntil }}</span>
-          <span class="days-label">{{ daysUntil === 1 ? 'day' : 'days' }}</span>
+          <span class="days-label">{{ daysUntil === 1 ? t('anniversaries.day') : t('anniversaries.days') }}</span>
         </div>
         <div class="countdown-status">
           <v-chip
@@ -106,8 +106,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 import type { Anniversary } from '@/types'
+
+const { t } = useI18n()
 
 // Props
 interface Props {
@@ -165,12 +168,12 @@ const getStatusColor = () => {
 }
 
 const getStatusText = () => {
-  if (daysUntil.value === 0) return 'Today!'
-  if (daysUntil.value === 1) return 'Tomorrow'
-  if (daysUntil.value <= 3) return 'Very Soon'
-  if (daysUntil.value <= 7) return 'This Week'
-  if (daysUntil.value <= 30) return 'This Month'
-  return 'Upcoming'
+  if (daysUntil.value === 0) return t('anniversaries.statusToday')
+  if (daysUntil.value === 1) return t('anniversaries.statusTomorrow')
+  if (daysUntil.value <= 3) return t('anniversaries.statusVerySoon')
+  if (daysUntil.value <= 7) return t('anniversaries.statusThisWeek')
+  if (daysUntil.value <= 30) return t('anniversaries.statusThisMonth')
+  return t('anniversaries.statusUpcoming')
 }
 
 const getTypeColor = () => {
@@ -195,21 +198,21 @@ const getTypeIcon = () => {
 
 const getTypeLabel = () => {
   const labels: Record<string, string> = {
-    'relationship': 'Relationship',
-    'milestone': 'Milestone',
-    'birthday': 'Birthday',
-    'other': 'Other'
+    'relationship': t('anniversaries.types.relationship'),
+    'milestone': t('anniversaries.types.milestone'),
+    'birthday': t('anniversaries.types.birthday'),
+    'other': t('anniversaries.types.other')
   }
-  return labels[props.anniversary.type] || 'Anniversary'
+  return labels[props.anniversary.type] || t('anniversaries.anniversary')
 }
 
 const getRecurringText = () => {
   const frequency = props.anniversary.frequency || 'yearly'
   const labels: Record<string, string> = {
-    'yearly': 'Every year',
-    'monthly': 'Every month'
+    'yearly': t('anniversaries.frequencies.yearly'),
+    'monthly': t('anniversaries.frequencies.monthly')
   }
-  return labels[frequency] || 'Recurring'
+  return labels[frequency] || t('anniversaries.recurring')
 }
 
 const formatDate = (date: string | Date) => {

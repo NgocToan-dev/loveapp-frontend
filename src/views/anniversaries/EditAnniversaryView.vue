@@ -2,24 +2,23 @@
   <v-container class="pa-6" max-width="800">
     <div class="text-center mb-8">
       <h1 class="font-heading text-3xl mb-4" :style="{ color: 'rgb(var(--v-theme-on-surface))' }">
-        ✏️ Chỉnh sửa Kỷ niệm
+        ✏️ {{ t('anniversaries.editAnniversary') }}
       </h1>
       <p class="text-lg font-script" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
-        "Những ngày đáng nhớ trong cuộc đời..."
+        "{{ t('anniversaries.editSubtitle') }}"
       </p>
     </div>
 
     <v-card rounded="xl" class="love-card-hover" elevation="0" :style="{ backgroundColor: 'rgb(var(--v-theme-surface))' }">
       <v-card-text class="pa-8">
         <v-form ref="anniversaryForm" @submit.prevent="updateAnniversary">
-          <v-row>
-            <v-col cols="12">
+          <v-row>            <v-col cols="12">
               <v-text-field
                 v-model="anniversaryData.title"
-                label="Tên kỷ niệm"
+                :label="t('anniversaries.anniversaryTitle')"
                 variant="outlined"
                 rounded="lg"
-                :rules="[v => !!v || 'Vui lòng nhập tên kỷ niệm']"
+                :rules="[v => !!v || t('validation.required')]"
                 :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
               />
             </v-col>
@@ -27,7 +26,7 @@
             <v-col cols="12">
               <v-textarea
                 v-model="anniversaryData.description"
-                label="Mô tả"
+                :label="t('anniversaries.description')"
                 variant="outlined"
                 rounded="lg"
                 rows="4"
@@ -38,11 +37,11 @@
             <v-col cols="12" md="6">
               <v-text-field
                 v-model="anniversaryData.date"
-                label="Ngày kỷ niệm"
+                :label="t('anniversaries.date')"
                 type="date"
                 variant="outlined"
                 rounded="lg"
-                :rules="[v => !!v || 'Vui lòng chọn ngày']"
+                :rules="[v => !!v || t('validation.required')]"
                 :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
               />
             </v-col>
@@ -51,7 +50,7 @@
               <v-select
                 v-model="anniversaryData.type"
                 :items="typeOptions"
-                label="Loại kỷ niệm"
+                :label="t('anniversaries.type')"
                 variant="outlined"
                 rounded="lg"
                 item-title="label"
@@ -71,7 +70,7 @@
               <v-select
                 v-model="anniversaryData.frequency"
                 :items="frequencyOptions"
-                label="Tần suất lặp lại"
+                :label="t('anniversaries.frequency')"
                 variant="outlined"
                 rounded="lg"
                 item-title="label"
@@ -83,15 +82,13 @@
             <v-col cols="12" md="6">
               <v-switch
                 v-model="anniversaryData.isRecurring"
-                label="Lặp lại hàng năm"
+                :label="t('anniversaries.isRecurring')"
                 color="primary"
                 hide-details
               />            </v-col>
           </v-row>
 
-          <v-divider class="my-6" />
-
-          <div class="d-flex justify-space-between flex-wrap gap-3">
+          <v-divider class="my-6" />          <div class="d-flex justify-space-between flex-wrap gap-3">
             <v-btn
               variant="outlined"
               rounded="lg"
@@ -100,7 +97,7 @@
               :style="{ color: 'rgb(var(--v-theme-on-surface))' }"
             >
               <v-icon start>mdi-arrow-left</v-icon>
-              Hủy bỏ
+              {{ t('common.cancel') }}
             </v-btn>
             
             <v-btn
@@ -112,7 +109,7 @@
               :loading="loading"
             >
               <v-icon start>mdi-content-save</v-icon>
-              Cập nhật kỷ niệm
+              {{ t('anniversaries.updateAnniversary') }}
             </v-btn>
           </div>
         </v-form>
@@ -124,11 +121,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAnniversariesStore } from '@/stores/anniversaries'
 import type { Anniversary } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const anniversariesStore = useAnniversariesStore()
 
 const anniversaryForm = ref()
@@ -144,15 +143,15 @@ const anniversaryData = ref({
 })
 
 const typeOptions = [
-  { value: 'relationship', label: 'Kỷ niệm tình yêu', icon: 'mdi-heart' },
-  { value: 'birthday', label: 'Sinh nhật', icon: 'mdi-cake' },
-  { value: 'milestone', label: 'Cột mốc', icon: 'mdi-flag' },
-  { value: 'other', label: 'Khác', icon: 'mdi-calendar-heart' }
+  { value: 'relationship', label: t('anniversaries.types.relationship'), icon: 'mdi-heart' },
+  { value: 'birthday', label: t('anniversaries.types.birthday'), icon: 'mdi-cake' },
+  { value: 'milestone', label: t('anniversaries.types.milestone'), icon: 'mdi-flag' },
+  { value: 'other', label: t('anniversaries.types.other'), icon: 'mdi-calendar-heart' }
 ]
 
 const frequencyOptions = [
-  { value: 'yearly', label: 'Hàng năm' },
-  { value: 'monthly', label: 'Hàng tháng' }
+  { value: 'yearly', label: t('anniversaries.frequencies.yearly') },
+  { value: 'monthly', label: t('anniversaries.frequencies.monthly') }
 ]
 
 const loadAnniversary = async () => {

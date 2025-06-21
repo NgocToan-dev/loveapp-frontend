@@ -8,13 +8,13 @@
             <div class="hero-text">
               <h1 class="hero-title">
                 <v-icon icon="mdi-calendar-heart" size="40" class="hero-icon" />
-                Our Special Moments
+                {{ t("anniversaries.title") }}
               </h1>
               <p class="hero-subtitle">
-                Cherish and celebrate every milestone in your love story
+                {{ t("anniversaries.subtitle") }}
               </p>
             </div>
-              <!-- Next Anniversary Countdown -->
+            <!-- Next Anniversary Countdown -->
             <div v-if="anniversaries.length > 0" class="hero-countdown">
               <AnniversaryCountdownWidget :anniversaries="anniversaries" />
             </div>
@@ -33,7 +33,9 @@
                     <v-icon icon="mdi-calendar-multiple" size="32" color="primary" />
                   </div>
                   <div class="stat-number">{{ stats.total }}</div>
-                  <div class="stat-label">Total Anniversaries</div>
+                  <div class="stat-label">
+                    {{ t("anniversaries.totalAnniversaries") }}
+                  </div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -44,7 +46,7 @@
                     <v-icon icon="mdi-clock-outline" size="32" color="warning" />
                   </div>
                   <div class="stat-number">{{ stats.upcoming }}</div>
-                  <div class="stat-label">Upcoming</div>
+                  <div class="stat-label">{{ t("anniversaries.upcoming") }}</div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -55,7 +57,7 @@
                     <v-icon icon="mdi-repeat" size="32" color="success" />
                   </div>
                   <div class="stat-number">{{ stats.recurring }}</div>
-                  <div class="stat-label">Recurring</div>
+                  <div class="stat-label">{{ t("anniversaries.recurring") }}</div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -66,7 +68,7 @@
                     <v-icon icon="mdi-heart" size="32" color="pink" />
                   </div>
                   <div class="stat-number">{{ stats.relationship }}</div>
-                  <div class="stat-label">Love Milestones</div>
+                  <div class="stat-label">{{ t("anniversaries.relationship") }}</div>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -74,7 +76,8 @@
         </v-container>
       </section>
 
-      <!-- Controls Section -->      <!-- Advanced Filter Section -->
+      <!-- Controls Section -->
+      <!-- Advanced Filter Section -->
       <section class="filter-section">
         <v-container>
           <v-card class="filter-card" elevation="0" rounded="xl">
@@ -82,8 +85,10 @@
               <!-- Header with Title and Create Button -->
               <div class="filter-header">
                 <div class="filter-title">
-                  <h2>Anniversary Collection</h2>
-                  <p class="text-medium-emphasis mb-0">Manage and explore your special moments</p>
+                  <h2>{{ t("anniversaries.collection") }}</h2>
+                  <p class="text-medium-emphasis mb-0">
+                    {{ t("anniversaries.collectionSubtitle") }}
+                  </p>
                 </div>
                 <v-btn
                   color="primary"
@@ -93,7 +98,7 @@
                   class="create-btn"
                 >
                   <v-icon icon="mdi-plus" start />
-                  Add Anniversary
+                  {{ t("anniversaries.addAnniversary") }}
                 </v-btn>
               </div>
 
@@ -105,8 +110,8 @@
                 <v-col cols="12" md="4">
                   <v-text-field
                     v-model="searchQuery"
-                    prepend-inner-icon="mdi-magnify"
-                    placeholder="Search anniversaries..."
+                  prepend-inner-icon="mdi-magnify"
+                    :placeholder="t('anniversaries.search')"
                     variant="outlined"
                     density="comfortable"
                     hide-details
@@ -122,7 +127,7 @@
                   <v-select
                     v-model="sortBy"
                     :items="sortOptions"
-                    label="Sort by"
+                    :label="t('common.sortBy')"
                     variant="outlined"
                     density="comfortable"
                     hide-details
@@ -137,7 +142,7 @@
                   <v-select
                     v-model="selectedType"
                     :items="typeOptions"
-                    label="Filter by type"
+                    :label="t('anniversaries.filterByType')"
                     variant="outlined"
                     density="comfortable"
                     hide-details
@@ -150,7 +155,12 @@
 
                 <!-- View Toggle -->
                 <v-col cols="12" md="2" class="text-right">
-                  <v-btn-toggle v-model="viewMode" mandatory class="view-toggle" rounded="lg">
+                  <v-btn-toggle
+                    v-model="viewMode"
+                    mandatory
+                    class="view-toggle"
+                    rounded="lg"
+                  >
                     <v-btn value="grid" variant="outlined" icon size="large">
                       <v-icon icon="mdi-grid" />
                     </v-btn>
@@ -160,7 +170,6 @@
                   </v-btn-toggle>
                 </v-col>
               </v-row>
-
             </v-card-text>
           </v-card>
         </v-container>
@@ -171,13 +180,8 @@
         <v-container>
           <!-- Loading State -->
           <div v-if="isLoading" class="loading-container">
-            <v-progress-circular
-              indeterminate
-              color="primary"
-              size="64"
-              width="4"
-            />
-            <p class="loading-text">Loading your special moments...</p>
+            <v-progress-circular indeterminate color="primary" size="64" width="4" />
+            <p class="loading-text">{{ t("anniversaries.loadingText") }}</p>
           </div>
 
           <!-- Empty State -->
@@ -185,18 +189,13 @@
             <div class="empty-icon">
               <v-icon icon="mdi-calendar-heart" size="120" color="grey-lighten-2" />
             </div>
-            <h3 class="empty-title">No anniversaries yet</h3>
+            <h3 class="empty-title">{{ t("anniversaries.noAnniversaries") }}</h3>
             <p class="empty-subtitle">
-              Create your first anniversary to start celebrating special moments!
+              {{ t("anniversaries.noAnniversariesDescription") }}
             </p>
-            <v-btn
-              color="primary"
-              size="large"
-              rounded
-              @click="createAnniversary"
-            >
+            <v-btn color="primary" size="large" rounded @click="createAnniversary">
               <v-icon icon="mdi-plus" start />
-              Add Your First Anniversary
+              {{ t("anniversaries.addFirstAnniversary") }}
             </v-btn>
           </div>
 
@@ -241,14 +240,25 @@
                   <v-list-item-title class="anniversary-list-title">
                     {{ anniversary.title }}
                   </v-list-item-title>
-                  
+
                   <v-list-item-subtitle class="anniversary-list-subtitle">
                     <div class="d-flex align-center">
-                      <v-chip size="x-small" :color="getTypeColor(anniversary.type)" variant="tonal" class="me-2">
+                      <v-chip
+                        size="x-small"
+                        :color="getTypeColor(anniversary.type)"
+                        variant="tonal"
+                        class="me-2"
+                      >
                         {{ getTypeLabel(anniversary.type) }}
                       </v-chip>
                       <span>{{ formatDate(anniversary.date) }}</span>
-                      <v-icon v-if="anniversary.isRecurring" size="14" color="success" class="ms-2">mdi-repeat</v-icon>
+                      <v-icon
+                        v-if="anniversary.isRecurring"
+                        size="14"
+                        color="success"
+                        class="ms-2"
+                        >mdi-repeat</v-icon
+                      >
                     </div>
                   </v-list-item-subtitle>
 
@@ -276,226 +286,232 @@
                 </v-list-item>
               </v-list>
             </v-card>
-          </div>        </v-container>
+          </div>
+        </v-container>
       </section>
     </div>
   </ResponsiveContainer>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAnniversariesStore } from '@/stores/anniversaries'
-import { useDialogsStore } from '@/stores/dialogs'
-import type { Anniversary } from '@/types'
-import dayjs from 'dayjs'
-import AnniversaryCard from '@/components/anniversaries/AnniversaryCard.vue'
-import AnniversaryCountdownWidget from '@/components/anniversaries/AnniversaryCountdownWidget.vue'
-import ResponsiveContainer from '@/components/ui/ResponsiveContainer.vue'
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { useAnniversariesStore } from "@/stores/anniversaries";
+import { useDialogsStore } from "@/stores/dialogs";
+import type { Anniversary } from "@/types";
+import dayjs from "dayjs";
+import AnniversaryCard from "@/components/anniversaries/AnniversaryCard.vue";
+import AnniversaryCountdownWidget from "@/components/anniversaries/AnniversaryCountdownWidget.vue";
+import ResponsiveContainer from "@/components/ui/ResponsiveContainer.vue";
 
-const anniversariesStore = useAnniversariesStore()
-const dialogsStore = useDialogsStore()
-const router = useRouter()
+const { t } = useI18n();
+const anniversariesStore = useAnniversariesStore();
+const dialogsStore = useDialogsStore();
+const router = useRouter();
 
 // State
-const searchQuery = ref('')
-const selectedType = ref('')
-const sortBy = ref('date-asc')
-const viewMode = ref<'grid' | 'list'>('grid')
-const selectedQuickFilter = ref('')
+const searchQuery = ref("");
+const selectedType = ref("");
+const sortBy = ref("date-asc");
+const viewMode = ref<"grid" | "list">("grid");
+const selectedQuickFilter = ref("");
 
 // Computed
-const anniversaries = computed(() => anniversariesStore.anniversaries || [])
-const isLoading = computed(() => anniversariesStore.isLoading)
-const error = computed(() => anniversariesStore.error)
+const anniversaries = computed(() => anniversariesStore.anniversaries || []);
+const isLoading = computed(() => anniversariesStore.isLoading);
+const error = computed(() => anniversariesStore.error);
 
 const stats = computed(() => ({
   total: anniversaries.value.length,
-  upcoming: anniversaries.value.filter(a => getDaysUntil(a.date) >= 0 && getDaysUntil(a.date) <= 30).length,
-  recurring: anniversaries.value.filter(a => a.isRecurring).length,
-  relationship: anniversaries.value.filter(a => a.type === 'relationship').length
-}))
+  upcoming: anniversaries.value.filter(
+    (a) => getDaysUntil(a.date) >= 0 && getDaysUntil(a.date) <= 30
+  ).length,
+  recurring: anniversaries.value.filter((a) => a.isRecurring).length,
+  relationship: anniversaries.value.filter((a) => a.type === "relationship").length,
+}));
 
 const nextAnniversary = computed(() => {
   const upcoming = anniversaries.value
-    .filter(a => getDaysUntil(a.date) >= 0)
-    .sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date))
-  
-  return upcoming.length > 0 ? upcoming[0] : null
-})
+    .filter((a) => getDaysUntil(a.date) >= 0)
+    .sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date));
 
-const typeOptions = [
-  { title: 'Relationship', value: 'relationship' },
-  { title: 'Milestone', value: 'milestone' },
-  { title: 'Birthday', value: 'birthday' },
-  { title: 'Other', value: 'other' }
-]
+  return upcoming.length > 0 ? upcoming[0] : null;
+});
 
-const sortOptions = [
-  { title: 'Date (newest)', value: 'date-desc' },
-  { title: 'Date (oldest)', value: 'date-asc' },
-  { title: 'Title A-Z', value: 'title-asc' },
-  { title: 'Type', value: 'type-asc' }
-]
+const typeOptions = computed(() => [
+  { title: t("anniversaries.types.relationship"), value: "relationship" },
+  { title: t("anniversaries.types.milestone"), value: "milestone" },
+  { title: t("anniversaries.types.birthday"), value: "birthday" },
+  { title: t("anniversaries.types.other"), value: "other" },
+]);
+
+const sortOptions = computed(() => [
+  { title: t("anniversaries.sortOptions.dateDesc"), value: "date-desc" },
+  { title: t("anniversaries.sortOptions.dateAsc"), value: "date-asc" },
+  { title: t("anniversaries.sortOptions.title"), value: "title-asc" },
+  { title: t("anniversaries.sortOptions.type"), value: "type-asc" },
+]);
 
 const filteredAnniversaries = computed(() => {
-  let filtered = [...anniversaries.value]
+  let filtered = [...anniversaries.value];
 
   // Search filter
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(anniversary =>
-      anniversary.title.toLowerCase().includes(query) ||
-      (anniversary.description && anniversary.description.toLowerCase().includes(query))
-    )
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (anniversary) =>
+        anniversary.title.toLowerCase().includes(query) ||
+        (anniversary.description && anniversary.description.toLowerCase().includes(query))
+    );
   }
 
   // Type filter
   if (selectedType.value) {
-    filtered = filtered.filter(anniversary => anniversary.type === selectedType.value)
+    filtered = filtered.filter((anniversary) => anniversary.type === selectedType.value);
   }
 
   // Sort
   filtered.sort((a, b) => {
     switch (sortBy.value) {
-      case 'date-asc':
-        return new Date(a.date).getTime() - new Date(b.date).getTime()
-      case 'date-desc':
-        return new Date(b.date).getTime() - new Date(a.date).getTime()
-      case 'title-asc':
-        return a.title.localeCompare(b.title)
-      case 'type-asc':
-        return a.type.localeCompare(b.type)
+      case "date-asc":
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      case "date-desc":
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      case "title-asc":
+        return a.title.localeCompare(b.title);
+      case "type-asc":
+        return a.type.localeCompare(b.type);
       default:
-        return 0
+        return 0;
     }
-  })
+  });
 
-  return filtered
-})
+  return filtered;
+});
 
 // Quick filter definitions
 const typeQuickFilters = [
-  { text: 'All', value: '', icon: 'mdi-all-inclusive' },
-  { text: 'Relationship', value: 'relationship', icon: 'mdi-heart' },
-  { text: 'Milestone', value: 'milestone', icon: 'mdi-trophy' },
-  { text: 'Birthday', value: 'birthday', icon: 'mdi-cake' },
-  { text: 'Other', value: 'other', icon: 'mdi-star' }
-]
+  { text: t('common.all'), value: "", icon: "mdi-all-inclusive" },
+  { text: t('anniversaries.types.relationship'), value: "relationship", icon: "mdi-heart" },
+  { text: t('anniversaries.types.milestone'), value: "milestone", icon: "mdi-trophy" },
+  { text: t('anniversaries.types.birthday'), value: "birthday", icon: "mdi-cake" },
+  { text: t('anniversaries.types.other'), value: "other", icon: "mdi-star" },
+];
 
 // Methods
 const loadAnniversaries = async () => {
   try {
-    await anniversariesStore.fetchAnniversaries()
+    await anniversariesStore.fetchAnniversaries();
   } catch (error) {
-    console.error('Failed to load anniversaries:', error)
+    console.error("Failed to load anniversaries:", error);
   }
-}
+};
 
 const createAnniversary = () => {
-  router.push('/anniversaries/create')
-}
+  router.push("/anniversaries/create");
+};
 
 const handleOpenAnniversary = (anniversary: Anniversary) => {
-  console.log('View anniversary:', anniversary)
+  console.log("View anniversary:", anniversary);
   // Navigate to anniversary detail view or open modal
-}
+};
 
 const handleEditAnniversary = (anniversary: Anniversary) => {
-  router.push({ name: 'edit-anniversary', params: { id: anniversary.id } })
-}
+  router.push({ name: "edit-anniversary", params: { id: anniversary.id } });
+};
 
 const handleDeleteAnniversary = async (anniversary: Anniversary) => {
   dialogsStore.openConfirmDialog({
-    title: 'Confirm Delete',
-    message: `Are you sure you want to delete "${anniversary.title}"?`,
-    confirmText: 'Delete',
-    cancelText: 'Cancel',
+    title: t("anniversaries.confirmDeleteTitle"),
+    message: t("anniversaries.confirmDelete", { title: anniversary.title }),
+    confirmText: t("common.delete"),
+    cancelText: t("common.cancel"),
     onConfirm: async () => {
       try {
-        await anniversariesStore.deleteAnniversary(anniversary.id)
-        
+        await anniversariesStore.deleteAnniversary(anniversary.id);
+
         dialogsStore.openAlertDialog({
-          title: 'Deleted!',
-          message: 'Anniversary has been deleted successfully!'
-        })
+          title: t("common.deleted"),
+          message: t("anniversaries.deleteSuccess"),
+        });
       } catch (error) {
-        console.error('Delete failed:', error)
-        
+        console.error("Delete failed:", error);
+
         dialogsStore.openAlertDialog({
-          title: 'Error!',
-          message: 'Failed to delete anniversary. Please try again.'
-        })
+          title: t("common.error"),
+          message: t("anniversaries.deleteError"),
+        });
       }
-    }
-  })
-}
+    },
+  });
+};
 
 const handleCelebrate = (anniversary: Anniversary) => {
-  console.log('Celebrate anniversary:', anniversary)
+  console.log("Celebrate anniversary:", anniversary);
   // Add celebration animation or effect
-}
+};
 
 const handleQuickFilter = (value: string) => {
-  selectedType.value = value
-  selectedQuickFilter.value = value
-}
+  selectedType.value = value;
+  selectedQuickFilter.value = value;
+};
 
 const getTypeCount = (type: string) => {
-  if (!type) return anniversaries.value.length
-  return anniversaries.value.filter(anniversary => anniversary.type === type).length
-}
+  if (!type) return anniversaries.value.length;
+  return anniversaries.value.filter((anniversary) => anniversary.type === type).length;
+};
 
 const getTypeColor = (type: string) => {
   const colors = {
-    'relationship': 'pink',
-    'milestone': 'purple',
-    'birthday': 'orange',
-    'other': 'success'
-  }
-  return colors[type as keyof typeof colors] || 'success'
-}
+    relationship: "pink",
+    milestone: "purple",
+    birthday: "orange",
+    other: "success",
+  };
+  return colors[type as keyof typeof colors] || "success";
+};
 
 const getTypeIcon = (type: string) => {
   const icons = {
-    'relationship': 'mdi-heart',
-    'milestone': 'mdi-trophy',
-    'birthday': 'mdi-cake',
-    'other': 'mdi-calendar-star'
-  }
-  return icons[type as keyof typeof icons] || 'mdi-calendar-star'
-}
+    relationship: "mdi-heart",
+    milestone: "mdi-trophy",
+    birthday: "mdi-cake",
+    other: "mdi-calendar-star",
+  };
+  return icons[type as keyof typeof icons] || "mdi-calendar-star";
+};
 
 const getTypeLabel = (type: string) => {
   const labels = {
-    'relationship': 'Relationship',
-    'milestone': 'Milestone',
-    'birthday': 'Birthday',
-    'other': 'Other'
-  }
-  return labels[type as keyof typeof labels] || type
-}
+    relationship: t("anniversaries.types.relationship"),
+    milestone: t("anniversaries.types.milestone"),
+    birthday: t("anniversaries.types.birthday"),
+    other: t("anniversaries.types.other"),
+  };
+  return labels[type as keyof typeof labels] || type;
+};
 
 const formatDate = (date: string | Date) => {
-  return dayjs(date).format('DD/MM/YYYY')
-}
+  return dayjs(date).format("DD/MM/YYYY");
+};
 
 const getDaysUntil = (date: string | Date) => {
-  const today = dayjs()
-  const anniversaryDate = dayjs(date)
-  
-  let targetDate = anniversaryDate.year(today.year())
-  if (targetDate.isBefore(today, 'day')) {
-    targetDate = targetDate.year(today.year() + 1)
+  const today = dayjs();
+  const anniversaryDate = dayjs(date);
+
+  let targetDate = anniversaryDate.year(today.year());
+  if (targetDate.isBefore(today, "day")) {
+    targetDate = targetDate.year(today.year() + 1);
   }
-  
-  return targetDate.diff(today, 'day')
-}
+
+  return targetDate.diff(today, "day");
+};
 
 // Initialize
 onMounted(() => {
-  loadAnniversaries()
-})
+  loadAnniversaries();
+});
 </script>
 
 <style scoped>
@@ -506,7 +522,11 @@ onMounted(() => {
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)));
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-primary)),
+    rgb(var(--v-theme-secondary))
+  );
   color: white;
   padding: 80px 0 60px;
   position: relative;
@@ -514,7 +534,7 @@ onMounted(() => {
 }
 
 .hero-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -605,9 +625,11 @@ onMounted(() => {
 /* Filter Section */
 .filter-section {
   padding: 40px 0;
-  background: linear-gradient(135deg, 
-    rgba(var(--v-theme-primary), 0.05) 0%, 
-    rgba(var(--v-theme-secondary), 0.03) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-primary), 0.05) 0%,
+    rgba(var(--v-theme-secondary), 0.03) 100%
+  );
 }
 
 .filter-card {
@@ -635,7 +657,11 @@ onMounted(() => {
   font-weight: 700;
   color: rgb(var(--v-theme-on-surface));
   margin: 0 0 8px 0;
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary)));
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-primary)),
+    rgb(var(--v-theme-secondary))
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -647,7 +673,11 @@ onMounted(() => {
 }
 
 .create-btn {
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)), rgb(var(--v-theme-secondary))) !important;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-primary)),
+    rgb(var(--v-theme-secondary))
+  ) !important;
   color: white !important;
   text-transform: none;
   font-weight: 600;
@@ -823,16 +853,16 @@ onMounted(() => {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .hero-title {
     font-size: 2.5rem;
   }
-  
+
   .controls-header {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .section-title {
     text-align: center;
   }
@@ -842,22 +872,22 @@ onMounted(() => {
     align-items: stretch;
     text-align: center;
   }
-  
+
   .filter-title h2 {
     font-size: 1.75rem;
   }
-  
+
   .create-btn {
     width: 100%;
     margin-top: 16px;
   }
-  
+
   .quick-filters {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
+
   .quick-filters-label {
     justify-content: center;
   }
@@ -869,27 +899,27 @@ onMounted(() => {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .hero-subtitle {
     font-size: 1.125rem;
   }
-  
+
   .stat-number {
     font-size: 2rem;
   }
-  
+
   .view-toggle {
     justify-self: center;
   }
-  
+
   .filter-title h2 {
     font-size: 1.5rem;
   }
-  
+
   .filter-controls {
     gap: 16px;
   }
-  
+
   .quick-filter-chips {
     justify-content: center;
   }

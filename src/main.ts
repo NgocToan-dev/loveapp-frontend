@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import vuetify from './plugins/vuetify'
-import i18n from './plugins/i18n'
+import i18n from './plugins/i18n/i18n'
 import App from './App.vue'
 import router from './router'
 

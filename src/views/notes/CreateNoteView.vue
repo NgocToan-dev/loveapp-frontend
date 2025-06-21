@@ -117,7 +117,7 @@
             <!-- Suggested Tags -->
             <v-col v-if="suggestedTags.length > 0" cols="12">
               <v-label class="mb-2">{{ $t('notes.suggestedTags') }}</v-label>
-              <div class="d-flex flex-wrap gap-2">
+              <div class="d-flex flex-wrap ga-2">
                 <v-chip
                   v-for="tag in suggestedTags"
                   :key="tag"

@@ -3,10 +3,10 @@
     <div class="text-center mb-8">
       <h1 class="text-h3 font-weight-bold mb-3">
         <v-icon size="40" color="primary" class="me-3">mdi-calendar-heart</v-icon>
-        Create Anniversary
+        {{ t('anniversaries.createAnniversary') }}
       </h1>
       <p class="text-h6 text-medium-emphasis">
-        Plan a special anniversary celebration
+        {{ t('anniversaries.subtitle') }}
       </p>
     </div>
 
@@ -24,9 +24,11 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import CreateAnniversaryDialog from '@/components/CreateAnniversaryDialog.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const handleClose = () => {
   router.push('/anniversaries')
