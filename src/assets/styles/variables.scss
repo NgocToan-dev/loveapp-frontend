@@ -91,79 +91,92 @@ $tracking-normal: 0em;
 $tracking-wide: 0.025em;
 $tracking-wider: 0.05em;
 
-// Spacing
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 16px;
-$spacing-lg: 24px;
-$spacing-xl: 32px;
-$spacing-xxl: 48px;
-
-// Border radius
-$border-radius-sm: 4px;
-$border-radius-md: 8px;
-$border-radius-lg: 12px;
-$border-radius-xl: 16px;
-
-// Shadows
-$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
-$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
-$shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.1);
-
-// Minimalist Shadows (Softer)
-$soft-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-$soft-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
-$soft-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.07);
-$soft-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
-$soft-shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.09);
-
-// Romantic Shadows
-$romantic-shadow-sm: 0 2px 8px rgba(255, 182, 193, 0.15);
-$romantic-shadow-md: 0 4px 12px rgba(255, 182, 193, 0.2);
-$romantic-shadow-lg: 0 8px 20px rgba(255, 182, 193, 0.25);
-
-// Love theme shadows
-$love-shadow-sm: 0 2px 4px rgba(255, 64, 129, 0.1);
-$love-shadow-md: 0 4px 8px rgba(255, 64, 129, 0.1);
-$love-shadow-lg: 0 8px 16px rgba(255, 64, 129, 0.2);
-$love-shadow-xl: 0 16px 32px rgba(255, 64, 129, 0.2);
-
-// Animation Variables
-$transition-fast: 0.15s ease-in-out;
-$transition-normal: 0.3s ease-in-out;
-$transition-slow: 0.5s ease-in-out;
-$transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-// Border Radius (More romantic curves)
-$border-radius-xs: 2px;
-$border-radius-sm: 6px;
-$border-radius-md: 12px;
-$border-radius-lg: 18px;
-$border-radius-xl: 24px;
-$border-radius-2xl: 32px;
-$border-radius-full: 9999px;
-
-// Breakpoints
-$breakpoint-xs: 0;
-$breakpoint-sm: 600px;
-$breakpoint-md: 960px;
-$breakpoint-lg: 1280px;
-$breakpoint-xl: 1920px;
-
-// Z-index
-$z-index-drawer: 200;
-$z-index-app-bar: 300;
-$z-index-dialog: 400;
-$z-index-snackbar: 500;
-$z-index-tooltip: 600;
-
-// Transitions
-$transition-fast: 0.15s ease;
-$transition-normal: 0.3s ease;
-$transition-slow: 0.5s ease;
-
 // Gradients
 $love-gradient-primary: linear-gradient(45deg, #{$love-primary}, #{$love-secondary});
 $love-gradient-accent: linear-gradient(45deg, #{$love-accent}, #{$love-primary});
 $love-gradient-background: linear-gradient(135deg, #{$love-background} 0%, #f8bbd9 100%);
+
+// 📏 SPACING SYSTEM
+$spacing-xs: 4px;      // 0.25rem
+$spacing-sm: 8px;      // 0.5rem  
+$spacing-md: 16px;     // 1rem
+$spacing-lg: 24px;     // 1.5rem
+$spacing-xl: 32px;     // 2rem
+$spacing-xxl: 48px;    // 3rem
+$spacing-xxxl: 64px;   // 4rem
+
+// Container padding
+$container-padding-mobile: 16px;
+$container-padding-tablet: 24px;
+$container-padding-desktop: 32px;
+
+// 📝 TYPOGRAPHY SCALE
+$heading-1: 2.5rem;    // 40px - Hero titles
+$heading-2: 2rem;      // 32px - Section titles
+$heading-3: 1.5rem;    // 24px - Card titles
+$heading-4: 1.25rem;   // 20px - Subtitles
+$body-large: 1.125rem; // 18px - Important text
+$body-regular: 1rem;   // 16px - Regular text
+$body-small: 0.875rem; // 14px - Secondary text
+$caption: 0.75rem;     // 12px - Captions
+
+// Font weights
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line heights
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.6;
+
+// 🎯 BORDER RADIUS SYSTEM
+$radius-xs: 4px;      // Very small elements
+$radius-sm: 8px;      // Small elements
+$radius-md: 12px;     // Cards, buttons
+$radius-lg: 16px;     // Major containers
+$radius-xl: 24px;     // Hero sections
+$radius-xxl: 32px;    // Special containers
+$radius-round: 50%;   // Avatar, icon buttons
+
+// 📦 Z-INDEX SCALE
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// 🎭 BOX SHADOW SYSTEM
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+$shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+
+// Hover shadows
+$shadow-hover-sm: 0 4px 16px rgba(0, 0, 0, 0.08);
+$shadow-hover-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+$shadow-hover-lg: 0 16px 32px rgba(0, 0, 0, 0.16);
+
+// 📱 RESPONSIVE BREAKPOINTS
+$breakpoint-xs: 480px;
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-xxl: 1536px;
+
+// Container max widths
+$container-sm: 640px;
+$container-md: 768px;
+$container-lg: 1024px;
+$container-xl: 1280px;
+$container-xxl: 1400px;
+
+// Transitions
+$transition-fast: 0.15s ease;

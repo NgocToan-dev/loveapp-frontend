@@ -1,6 +1,7 @@
 // Main SCSS file for LoveApp - Gentle & Loving Multi-theme support
 @use './variables' as vars;
 @use './animations';
+@use './utilities';
 
 // Global gentle styles
 * {
@@ -81,7 +82,7 @@ body {
   // Outlined buttons
   &.v-btn--variant-outlined {
     color: rgb(var(--v-theme-primary)) !important;
-    border-color: rgb(var(--v-theme-primary)) !important;
+    // border-color: rgb(var(--v-theme-primary)) !important;
     
     .v-icon {
       color: rgb(var(--v-theme-primary)) !important;
@@ -90,7 +91,7 @@ body {
     // Primary outlined buttons
     &.text-primary {
       color: rgb(var(--v-theme-primary)) !important;
-      border-color: rgb(var(--v-theme-primary)) !important;
+      // border-color: rgb(var(--v-theme-primary)) !important;
       
       .v-icon {
         color: rgb(var(--v-theme-primary)) !important;
@@ -691,12 +692,12 @@ p, .v-card-text {
 }
 
 // Focus states for accessibility
-.v-btn:focus,
-.v-card:focus,
-.v-chip:focus {
-  outline: 2px solid rgba(var(--v-theme-primary), 0.5);
-  outline-offset: 2px;
-}
+// .v-btn:focus,
+// .v-card:focus,
+// .v-chip:focus {
+//   outline: 2px solid rgba(var(--v-theme-primary), 0.5);
+//   outline-offset: 2px;
+// }
 
 // Reduced motion for users who prefer it
 @media (prefers-reduced-motion: reduce) {

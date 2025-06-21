@@ -66,15 +66,14 @@ const containerStyles = computed(() => {
       ? `${props.maxWidth}px` 
       : props.maxWidth
   }
-  
-  // Responsive padding
+    // Responsive padding
   if (props.adaptiveSpacing) {
     if (mobile.value) {
-      styles.padding = '12px'
+      styles.padding = '16px' // $container-padding-mobile
     } else if (tablet.value) {
-      styles.padding = '16px'
+      styles.padding = '24px' // $container-padding-tablet
     } else {
-      styles.padding = '24px'
+      styles.padding = '32px' // $container-padding-desktop
     }
   } else if (props.padding) {
     styles.padding = typeof props.padding === 'number'
@@ -97,7 +96,7 @@ const containerStyles = computed(() => {
 .responsive-container {
   width: 100%;
   box-sizing: border-box;
-  transition: padding 0.3s ease;
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Apply computed styles */
@@ -117,6 +116,26 @@ const containerStyles = computed(() => {
   
   /* Better text contrast */
   -webkit-font-smoothing: antialiased;
+  
+  /* Mobile-first max width */
+  max-width: 100%;
+}
+
+/* Tablet styles */
+.responsive-container.tablet {
+  max-width: 1024px; /* $container-lg */
+}
+
+/* Desktop styles */
+.responsive-container.desktop {
+  max-width: 1280px; /* $container-xl */
+}
+
+/* Large desktop styles */
+@media (min-width: 1280px) {
+  .responsive-container.desktop {
+    max-width: 1400px; /* $container-xxl */
+  }
 }
 
 /* Touch device optimizations */

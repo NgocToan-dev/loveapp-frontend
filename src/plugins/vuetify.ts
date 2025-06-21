@@ -435,31 +435,4 @@ export default createVuetify({
       darken: 4
     }
   },
-  defaults: {
-    VBtn: {
-      variant: 'elevated',
-      rounded: 'lg',
-      style: 'font-family: "Montserrat", sans-serif; text-transform: none; letter-spacing: 0.5px;'
-    },
-    VCard: {
-      variant: 'elevated',
-      rounded: 'xl',
-      style: 'transition: all 0.3s ease;'
-    },
-    VTextField: {
-      variant: 'outlined',
-      rounded: 'lg',
-      style: 'font-family: "Montserrat", sans-serif;'
-    },
-    VTextarea: {
-      variant: 'outlined',
-      rounded: 'lg',
-      style: 'font-family: "Montserrat", sans-serif;'
-    },
-    VSelect: {
-      variant: 'outlined',
-      rounded: 'lg',
-      style: 'font-family: "Montserrat", sans-serif;'
-    }
-  }
 })

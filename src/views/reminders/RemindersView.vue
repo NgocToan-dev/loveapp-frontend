@@ -69,14 +69,6 @@
               </div>
             </div>
           </div>
-          <div class="quick-filters">
-            <v-chip-group v-model="selectedFilter" mandatory>
-              <v-chip value="all" variant="elevated">All</v-chip>
-              <v-chip value="upcoming" variant="elevated">Upcoming</v-chip>
-              <v-chip value="today" variant="elevated">Today</v-chip>
-              <v-chip value="overdue" variant="elevated">Overdue</v-chip>
-            </v-chip-group>
-          </div>
         </v-container>
       </section>
 
@@ -84,24 +76,30 @@
       <section class="filter-section">
         <v-container>
           <!-- Main Filter Card -->
-          <v-card 
-            rounded="xl" 
-            elevation="0" 
+          <v-card
+            rounded="xl"
+            elevation="0"
             class="filter-card"
-            :style="{ 
+            :style="{
               backgroundColor: 'rgb(var(--v-theme-surface))',
-              border: '1px solid rgb(var(--v-theme-outline-variant))'
+              border: '1px solid rgb(var(--v-theme-outline-variant))',
             }"
           >
             <v-card-text class="pa-6">
               <!-- Quick Actions Header -->
               <div class="filter-header d-flex justify-space-between align-center mb-6">
                 <div class="filter-title">
-                  <h3 class="text-h6 font-weight-bold" :style="{ color: 'rgb(var(--v-theme-on-surface))' }">
+                  <h3
+                    class="text-h6 font-weight-bold"
+                    :style="{ color: 'rgb(var(--v-theme-on-surface))' }"
+                  >
                     <v-icon class="mr-2" color="warning">mdi-filter-variant</v-icon>
                     Bộ lọc & Tìm kiếm
                   </h3>
-                  <p class="text-caption mt-1" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
+                  <p
+                    class="text-caption mt-1"
+                    :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }"
+                  >
                     Tìm kiếm và lọc nhắc nhở theo ý muốn
                   </p>
                 </div>
@@ -134,18 +132,14 @@
                   >
                     <template #append-inner>
                       <v-fade-transition>
-                        <v-icon 
-                          v-if="searchQuery" 
-                          color="success"
-                          size="small"
-                        >
+                        <v-icon v-if="searchQuery" color="success" size="small">
                           mdi-check-circle
                         </v-icon>
                       </v-fade-transition>
                     </template>
                   </v-text-field>
                 </v-col>
-                
+
                 <v-col cols="6" md="2">
                   <v-select
                     v-model="sortBy"
@@ -159,12 +153,9 @@
                     :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
                   />
                 </v-col>
-                
+
                 <v-col cols="6" md="2">
                   <div class="view-toggle-wrapper">
-                    <label class="view-label text-caption" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
-                      Hiển thị
-                    </label>
                     <v-btn-toggle
                       v-model="viewMode"
                       mandatory
@@ -182,26 +173,15 @@
                     </v-btn-toggle>
                   </div>
                 </v-col>
-                
-                <v-col cols="12" md="2">
-                  <div class="results-count d-flex align-center justify-center">
-                    <v-chip
-                      color="warning"
-                      variant="tonal"
-                      rounded="xl"
-                      class="px-4"
-                    >
-                      <v-icon start size="small">mdi-bell</v-icon>
-                      {{ filteredReminders.length }} nhắc nhở
-                    </v-chip>
-                  </div>
-                </v-col>
               </v-row>
 
               <!-- Quick Status Filters -->
               <div class="status-filters">
                 <div class="filter-section-title mb-3">
-                  <span class="text-caption font-weight-medium" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
+                  <span
+                    class="text-caption font-weight-medium"
+                    :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }"
+                  >
                     Lọc nhanh theo trạng thái
                   </span>
                 </div>
@@ -212,86 +192,81 @@
                   filter
                   class="status-chips"
                 >
-                  <v-chip 
-                    value="all" 
+                  <v-chip
+                    value="all"
                     @click="filterByStatus('all')"
                     variant="outlined"
                     rounded="xl"
                     class="status-chip"
                   >
-                    <v-icon start size="small">mdi-bell-outline</v-icon>
-                    Tất cả
-                    <v-badge 
+                    <v-label class="mr-2">Tất cả</v-label>
+                    <v-badge
                       :content="totalReminders"
                       color="grey"
-                      offset-x="4"
-                      offset-y="4"
+                      offset-x="-2"
+                      offset-y="-2"
                     />
                   </v-chip>
-                  
-                  <v-chip 
-                    value="upcoming" 
+
+                  <v-chip
+                    value="upcoming"
                     @click="filterByStatus('upcoming')"
                     variant="outlined"
                     rounded="xl"
                     class="status-chip"
                     color="info"
                   >
-                    <v-icon start size="small">mdi-calendar-clock</v-icon>
-                    Sắp tới
-                    <v-badge 
+                    <v-label class="mr-2">Sắp tới</v-label>
+                    <v-badge
                       :content="upcomingReminders"
                       color="info"
-                      offset-x="4"
-                      offset-y="4"
+                      offset-x="-2"
+                      offset-y="-2"
                     />
                   </v-chip>
-                  
-                  <v-chip 
-                    value="today" 
+
+                  <v-chip
+                    value="today"
                     @click="filterByStatus('today')"
                     variant="outlined"
                     rounded="xl"
                     class="status-chip"
                     color="warning"
                   >
-                    <v-icon start size="small">mdi-calendar-today</v-icon>
-                    Hôm nay
+                    <v-label class="mr-2">Hôm nay</v-label>
                   </v-chip>
-                  
-                  <v-chip 
-                    value="overdue" 
+
+                  <v-chip
+                    value="overdue"
                     @click="filterByStatus('overdue')"
                     variant="outlined"
                     rounded="xl"
                     class="status-chip"
                     color="error"
                   >
-                    <v-icon start size="small">mdi-calendar-alert</v-icon>
-                    Quá hạn
-                    <v-badge 
+                    <v-label class="mr-2">Quá hạn</v-label>
+                    <v-badge
                       :content="overdueReminders"
                       color="error"
-                      offset-x="4"
-                      offset-y="4"
+                      offset-x="-2"
+                      offset-y="-2"
                     />
                   </v-chip>
-                  
-                  <v-chip 
-                    value="completed" 
+
+                  <v-chip
+                    value="completed"
                     @click="filterByStatus('completed')"
                     variant="outlined"
                     rounded="xl"
                     class="status-chip"
                     color="success"
                   >
-                    <v-icon start size="small">mdi-check-circle</v-icon>
-                    Đã hoàn thành
-                    <v-badge 
+                    <v-label class="mr-2">Hoàn thành</v-label>
+                    <v-badge
                       :content="completedReminders"
                       color="success"
-                      offset-x="4"
-                      offset-y="4"
+                      offset-x="-2"
+                      offset-y="-2"
                     />
                   </v-chip>
                 </v-chip-group>
@@ -572,7 +547,7 @@ const filteredReminders = computed(() => {
 
 // Methods
 const createReminder = () => {
-  router.push('/reminders/create')
+  router.push("/reminders/create");
 };
 
 const handleOpenReminder = (reminder: Reminder) => {
@@ -580,7 +555,7 @@ const handleOpenReminder = (reminder: Reminder) => {
 };
 
 const handleEditReminder = (reminder: Reminder) => {
-  router.push({ name: 'edit-reminder', params: { id: reminder.id } })
+  router.push({ name: "edit-reminder", params: { id: reminder.id } });
 };
 
 const handleDeleteReminder = async (reminder: Reminder) => {
@@ -949,7 +924,6 @@ onMounted(async () => {
 /* Filter Section */
 .filter-section {
   padding: 0 0 40px;
-  margin-top: -60px;
   position: relative;
   z-index: 10;
 }
@@ -963,7 +937,7 @@ onMounted(async () => {
 }
 
 .filter-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -982,13 +956,17 @@ onMounted(async () => {
 }
 
 .filter-title h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   display: flex;
   align-items: center;
 }
 
 .create-btn {
-  background: linear-gradient(135deg, rgb(var(--v-theme-warning)), rgb(var(--v-theme-primary))) !important;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--v-theme-warning)),
+    rgb(var(--v-theme-primary))
+  ) !important;
   color: white !important;
   font-weight: 600;
   text-transform: none;
@@ -1041,11 +1019,6 @@ onMounted(async () => {
   backdrop-filter: blur(10px);
 }
 
-.view-toggle .v-btn {
-  border-radius: 0;
-  height: 40px;
-}
-
 .results-count {
   height: 100%;
 }
@@ -1067,7 +1040,7 @@ onMounted(async () => {
 }
 
 .status-chip {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 500;
   min-height: 40px;
   padding: 0 16px;
@@ -1095,10 +1068,6 @@ onMounted(async () => {
 .type-select,
 .sort-select {
   border-radius: 15px;
-}
-
-.view-toggle .v-btn {
-  border-radius: 12px;
 }
 
 /* Content Section */

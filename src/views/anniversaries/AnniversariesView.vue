@@ -161,38 +161,6 @@
                 </v-col>
               </v-row>
 
-              <!-- Quick Filter Chips -->
-              <div class="quick-filters mt-4">
-                <div class="quick-filters-label">
-                  <v-icon icon="mdi-lightning-bolt" size="small" class="mr-2" />
-                  Quick Filters:
-                </div>
-                <v-chip-group
-                  v-model="selectedQuickFilter"
-                  selected-class="text-primary"
-                  class="quick-filter-chips"
-                >
-                  <v-chip
-                    v-for="type in typeQuickFilters"
-                    :key="type.value"
-                    :value="type.value"
-                    variant="outlined"
-                    size="small"
-                    rounded="lg"
-                    class="quick-filter-chip"
-                    @click="handleQuickFilter(type.value)"
-                  >
-                    <v-icon :icon="type.icon" start size="small" />
-                    {{ type.text }}
-                    <v-badge
-                      v-if="getTypeCount(type.value) > 0"
-                      :content="getTypeCount(type.value)"
-                      color="primary"
-                      class="ml-2"
-                    />
-                  </v-chip>
-                </v-chip-group>
-              </div>
             </v-card-text>
           </v-card>
         </v-container>

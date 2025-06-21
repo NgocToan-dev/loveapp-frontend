@@ -160,258 +160,387 @@ onMounted(async () => {
 </script>
 
 <template>
-  <ResponsiveContainer>
-    <v-container fluid class="dashboard-container pa-6">
-      <!-- Hero Section -->
-      <HeroSection
-        :height="400"
-        @create-memory="navigateTo('create-memory')"
-        class="mb-6"
-      />
+  <div class="dashboard-view">
+    <!-- Hero Section với background gradient -->
+    <section class="hero-section">
+      <ResponsiveContainer class="hero-container">
+        <HeroSection
+          :height="400"
+          @create-memory="navigateTo('create-memory')"
+        />
+      </ResponsiveContainer>
+    </section>
 
-      <!-- Main Dashboard Content -->
-      <v-row>
-        <!-- Left Column - Primary Content -->
-        <v-col cols="12" lg="8">
-        <v-row>
-          <!-- Love Quote Widget -->
-          <v-col cols="12" md="6">
-            <LoveQuoteWidget :height="300" class="mb-4" />
-          </v-col>
-
-          <!-- Anniversary Countdown -->
-          <v-col cols="12" md="6">
-            <AnniversaryCountdown
-              :height="300"
-              anniversary-date="2024-02-14"
-              class="mb-4"
-            />
-          </v-col>
-
-          <!-- Quick Actions -->
-          <v-col cols="12">
-            <QuickActions :height="280" class="mb-4" />
-          </v-col>
-        </v-row>
-      </v-col>
-
-      <!-- Right Column - Stats & Activity -->
-      <v-col cols="12" lg="4">
-        <!-- Love Stats Cards -->
-        <v-row class="mb-4">
-          <v-col cols="6" sm="6">
-            <v-card
-              class="text-center pa-4 love-stat-card"
-              elevation="2"
-              @click="navigateTo('memories')"
-            >
-              <v-icon size="40" color="pink" class="mb-2"> mdi-heart </v-icon>
-              <div class="text-h5 font-weight-bold text-pink mb-1">
-                {{ isLoading ? "..." : stats.memories }}
-              </div>
-              <div class="text-caption text-medium-emphasis">Kỷ niệm</div>
-            </v-card>
-          </v-col>
-
-          <v-col cols="6" sm="6">
-            <v-card
-              class="text-center pa-4 love-stat-card"
-              elevation="2"
-              @click="navigateTo('notes')"
-            >
-              <v-icon size="40" color="primary" class="mb-2"> mdi-note-text </v-icon>
-              <div class="text-h5 font-weight-bold text-primary mb-1">
-                {{ isLoading ? "..." : stats.notes }}
-              </div>
-              <div class="text-caption text-medium-emphasis">Ghi chú</div>
-            </v-card>
-          </v-col>
-
-          <v-col cols="6" sm="6">
-            <v-card
-              class="text-center pa-4 love-stat-card"
-              elevation="2"
-              @click="navigateTo('reminders')"
-            >
-              <v-icon size="40" color="orange" class="mb-2"> mdi-bell </v-icon>
-              <div class="text-h5 font-weight-bold text-orange mb-1">
-                {{ isLoading ? "..." : stats.reminders }}
-              </div>
-              <div class="text-caption text-medium-emphasis">Nhắc nhở</div>
-            </v-card>
-          </v-col>
-
-          <v-col cols="6" sm="6">
-            <v-card
-              class="text-center pa-4 love-stat-card"
-              elevation="2"
-              @click="navigateTo('anniversaries')"
-            >
-              <v-icon size="40" color="success" class="mb-2"> mdi-calendar-heart </v-icon>
-              <div class="text-h5 font-weight-bold text-success mb-1">
-                {{ isLoading ? "..." : stats.anniversaries }}
-              </div>
-              <div class="text-caption text-medium-emphasis">Kỷ niệm</div>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <!-- Recent Activity -->
-        <v-card class="recent-activity-card mb-4" elevation="2" rounded="xl">
-          <v-card-title class="font-heading text-h6 pb-2">
-            <v-icon start color="primary" size="20">mdi-clock-outline</v-icon>
-            Hoạt động gần đây
-          </v-card-title>
-
-          <v-card-text class="py-2">
-            <v-list v-if="recentItems.length > 0" class="bg-transparent py-0">
-              <v-list-item
-                v-for="item in recentItems"
-                :key="item.id"
-                @click="openItem(item)"
-                class="px-2 mb-1 rounded-lg hover-item"
-                density="compact"
-              >
-                <template #prepend>
-                  <v-avatar :color="getItemColor(item.type)" size="32" class="mr-3">
-                    <v-icon :icon="getItemIcon(item.type)" size="16"></v-icon>
-                  </v-avatar>
-                </template>
-
-                <v-list-item-title class="text-body-2 font-weight-medium">
-                  {{ item.title }}
-                </v-list-item-title>
-                <v-list-item-subtitle class="text-caption">
-                  {{ formatDate(item.updatedAt) }}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-
-            <div v-else class="text-center py-6">
-              <v-icon
-                icon="mdi-inbox"
-                size="32"
-                color="grey-lighten-2"
-                class="mb-2"
-              ></v-icon>
-              <p class="text-body-2 text-medium-emphasis">Chưa có hoạt động nào</p>
+    <!-- Main Content -->
+    <main class="main-content">
+      <ResponsiveContainer>
+        <div class="widgets-grid">
+          <!-- Left Column - Primary Widgets -->
+          <div class="widget-column primary-column">
+            <div class="widget-row">
+              <LoveQuoteWidget class="widget-card" />
+              <AnniversaryCountdown
+                anniversary-date="2024-02-14"
+                class="widget-card"
+              />
             </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>    </v-container>
-  </ResponsiveContainer>
+            <QuickActions class="widget-card full-width" />
+          </div>
+
+          <!-- Right Column - Stats & Activity -->
+          <div class="widget-column secondary-column">
+            <!-- Love Stats Grid -->
+            <div class="stats-grid">
+              <div 
+                class="stat-card hover-lift"
+                @click="navigateTo('memories')"
+              >
+                <div class="stat-icon">
+                  <v-icon icon="mdi-heart" color="pink" />
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">{{ isLoading ? "..." : stats.memories }}</div>
+                  <div class="stat-label">Memories</div>
+                </div>
+              </div>
+
+              <div 
+                class="stat-card hover-lift"
+                @click="navigateTo('notes')"
+              >
+                <div class="stat-icon">
+                  <v-icon icon="mdi-note-text" color="primary" />
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">{{ isLoading ? "..." : stats.notes }}</div>
+                  <div class="stat-label">Notes</div>
+                </div>
+              </div>
+
+              <div 
+                class="stat-card hover-lift"
+                @click="navigateTo('reminders')"
+              >
+                <div class="stat-icon">
+                  <v-icon icon="mdi-bell" color="orange" />
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">{{ isLoading ? "..." : stats.reminders }}</div>
+                  <div class="stat-label">Reminders</div>
+                </div>
+              </div>
+
+              <div 
+                class="stat-card hover-lift"
+                @click="navigateTo('anniversaries')"
+              >
+                <div class="stat-icon">
+                  <v-icon icon="mdi-calendar-heart" color="success" />
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">{{ isLoading ? "..." : stats.anniversaries }}</div>
+                  <div class="stat-label">Anniversaries</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <v-card class="recent-activity-card widget-card rounded-lg">
+              <v-card-title class="recent-activity-title">
+                <v-icon icon="mdi-clock-outline" color="primary" size="20" class="mr-2" />
+                Recent Activity
+              </v-card-title>
+
+              <v-card-text class="recent-activity-content">
+                <v-list v-if="recentItems.length > 0" class="bg-transparent">
+                  <v-list-item
+                    v-for="item in recentItems"
+                    :key="item.id"
+                    @click="openItem(item)"
+                    class="recent-item hover-lift"
+                    density="compact"
+                  >
+                    <template #prepend>
+                      <v-avatar :color="getItemColor(item.type)" size="32" class="mr-3">
+                        <v-icon :icon="getItemIcon(item.type)" size="16" />
+                      </v-avatar>
+                    </template>
+
+                    <v-list-item-title class="recent-item-title">
+                      {{ item.title }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle class="recent-item-date">
+                      {{ formatDate(item.updatedAt) }}
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+
+                <div v-else class="empty-state">
+                  <v-icon icon="mdi-inbox" size="48" color="grey-lighten-2" class="mb-3" />
+                  <p class="empty-state-text">No recent activity</p>
+                </div>
+              </v-card-text>
+            </v-card>
+          </div>
+        </div>
+      </ResponsiveContainer>
+    </main>
+  </div>
 </template>
 
 <style scoped>
-.dashboard-container {
-  background: rgb(var(--v-theme-background));
+.dashboard-view {
   min-height: 100vh;
+  background: linear-gradient(135deg, var(--v-theme-background) 0%, var(--v-theme-surface) 100%);
 }
 
-.love-stat-card {
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border-radius: 16px;
-  height: 100px;
+.hero-section {
+  padding: 48px 0;
+  background: linear-gradient(135deg, var(--v-theme-primary-lighten-5) 0%, var(--v-theme-surface) 100%);
 }
 
-.love-stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(var(--v-theme-primary), 0.15);
-}
-
-.recent-activity-card {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.95),
-    rgba(248, 250, 252, 0.95)
-  );
-  transition: all 0.3s ease;
-}
-
-.recent-activity-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(var(--v-theme-primary), 0.1);
-}
-
-.hover-item {
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border-radius: 8px;
-}
-
-.hover-item:hover {
-  background-color: rgba(var(--v-theme-primary), 0.08);
-}
-
-.text-pink {
-  color: rgb(233, 30, 99) !important;
-}
-
-.text-orange {
-  color: rgb(255, 152, 0) !important;
-}
-
-/* Typography improvements */
-.font-heading {
-  font-family: "Playfair Display", Georgia, serif !important;
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: 16px !important;
-  }
-
-  .love-stat-card {
-    height: 80px;
-  }
-
-  .love-stat-card .v-icon {
-    size: 32px;
-  }
-
-  .love-stat-card .text-h5 {
-    font-size: 1.25rem !important;
+  .hero-section {
+    padding: 32px 0;
   }
 }
 
-/* Dark mode adjustments */
-.v-theme--dark .recent-activity-card {
-  background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(40, 40, 40, 0.95));
+.hero-container {
+  position: relative;
+  z-index: 2;
 }
 
-/* Animation classes */
-.stagger-fade-in {
-  animation: romanticFadeIn 0.6s ease-out;
+.main-content {
+  padding: 48px 0;
+  position: relative;
+  z-index: 1;
+  margin-top: -24px;
 }
 
-.stagger-fade-in:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.stagger-fade-in:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.stagger-fade-in:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.stagger-fade-in:nth-child(4) {
-  animation-delay: 0.4s;
-}
-
-@keyframes romanticFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+@media (max-width: 768px) {
+  .main-content {
+    padding: 32px 0;
+    margin-top: -16px;
   }
 }
 
-.text-orange {
-  color: rgb(255, 152, 0) !important;
+.widgets-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 1024px) {
+  .widgets-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.widget-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.primary-column .widget-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .primary-column .widget-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.primary-column .full-width {
+  grid-column: 1 / -1;
+}
+
+.widget-card {
+  background: var(--v-theme-surface);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(var(--v-theme-outline-variant), 0.12);
+}
+
+.widget-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--v-theme-surface);
+  border-radius: 12px;
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid rgba(var(--v-theme-outline-variant), 0.08);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--v-theme-primary-lighten-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--v-theme-primary);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--v-theme-on-surface-variant);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.recent-activity-card :deep(.v-card-title) {
+  padding: 20px 20px 8px 20px !important;
+}
+
+.recent-activity-card :deep(.v-card-text) {
+  padding: 8px 20px 20px 20px !important;
+}
+
+.recent-activity-title {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  color: var(--v-theme-on-surface) !important;
+  display: flex;
+  align-items: center;
+}
+
+.recent-activity-content :deep(.v-list) {
+  padding: 0 !important;
+}
+
+.recent-item {
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+  padding: 8px !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.recent-item:hover {
+  background-color: rgba(var(--v-theme-primary), 0.08) !important;
+  transform: translateX(4px);
+}
+
+.recent-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+.recent-item-title {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: var(--v-theme-on-surface) !important;
+}
+
+.recent-item-date {
+  font-size: 0.75rem !important;
+  color: var(--v-theme-on-surface-variant) !important;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-state-text {
+  font-size: 0.875rem;
+  color: var(--v-theme-on-surface-variant);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    gap: 12px;
+  }
+  
+  .stat-card {
+    padding: 16px 12px;
+    gap: 10px;
+  }
+  
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .stat-number {
+    font-size: 1.25rem;
+  }
+  
+  .recent-item {
+    padding: 12px 8px !important;
+  }
+}
+
+.v-theme--dark .dashboard-view {
+  background: linear-gradient(135deg, var(--v-theme-background) 0%, var(--v-theme-surface-variant) 100%);
+}
+
+.v-theme--dark .hero-section {
+  background: linear-gradient(135deg, var(--v-theme-surface-variant) 0%, var(--v-theme-surface) 100%);
+}
+
+.v-theme--dark .widget-card {
+  border-color: rgba(var(--v-theme-outline), 0.12);
+}
+
+.v-theme--dark .stat-card {
+  border-color: rgba(var(--v-theme-outline), 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .widget-card,
+  .stat-card,
+  .recent-item {
+    transition: none !important;
+  }
+  
+  .hover-lift:hover {
+    transform: none !important;
+  }
+}
+
+.stat-card:focus-visible,
+.recent-item:focus-visible {
+  outline: 2px solid var(--v-theme-primary);
+  outline-offset: 2px;
 }
 </style>

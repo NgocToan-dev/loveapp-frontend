@@ -147,23 +147,25 @@
                     </template>
                   </v-text-field>
                 </v-col>
-                
+
+                <!-- filter danh mục -->
                 <v-col cols="4" md="2">
                   <v-select
                     v-model="selectedCategory"
                     :items="categoryOptions"
-                    label="Danh mục"
+                    item-title="title"
+                    item-value="value"
+                    label="Chọn danh mục"
                     variant="outlined"
                     rounded="xl"
                     hide-details
-                    prepend-inner-icon="mdi-tag"
-                    clearable
+                    prepend-inner-icon="mdi-folder"
                     class="category-select"
                     :style="{ '--v-field-label-color': 'rgb(var(--v-theme-on-surface))' }"
                   />
                 </v-col>
                 
-                <v-col cols="4" md="2">
+                <v-col cols="4" md="3">
                   <v-select
                     v-model="sortBy"
                     :items="sortOptions"
@@ -177,7 +179,7 @@
                   />
                 </v-col>
                 
-                <v-col cols="4" md="1">
+                <v-col cols="4" md="2">
                   <div class="view-toggle-wrapper">
                     <v-btn-toggle
                       v-model="viewMode"
@@ -185,7 +187,6 @@
                       variant="outlined"
                       divided
                       rounded="xl"
-                      class="view-toggle"
                     >
                       <v-btn value="grid" size="small">
                         <v-icon>mdi-view-grid</v-icon>
@@ -197,116 +198,8 @@
                   </div>
                 </v-col>
                 
-                <v-col cols="12" md="2">
-                  <div class="results-count d-flex align-center justify-center">
-                    <v-chip
-                      color="primary"
-                      variant="tonal"
-                      rounded="xl"
-                      class="px-4"
-                    >
-                      <v-icon start size="small">mdi-notebook</v-icon>
-                      {{ filteredNotes.length }} ghi chú
-                    </v-chip>
-                  </div>
-                </v-col>
               </v-row>
 
-              <!-- Quick Category Filters -->
-              <div class="category-filters">
-                <div class="filter-section-title mb-3">
-                  <span class="text-caption font-weight-medium" :style="{ color: 'rgb(var(--v-theme-on-surface-variant))' }">
-                    Lọc nhanh theo danh mục
-                  </span>
-                </div>
-                <v-chip-group
-                  v-model="selectedFilter"
-                  selected-class="text-primary"
-                  color="primary"
-                  filter
-                  class="category-chips"
-                >
-                  <v-chip 
-                    value="all" 
-                    @click="filterByCategory('all')"
-                    variant="outlined"
-                    rounded="xl"
-                    class="category-chip"
-                  >
-                    <v-icon start size="small">mdi-note-text</v-icon>
-                    Tất cả
-                    <v-badge 
-                      :content="totalNotes"
-                      color="grey"
-                      offset-x="4"
-                      offset-y="4"
-                    />
-                  </v-chip>
-                  
-                  <v-chip 
-                    value="private" 
-                    @click="filterByCategory('private')"
-                    variant="outlined"
-                    rounded="xl"
-                    class="category-chip"
-                    color="orange"
-                  >
-                    <v-icon start size="small">mdi-lock</v-icon>
-                    Riêng tư
-                    <v-badge 
-                      :content="privateNotesCount"
-                      color="orange"
-                      offset-x="4"
-                      offset-y="4"
-                    />
-                  </v-chip>
-                  
-                  <v-chip 
-                    value="shared" 
-                    @click="filterByCategory('shared')"
-                    variant="outlined"
-                    rounded="xl"
-                    class="category-chip"
-                    color="info"
-                  >
-                    <v-icon start size="small">mdi-share</v-icon>
-                    Chia sẻ
-                    <v-badge 
-                      :content="sharedNotesCount"
-                      color="info"
-                      offset-x="4"
-                      offset-y="4"
-                    />
-                  </v-chip>
-                  
-                  <v-chip 
-                    value="recent" 
-                    @click="filterByCategory('recent')"
-                    variant="outlined"
-                    rounded="xl"
-                    class="category-chip"
-                    color="success"
-                  >
-                    <v-icon start size="small">mdi-clock-outline</v-icon>
-                    Gần đây
-                  </v-chip>
-
-                  <!-- Dynamic category chips -->
-                  <v-chip 
-                    v-for="category in allCategories.slice(0, 4)"
-                    :key="category"
-                    :value="category"
-                    @click="filterByCategory(category)"
-                    variant="outlined"
-                    rounded="xl"
-                    class="category-chip"
-                    :color="getCategoryColor(category)"
-                  >
-                    <v-icon start size="small">{{ getCategoryIcon(category) }}</v-icon>
-                    {{ category }}
-                  </v-chip>
-                </v-chip-group>
-              </div>
             </v-card-text>
           </v-card>
         </v-container>
@@ -920,10 +813,6 @@ onMounted(async () => {
 .category-select,
 .sort-select {
   border-radius: 15px;
-}
-
-.view-toggle .v-btn {
-  border-radius: 12px;
 }
 
 /* Content Section */
