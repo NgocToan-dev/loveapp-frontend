@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n'
-import vi from './vn'
-import en from './en'
+import vi from './locales/vi'
+import en from './locales/en'
 
 const i18n = createI18n({
   legacy: false,
@@ -8,8 +8,8 @@ const i18n = createI18n({
   fallbackLocale: 'en',
   messages: {
     vi,
-    en
-  }
+    en,
+  },
 })
 
 export default i18n

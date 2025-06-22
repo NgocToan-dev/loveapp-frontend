@@ -29,12 +29,8 @@ import { useDialogsStore } from '@/stores/dialogs'
 
 // Import dialog components
 import InvitationsDialog from './InvitationsDialog.vue'
-import CouplePreferencesDialog from './CouplePreferencesDialog.vue'
 import ConfirmDialog from '@components/ConfirmDialog.vue'
 import AlertDialog from '@components/AlertDialog.vue'
-import CreateMemoryDialog from '@components/CreateMemoryDialog.vue'
-import CreateReminderDialog from '@components/CreateReminderDialog.vue'
-import CreateAnniversaryDialog from '@components/CreateAnniversaryDialog.vue'
 import ShareMemoryDialog from '@components/ShareMemoryDialog.vue'
 
 const dialogsStore = useDialogsStore()
@@ -44,12 +40,8 @@ const dialogs = computed(() => dialogsStore.dialogs)
 const getDialogComponent = (componentName: string) => {
   const components: Record<string, any> = {
     InvitationsDialog,
-    CouplePreferencesDialog,
     ConfirmDialog,
     AlertDialog,
-    CreateMemoryDialog,
-    CreateReminderDialog,
-    CreateAnniversaryDialog,
     ShareMemoryDialog
   }
   return components[componentName] || null

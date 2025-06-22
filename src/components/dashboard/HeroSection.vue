@@ -53,7 +53,9 @@
                     <div class="stat-number font-heading text-white">
                       {{ daysTogether }}
                     </div>
-                    <div class="stat-label text-white opacity-75">Ngày bên nhau</div>
+                    <div class="stat-label text-white opacity-75">
+                      {{ $t("dashboard.hero.daysTogether") }}
+                    </div>
                   </div>
                 </v-col>
                 <v-col cols="auto" class="mx-2">
@@ -64,7 +66,9 @@
                     <div class="stat-number font-heading text-white">
                       {{ totalMemories }}
                     </div>
-                    <div class="stat-label text-white opacity-75">Kỷ niệm</div>
+                    <div class="stat-label text-white opacity-75">
+                      {{ $t("dashboard.hero.memories") }}
+                    </div>
                   </div>
                 </v-col>
                 <v-col cols="auto" class="mx-2"> <div class="stat-divider"></div> </v-col>
@@ -81,7 +85,7 @@
               @click="$emit('createMemory')"
             >
               <v-icon start>mdi-plus</v-icon>
-              Tạo kỷ niệm mới
+              {{ $t("dashboard.hero.createNewMemory") }}
             </v-btn>
           </v-card-text>
 
@@ -112,6 +116,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useMemoriesStore } from "@/stores/memories";
+import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
 import { useRouter } from "vue-router";
 
@@ -122,9 +127,7 @@ interface Props {
   height?: string | number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  height: 400,
-});
+const props = withDefaults(defineProps<Props>(), {});
 
 // Emits
 defineEmits<{
@@ -138,6 +141,9 @@ const memoriesStore = useMemoriesStore();
 // Router
 const router = useRouter();
 
+// I18n
+const { t } = useI18n();
+
 // Refs
 const showFloatingHearts = ref(false);
 
@@ -146,29 +152,29 @@ const heroHeight = computed(() => {
   return typeof props.height === "number" ? `${props.height}px` : props.height;
 });
 
-const userName = computed(() => authStore.user?.displayName || "Bạn");
-const partnerName = computed(() => "Người ấy"); // TODO: Get from couples store
+const userName = computed(
+  () => authStore.user?.displayName || t("dashboard.hero.defaultUser")
+);
+const partnerName = computed(() => t("dashboard.hero.defaultPartner")); // TODO: Get from couples store
 
 const welcomeMessage = computed(() => {
   const hour = new Date().getHours();
-  let greeting = "Chào buổi tối";
+  let greeting = t("dashboard.hero.greetings.evening");
 
-  if (hour < 12) greeting = "Chào buổi sáng";
-  else if (hour < 18) greeting = "Chào buổi chiều";
+  if (hour < 12) greeting = t("dashboard.hero.greetings.morning");
+  else if (hour < 18) greeting = t("dashboard.hero.greetings.afternoon");
 
   return `${greeting}, ${userName.value}! 💕`;
 });
 
 const loveSubtitle = computed(() => {
-  const messages = [
-    "Tình yêu của chúng ta là câu chuyện đẹp nhất",
-    "Mỗi ngày bên nhau là một món quà",
-    "Yêu thương là hạnh phúc lớn nhất",
-    "Kỷ niệm ngọt ngào, tương lai tươi sáng",
-    "Cùng nhau viết nên câu chuyện tình yêu",
-  ];
-  const today = new Date().getDate();
-  return messages[today % messages.length];
+  const messageKey = "dashboard.hero.loveSubtitles";
+  const messages = (t(messageKey, { returnObjects: true }) as unknown) as string[];
+  if (Array.isArray(messages)) {
+    const today = new Date().getDate();
+    return messages[today % messages.length];
+  }
+  return t("dashboard.hero.loveSubtitles.0"); // Fallback
 });
 
 const daysTogether = computed(() => {

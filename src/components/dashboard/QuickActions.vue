@@ -1,10 +1,9 @@
 <template>
   <v-card class="quick-actions-card cardLift" elevation="0">
-    <v-card-title class="actions-header slideInUp">
-      <v-icon class="header-icon magicalGlow" color="primary" size="28">
+    <v-card-title class="actions-header slideInUp">      <v-icon class="header-icon magicalGlow" color="primary" size="28">
         mdi-lightning-bolt
       </v-icon>
-      <span>Quick Actions</span>
+      <span>{{ $t('dashboard.quickActionsWidget.title') }}</span>
     </v-card-title>
 
     <v-card-text class="actions-content">
@@ -19,8 +18,8 @@
             <v-icon size="32" color="primary">mdi-heart</v-icon>
           </div>
           <div class="action-text">
-            <h4 class="action-title">Create Memory</h4>
-            <p class="action-description">Capture a special moment</p>
+            <h4 class="action-title">{{ $t("dashboard.createMemory") }}</h4>
+            <p class="action-description">{{ $t('dashboard.subTitleMemory') }}</p>
           </div>        </div>        <!-- Set Reminder -->
         <div 
           class="action-item loveClick cardLift slideInUp"
@@ -29,10 +28,9 @@
         >
           <div class="action-icon reminder-icon">
             <v-icon size="32" color="accent">mdi-bell-plus</v-icon>
-          </div>
-          <div class="action-text">
-            <h4 class="action-title">Set Reminder</h4>
-            <p class="action-description">Never forget important dates</p>
+          </div>          <div class="action-text">
+            <h4 class="action-title">{{ $t('dashboard.quickActionsWidget.actions.setReminder.title') }}</h4>
+            <p class="action-description">{{ $t('dashboard.quickActionsWidget.actions.setReminder.description') }}</p>
           </div>
         </div>        <!-- Upload Files -->
         <div 
@@ -42,10 +40,9 @@
         >
           <div class="action-icon files-icon">
             <v-icon size="32" color="info">mdi-cloud-upload</v-icon>
-          </div>
-          <div class="action-text">
-            <h4 class="action-title">Upload Files</h4>
-            <p class="action-description">Share photos and videos</p>
+          </div>          <div class="action-text">
+            <h4 class="action-title">{{ $t('dashboard.quickActionsWidget.actions.uploadFiles.title') }}</h4>
+            <p class="action-description">{{ $t('dashboard.quickActionsWidget.actions.uploadFiles.description') }}</p>
           </div>
         </div>        <!-- Plan Anniversary -->
         <div 
@@ -55,10 +52,9 @@
         >
           <div class="action-icon anniversary-icon">
             <v-icon size="32" color="error">mdi-calendar-heart</v-icon>
-          </div>
-          <div class="action-text">
-            <h4 class="action-title">Plan Anniversary</h4>
-            <p class="action-description">Celebrate your milestones</p>
+          </div>          <div class="action-text">
+            <h4 class="action-title">{{ $t('dashboard.quickActionsWidget.actions.planAnniversary.title') }}</h4>
+            <p class="action-description">{{ $t('dashboard.quickActionsWidget.actions.planAnniversary.description') }}</p>
           </div>
         </div>        <!-- Send Invitation -->
         <div 
@@ -68,10 +64,9 @@
         >
           <div class="action-icon invite-icon">
             <v-icon size="32" color="purple">mdi-account-plus</v-icon>
-          </div>
-          <div class="action-text">
-            <h4 class="action-title">Send Invitation</h4>
-            <p class="action-description">Invite your partner</p>
+          </div>          <div class="action-text">
+            <h4 class="action-title">{{ $t('dashboard.quickActionsWidget.actions.sendInvitation.title') }}</h4>
+            <p class="action-description">{{ $t('dashboard.quickActionsWidget.actions.sendInvitation.description') }}</p>
           </div>
         </div>
       </div>
@@ -88,9 +83,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDialogsStore } from '@/stores/dialogs'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const dialogs = useDialogsStore()
+const { t } = useI18n()
 const showClickFeedback = ref(false)
 
 const handleAction = (actionType: string) => {

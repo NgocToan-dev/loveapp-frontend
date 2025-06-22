@@ -1,0 +1,16 @@
+export const nav = {
+  home: 'Home',
+  memories: 'Memories',
+  reminders: 'Reminders',
+  anniversaries: 'Anniversaries',
+  messages: 'Messages',
+  photos: 'Our Photos',
+  login: 'Login',
+  dashboard: 'Dashboard',
+  files: 'Files',
+  notifications: 'Notifications',
+  profile: 'Profile',
+  logout: 'Logout',
+  couples: 'Couples',
+  settings: 'Settings',
+}

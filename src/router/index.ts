@@ -97,7 +97,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/memories/create',
     name: 'create-memory',
-    component: () => import('@views/memories/CreateMemoryView.vue'),
+    component: () => import('@views/memories/MemoryDetailView.vue'),
     meta: {
       title: 'Create Memory',
       requiresAuth: true
@@ -115,7 +115,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/memories/:id/edit',
     name: 'edit-memory',
-    component: () => import('@views/memories/EditMemoryView.vue'),
+    component: () => import('@views/memories/MemoryDetailView.vue'),
     meta: {
       title: 'Edit Memory',
       requiresAuth: true
@@ -124,7 +124,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/reminders/create',
     name: 'create-reminder',
-    component: () => import('@/views/reminders/CreateReminderView.vue'),
+    component: () => import('@/views/reminders/ReminderDetailView.vue'),
     meta: {
       title: 'Create Reminder',
       requiresAuth: true
@@ -151,7 +151,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/reminders/:id/edit',
     name: 'edit-reminder',
-    component: () => import('@views/reminders/EditReminderView.vue'),
+    component: () => import('@/views/reminders/ReminderDetailView.vue'),
     meta: {
       title: 'Edit Reminder',
       requiresAuth: true
@@ -160,7 +160,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/anniversaries/create',
     name: 'create-anniversary',
-    component: () => import('@/views/anniversaries/CreateAnniversaryView.vue'),
+    component: () => import('@/views/anniversaries/AnniversaryDetailView.vue'),
     meta: {
       title: 'Create Anniversary',
       requiresAuth: true
@@ -187,7 +187,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/anniversaries/:id/edit',
     name: 'edit-anniversary',
-    component: () => import('@views/anniversaries/EditAnniversaryView.vue'),
+    component: () => import('@views/anniversaries/AnniversaryDetailView.vue'),
     meta: {
       title: 'Edit Anniversary',
       requiresAuth: true

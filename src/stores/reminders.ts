@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Reminder } from '@/types'
-import { remindersService, type CreateReminderData, type UpdateReminderData, type ReminderFilters } from '@/services/reminders'
+import { remindersService, type ReminderFilters } from '@/services/reminders'
 
 export const useRemindersStore = defineStore('reminders', () => {
   // State
@@ -137,7 +137,7 @@ export const useRemindersStore = defineStore('reminders', () => {
     }
   }
 
-  const createReminder = async (data: CreateReminderData) => {
+  const createReminder = async (data: Reminder) => {
     try {
       isLoading.value = true
       error.value = null
@@ -159,13 +159,13 @@ export const useRemindersStore = defineStore('reminders', () => {
       isLoading.value = false
     }
   }
-  const updateReminder = async (id: string, data: UpdateReminderData) => {
+  const updateReminder = async (id: string, data: Partial<Reminder>) => {
     try {
       isLoading.value = true
       error.value = null
       
       const response = await remindersService.updateReminder(id, data)
-      debugger
+      
       // Ensure reminders array exists
       if (!reminders.value) {
         reminders.value = []
@@ -240,8 +240,43 @@ export const useRemindersStore = defineStore('reminders', () => {
       }
       
       return response
-    } catch (err: any) {      error.value = err.message || 'Failed to complete reminder'
+    } catch (err: any) {
+      error.value = err.message || 'Failed to complete reminder'
       console.error('Error completing reminder:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+  const uncompleteReminder = async (id: string) => {
+    try {
+      isLoading.value = true
+      error.value = null
+      
+      const response = await remindersService.updateReminder(id, {
+        isCompleted: false,
+        completedAt: null
+      })
+      
+      // Ensure reminders array exists
+      if (!reminders.value) {
+        reminders.value = []
+      }
+      
+      const index = reminders.value.findIndex((reminder: Reminder) => reminder.id === id)
+      if (index !== -1) {
+        reminders.value[index] = response
+      }
+      
+      // Update current reminder if it's the one being uncompleted
+      if (currentReminder.value?.id === id) {
+        currentReminder.value = response
+      }
+      
+      return response
+    } catch (err: any) {
+      error.value = err.message || 'Failed to uncomplete reminder'
+      console.error('Error uncompleting reminder:', err)
       throw err
     } finally {
       isLoading.value = false
@@ -254,7 +289,8 @@ export const useRemindersStore = defineStore('reminders', () => {
       error.value = null
       
       // For now, update reminder with new date
-      const response = await remindersService.updateReminder(id, { reminderDate: newDate })
+      const response = await remindersService.updateReminder(id, {
+        reminderDate: newDate})
       
       // Ensure reminders array exists
       if (!reminders.value) {
@@ -330,6 +366,7 @@ export const useRemindersStore = defineStore('reminders', () => {
     updateReminder,
     deleteReminder,
     completeReminder,
+    uncompleteReminder,
     snoozeReminder,
     updateFilters,
     resetFilters,

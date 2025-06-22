@@ -149,7 +149,6 @@ onMounted(async () => {
     <section class="hero-section">
       <ResponsiveContainer class="hero-container">
         <HeroSection
-          :height="400"
           @create-memory="navigateTo('create-memory')"
         />
       </ResponsiveContainer>
@@ -184,7 +183,7 @@ onMounted(async () => {
                 </div>
                 <div class="stat-content">
                   <div class="stat-number">{{ isLoading ? "..." : stats.memories }}</div>
-                  <div class="stat-label">Memories</div>
+                  <div class="stat-label">{{ $t('dashboard.stats.memories') }}</div>
                 </div>
               </div>
 
@@ -197,7 +196,7 @@ onMounted(async () => {
                 </div>
                 <div class="stat-content">
                   <div class="stat-number">{{ isLoading ? "..." : stats.reminders }}</div>
-                  <div class="stat-label">Reminders</div>
+                  <div class="stat-label">{{ $t('dashboard.stats.reminders') }}</div>
                 </div>
               </div>
 
@@ -210,7 +209,7 @@ onMounted(async () => {
                 </div>
                 <div class="stat-content">
                   <div class="stat-number">{{ isLoading ? "..." : stats.anniversaries }}</div>
-                  <div class="stat-label">Anniversaries</div>
+                  <div class="stat-label">{{ $t('dashboard.stats.anniversaries') }}</div>
                 </div>
               </div>
             </div>
@@ -219,7 +218,7 @@ onMounted(async () => {
             <v-card class="recent-activity-card widget-card rounded-lg">
               <v-card-title class="recent-activity-title">
                 <v-icon icon="mdi-clock-outline" color="primary" size="20" class="mr-2" />
-                Recent Activity
+                {{ $t('dashboard.recentActivity') }}
               </v-card-title>
 
               <v-card-text class="recent-activity-content">
@@ -248,7 +247,7 @@ onMounted(async () => {
 
                 <div v-else class="empty-state">
                   <v-icon icon="mdi-inbox" size="48" color="grey-lighten-2" class="mb-3" />
-                  <p class="empty-state-text">No recent activity</p>
+                  <p class="empty-state-text">{{ $t('dashboard.emptyStates.noRecentActivity') }}</p>
                 </div>
               </v-card-text>
             </v-card>
@@ -266,14 +265,7 @@ onMounted(async () => {
 }
 
 .hero-section {
-  padding: 48px 0;
   background: linear-gradient(135deg, var(--v-theme-primary-lighten-5) 0%, var(--v-theme-surface) 100%);
-}
-
-@media (max-width: 768px) {
-  .hero-section {
-    padding: 32px 0;
-  }
 }
 
 .hero-container {
@@ -282,10 +274,8 @@ onMounted(async () => {
 }
 
 .main-content {
-  padding: 48px 0;
   position: relative;
   z-index: 1;
-  margin-top: -24px;
 }
 
 @media (max-width: 768px) {

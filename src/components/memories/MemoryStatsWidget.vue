@@ -58,122 +58,6 @@
       </div>
     </StatsWidget>
 
-    <!-- Recent Activity -->
-    <StatsWidget 
-      :title="$t('common.recentActivity')"
-      icon="mdi-clock-outline"
-      class="mb-4"
-    >
-      <div class="recent-memories">
-        <div 
-          v-for="memory in recentMemories" 
-          :key="memory.id"
-          class="recent-item d-flex align-center mb-3"
-          @click="$emit('openMemory', memory)"
-        >
-          <v-avatar size="32" class="me-3">
-            <v-img 
-              v-if="getMemoryImage(memory)"
-              :src="getMemoryImage(memory)"
-              :alt="memory.title"
-            />
-            <v-icon v-else icon="mdi-camera" />
-          </v-avatar>
-          <div class="flex-grow-1">
-            <div class="text-body-2 font-weight-medium line-clamp-1">
-              {{ memory.title }}
-            </div>
-            <div class="text-caption text-medium-emphasis">
-              {{ formatRelativeTime(memory.date) }}
-            </div>
-          </div>
-        </div>
-        
-        <v-btn
-          v-if="memories.length > 3"
-          variant="text"
-          size="small"
-          block
-          @click="$emit('viewAllMemories')"
-        >
-          {{ $t('common.viewAll') }}
-        </v-btn>
-      </div>
-    </StatsWidget>
-
-    <!-- Monthly Progress -->
-    <StatsWidget 
-      :title="$t('common.thisMonth')"
-      icon="mdi-calendar-month"
-      class="mb-4"
-    >
-      <div class="monthly-progress">
-        <div class="progress-item d-flex align-center justify-space-between mb-2">
-          <span class="text-body-2">{{ $t('memories.create') }}</span>
-          <div class="d-flex align-center">
-            <span class="text-h6 me-2">{{ thisMonthCount }}</span>
-            <v-icon 
-              :color="monthlyChange >= 0 ? 'success' : 'error'"
-              size="16"
-            >
-              {{ monthlyChange >= 0 ? 'mdi-trending-up' : 'mdi-trending-down' }}
-            </v-icon>
-          </div>
-        </div>
-        
-        <v-progress-linear
-          :model-value="monthlyProgress"
-          color="primary"
-          height="6"
-          rounded
-        />
-        
-        <div class="text-caption text-medium-emphasis mt-1">
-          {{ $t('common.comparedToLastMonth') }}
-        </div>
-      </div>
-    </StatsWidget>
-
-    <!-- Quick Actions -->
-    <StatsWidget 
-      :title="$t('common.quickActions')"
-      icon="mdi-lightning-bolt"
-    >
-      <div class="quick-actions d-flex flex-column gap-2">
-        <v-btn
-          color="primary"
-          variant="tonal"
-          size="small"
-          prepend-icon="mdi-plus"
-          block
-          @click="$emit('createMemory')"
-        >
-          {{ $t('memories.create') }}
-        </v-btn>
-        
-        <v-btn
-          color="secondary"
-          variant="tonal"
-          size="small"
-          prepend-icon="mdi-heart"
-          block
-          @click="$emit('viewFavorites')"
-        >
-          {{ $t('memories.favorites') }}
-        </v-btn>
-        
-        <v-btn
-          color="info"
-          variant="tonal"
-          size="small"
-          prepend-icon="mdi-export"
-          block
-          @click="$emit('exportMemories')"
-        >
-          {{ $t('common.export') }}
-        </v-btn>
-      </div>
-    </StatsWidget>
   </div>
 </template>
 
@@ -191,7 +75,7 @@ const props = withDefaults(defineProps<Props>(), {
   memories: () => []
 })
 
-const emit = defineEmits<{
+defineEmits<{
   openMemory: [memory: Memory]
   createMemory: []
   viewAllMemories: []
@@ -199,7 +83,7 @@ const emit = defineEmits<{
   exportMemories: []
 }>()
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 // Computed stats
 const totalPhotos = computed(() => {

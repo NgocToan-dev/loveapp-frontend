@@ -1,27 +1,29 @@
-<template>  <v-card 
-    class="memory-card cardLift loveClick slideInUp" 
+<template>
+  <v-card
+    class="memory-card cardLift loveClick slideInUp"
     :class="{ 'mobile-optimized': mobile }"
     elevation="0"
     @click="handleCardClick"
     ref="cardRef"
-  ><!-- Memory Image/Video -->
+    ><!-- Memory Image/Video -->
     <div class="memory-media" v-if="memoryImage || memoryVideo">
       <div class="media-container">
-        <img 
-          v-if="memoryImage" 
-          :src="memoryImage" 
+        <img
+          v-if="memoryImage"
+          :src="memoryImage"
           :alt="memory.title"
           class="memory-image"
           @load="onImageLoad"
         />
-        <video 
+        <video
           v-else-if="memoryVideo"
           :src="memoryVideo"
           class="memory-video"
           muted
           @mouseover="playVideo"
           @mouseleave="pauseVideo"
-        />          <!-- Media Overlay -->
+        />
+        <!-- Media Overlay -->
         <div class="media-overlay">
           <div class="media-actions">
             <v-btn
@@ -31,14 +33,14 @@
               class="media-btn loveClick"
               @click.stop="toggleFavorite"
             >
-              <v-icon 
+              <v-icon
                 :color="memory.isFavorite ? 'error' : 'white'"
-                :class="{ 'heartBeat': memory.isFavorite }"
+                :class="{ heartBeat: memory.isFavorite }"
               >
-                {{ memory.isFavorite ? 'mdi-heart' : 'mdi-heart-outline' }}
+                {{ memory.isFavorite ? "mdi-heart" : "mdi-heart-outline" }}
               </v-icon>
             </v-btn>
-            
+
             <!-- Action Menu -->
             <v-menu>
               <template #activator="{ props: menuProps }">
@@ -53,41 +55,45 @@
                   <v-icon color="white">mdi-dots-vertical</v-icon>
                 </v-btn>
               </template>
-              
+
               <v-list>
                 <v-list-item @click.stop="handleConvertToAnniversary">
                   <template #prepend>
                     <v-icon icon="mdi-calendar-star" color="primary" />
                   </template>
-                  <v-list-item-title>{{ $t('memories.convertToAnniversary') }}</v-list-item-title>
+                  <v-list-item-title>{{
+                    $t("memories.convertToAnniversary")
+                  }}</v-list-item-title>
                 </v-list-item>
-                
+
                 <v-list-item @click.stop="handleEdit">
                   <template #prepend>
                     <v-icon icon="mdi-pencil" />
                   </template>
-                  <v-list-item-title>{{ $t('common.edit') }}</v-list-item-title>
+                  <v-list-item-title>{{ $t("common.edit") }}</v-list-item-title>
                 </v-list-item>
-                
+
                 <v-list-item @click.stop="handleShare">
                   <template #prepend>
                     <v-icon icon="mdi-share" />
                   </template>
-                  <v-list-item-title>{{ $t('common.share') }}</v-list-item-title>
+                  <v-list-item-title>{{ $t("common.share") }}</v-list-item-title>
                 </v-list-item>
-                
+
                 <v-divider />
-                
+
                 <v-list-item @click.stop="handleDelete">
                   <template #prepend>
                     <v-icon icon="mdi-delete" color="error" />
                   </template>
-                  <v-list-item-title class="text-error">{{ $t('common.delete') }}</v-list-item-title>
+                  <v-list-item-title class="text-error">{{
+                    $t("common.delete")
+                  }}</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
           </div>
-          
+
           <!-- Date Badge -->
           <div class="date-badge magicalGlow">
             {{ formatDate(memory.date) }}
@@ -118,7 +124,8 @@
         >
           {{ tag }}
         </v-chip>
-      </div>      <!-- Memory Stats -->
+      </div>
+      <!-- Memory Stats -->
       <div class="memory-stats">
         <div class="stat-item">
           <v-icon size="16" color="primary">mdi-calendar</v-icon>
@@ -141,135 +148,136 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import type { Memory } from '@/types'
-import { useTouch } from '@/composables/useTouch'
-import { useBreakpoints } from '@/composables/useBreakpoints'
+import { ref, computed, onMounted } from "vue";
+import type { Memory } from "@/types";
+import { useTouch } from "@/composables/useTouch";
+import { useBreakpoints } from "@/composables/useBreakpoints";
 
 interface Props {
-  memory: Memory
+  memory: Memory;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 const emit = defineEmits<{
-  'click': [memory: Memory]
-  'favorite': [memory: Memory]
-  'swipe-left': [memory: Memory]
-  'swipe-right': [memory: Memory]
-  'convert-to-anniversary': [memory: Memory]
-  'edit': [memory: Memory]
-  'delete': [memory: Memory]
-  'share': [memory: Memory]
-}>()
+  click: [memory: Memory];
+  favorite: [memory: Memory];
+  "swipe-left": [memory: Memory];
+  "swipe-right": [memory: Memory];
+  "convert-to-anniversary": [memory: Memory];
+  edit: [memory: Memory];
+  delete: [memory: Memory];
+  share: [memory: Memory];
+}>();
 
-const showFavoriteHearts = ref(false)
-const cardRef = ref<HTMLElement>()
-const { mobile, isTouchDevice } = useBreakpoints()
+const showFavoriteHearts = ref(false);
+const cardRef = ref<HTMLElement>();
+const { mobile, isTouchDevice } = useBreakpoints();
 
 // Touch handling
-const { setHandlers, bindToElement } = useTouch()
+const { setHandlers, bindToElement } = useTouch();
 
 // Setup touch handlers
 setHandlers({
   onTap: () => {
     if (isTouchDevice.value) {
-      handleCardClick()
+      handleCardClick();
     }
   },
   onSwipe: (swipe) => {
-    if (swipe.direction === 'left') {
-      emit('swipe-left', props.memory)
-    } else if (swipe.direction === 'right') {
-      emit('swipe-right', props.memory)
+    if (swipe.direction === "left") {
+      emit("swipe-left", props.memory);
+    } else if (swipe.direction === "right") {
+      emit("swipe-right", props.memory);
     }
   },
   onLongPress: () => {
     // Long press to favorite on mobile
     if (mobile.value) {
-      toggleFavorite()
+      toggleFavorite();
     }
-  }
-})
+  },
+});
 
 // Computed properties for media files
 const memoryImage = computed(() => {
-  const imageFile = props.memory.files?.find(file => 
-    file.type?.startsWith('image/') || 
-    /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name || '')
-  )
-  return imageFile?.url
-})
+  const imageFile = props.memory.files?.find(
+    (file) =>
+      file.type?.startsWith("image/") ||
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name || "")
+  );
+  return imageFile?.url;
+});
 
 const memoryVideo = computed(() => {
-  const videoFile = props.memory.files?.find(file => 
-    file.type?.startsWith('video/') || 
-    /\.(mp4|webm|ogg|mov)$/i.test(file.name || '')
-  )
-  return videoFile?.url
-})
+  const videoFile = props.memory.files?.find(
+    (file) =>
+      file.type?.startsWith("video/") || /\.(mp4|webm|ogg|mov)$/i.test(file.name || "")
+  );
+  return videoFile?.url;
+});
 
 const handleCardClick = () => {
-  emit('click', props.memory)
-}
+  emit("click", props.memory);
+};
 
 const toggleFavorite = () => {
   // Show hearts animation for favorites
   if (!props.memory.isFavorite) {
-    showFavoriteHearts.value = true
+    showFavoriteHearts.value = true;
     setTimeout(() => {
-      showFavoriteHearts.value = false
-    }, 2000)
+      showFavoriteHearts.value = false;
+    }, 2000);
   }
-  
-  emit('favorite', props.memory)
-}
+
+  emit("favorite", props.memory);
+};
 
 // Action handlers
 const handleConvertToAnniversary = () => {
-  emit('convert-to-anniversary', props.memory)
-}
+  emit("convert-to-anniversary", props.memory);
+};
 
 const handleEdit = () => {
-  emit('edit', props.memory)
-}
+  emit("edit", props.memory);
+};
 
 const handleShare = () => {
-  emit('share', props.memory)
-}
+  emit("share", props.memory);
+};
 
 const handleDelete = () => {
-  emit('delete', props.memory)
-}
+  emit("delete", props.memory);
+};
 
 const formatDate = (date: string | Date) => {
-  const d = new Date(date)
-  return d.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric',
-    year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-  })
-}
+  const d = new Date(date);
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: d.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+  });
+};
 
 const onImageLoad = () => {
   // Add a subtle entrance animation when image loads
-}
+};
 
 const playVideo = (event: Event) => {
-  const video = event.target as HTMLVideoElement
-  video.play()
-}
+  const video = event.target as HTMLVideoElement;
+  video.play();
+};
 
 const pauseVideo = (event: Event) => {
-  const video = event.target as HTMLVideoElement
-  video.pause()
-}
+  const video = event.target as HTMLVideoElement;
+  video.pause();
+};
 
 // Bind touch events when component mounts
 onMounted(() => {
   if (cardRef.value && isTouchDevice.value) {
-    bindToElement(cardRef.value)
+    bindToElement(cardRef.value);
   }
-})
+});
 </script>
 
 <style scoped>
@@ -388,7 +396,8 @@ onMounted(() => {
   font-size: 0.95rem;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin: 0;  display: -webkit-box;
+  margin: 0;
+  display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -471,9 +480,11 @@ onMounted(() => {
 
 /* No Image State */
 .memory-card:not(:has(.memory-media)) {
-  background: linear-gradient(135deg, 
-    rgba(var(--primary-rgb), 0.05) 0%, 
-    rgba(var(--secondary-rgb), 0.03) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--primary-rgb), 0.05) 0%,
+    rgba(var(--secondary-rgb), 0.03) 100%
+  );
 }
 
 .memory-card:not(:has(.memory-media)) .memory-content {
@@ -527,7 +538,7 @@ onMounted(() => {
   .memory-card:hover {
     transform: none; /* Disable hover effects on touch devices */
   }
-  
+
   .memory-card:active {
     transform: scale(0.98); /* Active state for touch feedback */
   }
@@ -538,23 +549,23 @@ onMounted(() => {
   .memory-content {
     padding: 16px;
   }
-  
+
   .memory-title {
     font-size: 1.125rem;
   }
-  
+
   .memory-description {
     font-size: 0.9rem;
   }
-  
+
   .media-overlay {
     padding: 12px;
   }
-  
+
   .memory-stats {
     gap: 12px;
   }
-  
+
   .stat-item {
     font-size: 0.8rem;
   }

@@ -33,23 +33,6 @@ const normalizeReminder = (reminder: any): Reminder => {
     completedAt: reminder.completedAt ? convertFirebaseTimestamp(reminder.completedAt) : null
   }
 }
-
-export interface CreateReminderData {
-  title: string
-  description?: string
-  reminderDate: Date
-  priority: 'low' | 'medium' | 'high'
-  repeat?: 'daily' | 'weekly' | 'monthly' | 'yearly'
-}
-
-export interface UpdateReminderData {
-  title?: string
-  description?: string
-  reminderDate?: Date
-  priority?: 'low' | 'medium' | 'high'
-  repeat?: 'daily' | 'weekly' | 'monthly' | 'yearly'
-}
-
 export interface ReminderFilters extends PaginationParams {
   priority?: 'low' | 'medium' | 'high'
   isCompleted?: boolean
@@ -85,12 +68,12 @@ class RemindersService {
     return normalizeReminder(response.data)
   }
 
-  async createReminder(data: CreateReminderData): Promise<Reminder> {
+  async createReminder(data: Partial<Reminder>): Promise<Reminder> {
     const response = await ApiService.post<any>(this.baseUrl, data)
     return normalizeReminder(response.data)
   }
 
-  async updateReminder(id: string, data: UpdateReminderData): Promise<Reminder> {
+  async updateReminder(id: string, data: Partial<Reminder>): Promise<Reminder> {
     const response = await ApiService.put<any>(`${this.baseUrl}/${id}`, data)
     return normalizeReminder(response.data)
   }

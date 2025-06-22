@@ -1,0 +1,16 @@
+export const nav = {
+  home: 'Trang chủ',
+  memories: 'Kỷ niệm',
+  reminders: 'Nhắc nhở',
+  anniversaries: 'Ngày kỷ niệm',
+  messages: 'Tin nhắn',
+  photos: 'Ảnh của chúng ta',
+  login: 'Đăng nhập',
+  dashboard: 'Bảng điều khiển',
+  files: 'Tệp tin',
+  notifications: 'Thông báo',
+  profile: 'Hồ sơ',
+  logout: 'Đăng xuất',
+  couples: 'Cặp đôi',
+  settings: 'Cài đặt',
+}

@@ -16,7 +16,7 @@
             mdi-format-quote-open
           </v-icon>
         </div>
-        <h3 class="quote-title text-h6 font-weight-bold">Daily Love Quote</h3>
+        <h3 class="quote-title text-h6 font-weight-bold">{{ $t('dashboard.loveQuote.title') }}</h3>
       </div>
 
       <!-- Quote Text -->
@@ -59,9 +59,8 @@
           class="refresh-btn loveClick mr-2"
           @click="refreshQuote"
           :loading="isRefreshing"
-        >
-          <v-icon start size="20">mdi-refresh</v-icon>
-          New Quote
+        >          <v-icon start size="20">mdi-refresh</v-icon>
+          {{ $t('dashboard.loveQuote.newQuote') }}
         </v-btn>
         
         <v-btn
@@ -71,9 +70,8 @@
           :color="buttonColor"
           class="share-btn loveClick"
           @click="shareQuote"
-        >
-          <v-icon start size="20">mdi-heart</v-icon>
-          Love This
+        >          <v-icon start size="20">mdi-heart</v-icon>
+          {{ $t('dashboard.loveQuote.loveThis') }}
         </v-btn>
       </div>
 
@@ -90,6 +88,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 
 // Props
 interface Props {
@@ -121,6 +120,9 @@ interface LoveQuote {
 
 // Vuetify theme
 const theme = useTheme()
+
+// I18n
+const { t } = useI18n()
 
 // Refs
 const currentQuoteIndex = ref(0)

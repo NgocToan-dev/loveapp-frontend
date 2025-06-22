@@ -7,7 +7,7 @@
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="d-flex flex-column justify-center align-center pa-8">
+      <div v-else-if="error && formType === 'view'" class="d-flex flex-column justify-center align-center pa-8">
         <v-icon icon="mdi-alert-circle" size="48" color="error" class="mb-4" />
         <h3 class="text-h6 mb-2">{{ t('common.error') }}</h3>
         <p class="text-body-2 text-center">{{ error }}</p>
@@ -21,8 +21,8 @@
         </v-btn>
       </div>
 
-      <!-- Reminder Detail -->
-      <div v-else-if="reminder" class="reminder-detail">
+      <!-- Form Mode (Create/Edit) -->
+      <div v-if="formType === 'create' || formType === 'edit'" class="reminder-form">
         <!-- Header -->
         <div class="detail-header">
           <div class="header-background">
@@ -40,7 +40,154 @@
                   <v-icon>mdi-arrow-left</v-icon>
                 </v-btn>
                 <div class="flex-grow-1">
-                  <div class="d-flex align-center">                    <v-chip
+                  <h1 class="text-h4 font-weight-bold">
+                    {{ formType === 'create' ? t('reminders.create') : t('reminders.edit') }}
+                  </h1>
+                </div>
+                <div class="d-flex align-center">
+                  <v-btn
+                    variant="text"
+                    color="error"
+                    @click="goBack"
+                  >
+                    {{ t('common.cancel') }}
+                  </v-btn>
+                </div>
+              </div>
+            </v-container>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <v-container class="py-8">
+          <v-row justify="center">
+            <v-col cols="12" md="8" lg="6">
+              <v-card rounded="xl" elevation="0" class="reminder-form-card">
+                <v-card-text class="pa-6">
+                  <v-form ref="formRef" v-model="formValid" @submit.prevent="handleSubmit">
+                    <v-row>
+                      <v-col cols="12">
+                        <v-text-field
+                          v-model="formData.title"
+                          :label="t('reminders.form.title')"
+                          :rules="titleRules"
+                          variant="outlined"
+                          rounded="xl"
+                          required
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <v-textarea
+                          v-model="formData.description"
+                          :label="t('reminders.form.description')"
+                          variant="outlined"
+                          rounded="xl"
+                          rows="3"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <v-text-field
+                          v-model="formData.reminderDate"
+                          :label="t('reminders.form.date')"
+                          type="datetime-local"
+                          variant="outlined"
+                          rounded="xl"
+                          :rules="dateRules"
+                          required
+                        />
+                      </v-col>
+                      <v-col cols="12" md="6">
+                        <v-select
+                          v-model="formData.repeat"
+                          :items="repeatOptions"
+                          :label="t('reminders.form.repeat')"
+                          variant="outlined"
+                          rounded="xl"
+                          clearable
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <div class="mb-3">
+                          <label class="text-body-2 font-weight-medium text-medium-emphasis">
+                            {{ t('reminders.form.priority') }}
+                          </label>
+                        </div>
+                        <v-chip-group v-model="formData.priority" mandatory variant="tonal">
+                          <v-chip
+                            v-for="opt in priorityOptions"
+                            :key="opt.value"
+                            :value="opt.value"
+                            :color="opt.color"
+                            class="ma-1"
+                          >
+                            <v-icon start size="16">{{ opt.icon }}</v-icon>
+                            {{ opt.label }}
+                          </v-chip>
+                        </v-chip-group>
+                      </v-col>
+                      <v-col cols="12" v-if="formType === 'edit'">
+                        <v-switch 
+                          v-model="formData.isCompleted" 
+                          :label="t('reminders.form.completed')" 
+                          color="success" 
+                        />
+                      </v-col>
+                    </v-row>
+
+                    <v-row class="mt-4">
+                      <v-col cols="12">
+                        <div class="d-flex justify-end ga-3">
+                          <v-btn
+                            variant="outlined"
+                            rounded="xl"
+                            size="large"
+                            @click="goBack"
+                          >
+                            {{ t('common.cancel') }}
+                          </v-btn>
+                          <v-btn
+                            color="primary"
+                            rounded="xl"
+                            size="large"
+                            :loading="isSubmitting"
+                            :disabled="!formValid"
+                            @click="handleSubmit"
+                          >
+                            <v-icon start>{{ formType === 'create' ? 'mdi-plus' : 'mdi-content-save' }}</v-icon>
+                            {{ formType === 'create' ? t('reminders.create') : t('reminders.update') }}
+                          </v-btn>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-form>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
+
+      <!-- View Mode -->
+      <div v-else-if="reminder && formType === 'view'" class="reminder-detail">
+        <!-- Header -->
+        <div class="detail-header">
+          <div class="header-background">
+            <div class="header-overlay"></div>
+          </div>
+          <div class="header-content">
+            <v-container>
+              <div class="d-flex align-center mb-4">
+                <v-btn
+                  icon
+                  variant="text"
+                  @click="goBack"
+                  class="mr-2"
+                >
+                  <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-center">
+                    <v-chip
                       :color="getStatusColor(reminder)"
                       variant="flat"
                       size="small"
@@ -112,7 +259,9 @@
                         <v-icon icon="mdi-clock" class="mr-2" />
                         {{ formatTime(reminder.reminderDate) }}
                       </div>
-                    </div>                    <div class="detail-item mb-4">
+                    </div>
+
+                    <div class="detail-item mb-4">
                       <div class="detail-label">{{ t('reminders.priority') }}</div>
                       <div class="detail-value">
                         <v-icon :icon="getPriorityIcon(reminder.priority)" class="mr-2" />
@@ -220,7 +369,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useRemindersStore } from '@/stores/reminders'
@@ -233,11 +382,91 @@ const { t } = useI18n()
 const remindersStore = useRemindersStore()
 const dialogsStore = useDialogsStore()
 
+// Determine form type based on route
+const formType = ref<'view' | 'edit' | 'create'>('view')
+
+// State for view mode
 const reminder = ref<Reminder | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
+// State for form mode
+const formRef = ref()
+const formValid = ref(false)
+const isSubmitting = ref(false)
+const formData = ref<Partial<Reminder>>({
+  title: '',
+  description: '',
+  reminderDate: '',
+  priority: 'medium',
+  repeat: undefined,
+  isCompleted: false
+})
+
+// Form validation rules
+const titleRules = [
+  (v: string) => !!v || t('validation.required')
+]
+
+const dateRules = [
+  (v: string) => !!v || t('validation.required')
+]
+
+// Form options
+const priorityOptions = computed(() => [
+  { value: 'low', label: t('reminders.priority.low'), icon: 'mdi-arrow-down', color: 'success' },
+  { value: 'medium', label: t('reminders.priority.medium'), icon: 'mdi-minus', color: 'warning' },
+  { value: 'high', label: t('reminders.priority.high'), icon: 'mdi-arrow-up', color: 'error' }
+])
+
+const repeatOptions = computed(() => [
+  { title: t('reminders.repeat.none'), value: undefined },
+  { title: t('reminders.repeat.daily'), value: 'daily' },
+  { title: t('reminders.repeat.weekly'), value: 'weekly' },
+  { title: t('reminders.repeat.monthly'), value: 'monthly' },
+  { title: t('reminders.repeat.yearly'), value: 'yearly' }
+])
+
+// Determine form type on route change
+const determineFormType = () => {
+  const routeName = route.name as string
+  const isCreate = routeName === 'create-reminder' || route.path === '/reminders/create'
+  const isEdit = routeName === 'edit-reminder' || route.path.includes('/edit')
+  
+  if (isCreate) {
+    formType.value = 'create'
+    isLoading.value = false
+    // Initialize form with default values for create
+    formData.value = {
+      title: '',
+      description: '',
+      reminderDate: '',
+      priority: 'medium',
+      repeat: undefined,
+      isCompleted: false
+    }
+  } else if (isEdit) {
+    formType.value = 'edit'
+  } else {
+    formType.value = 'view'
+  }
+}
+
+// Initialize form data for edit mode
+const initializeFormData = (reminderData: Reminder) => {
+  formData.value = {
+    title: reminderData.title,
+    description: reminderData.description,
+    reminderDate: reminderData.reminderDate ? new Date(reminderData.reminderDate).toISOString().slice(0, 16) : '',
+    priority: reminderData.priority,
+    repeat: reminderData.repeat,
+    isCompleted: reminderData.isCompleted || false
+  }
+}
+
 const fetchReminder = async () => {
+  if (formType.value === 'create') return
+  
   try {
     isLoading.value = true
     error.value = null
@@ -246,6 +475,11 @@ const fetchReminder = async () => {
     const fetchedReminder = await remindersStore.fetchReminderById(id)
     if (fetchedReminder) {
       reminder.value = fetchedReminder
+      
+      // If in edit mode, initialize form data
+      if (formType.value === 'edit') {
+        initializeFormData(fetchedReminder)
+      }
     } else {
       error.value = t('reminders.notFound')
     }
@@ -263,7 +497,44 @@ const goBack = () => {
 
 const editReminder = () => {
   if (reminder.value) {
-    router.push({ name: 'edit-reminder', params: { id: reminder.value.id } })
+    formType.value = 'edit'
+    initializeFormData(reminder.value)
+  }
+}
+
+const handleSubmit = async () => {
+  if (!formRef.value) return
+  
+  const { valid } = await formRef.value.validate()
+  if (!valid) return
+  
+  try {
+    isSubmitting.value = true
+    
+    if (formType.value === 'create') {
+      // Create new reminder
+      const newReminder = await remindersStore.createReminder({
+        ...formData.value,
+        reminderDate: new Date(formData.value.reminderDate!),
+      } as Reminder)
+      
+      // Redirect to view mode of created reminder
+      router.push({ name: 'reminder-detail', params: { id: newReminder.id } })
+    } else if (formType.value === 'edit' && reminder.value) {
+      // Update existing reminder
+      const updatedReminder = await remindersStore.updateReminder(reminder.value.id, {
+        ...formData.value,
+        reminderDate: formData.value.reminderDate ? new Date(formData.value.reminderDate) : undefined,
+      })
+      
+      // Update local reminder and switch back to view mode
+      reminder.value = updatedReminder
+      formType.value = 'view'
+    }
+  } catch (error) {
+    console.error('Failed to save reminder:', error)
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -296,12 +567,9 @@ const toggleComplete = async () => {
       const updatedReminder = await remindersStore.completeReminder(reminder.value.id)
       reminder.value = updatedReminder
     } else {
-      // Mark as incomplete - use updateReminder to reset the completion state
-      // Note: This might not work if the API doesn't support uncompleting
-      console.log('Attempting to mark reminder as incomplete:', reminder.value.id)
-      // For now, just update the local state
-      reminder.value.isCompleted = false
-      reminder.value.completedAt = null
+      // Mark as incomplete using uncompleteReminder
+      const updatedReminder = await remindersStore.uncompleteReminder(reminder.value.id)
+      reminder.value = updatedReminder
     }
   } catch (error) {
     console.error('Failed to toggle reminder completion:', error)
@@ -404,8 +672,19 @@ const getStatusDescription = (reminder: Reminder) => {
   return t('reminders.statusUpcoming')
 }
 
+// Watch for route changes
+watch(() => route.path, () => {
+  determineFormType()
+  if (formType.value !== 'create') {
+    fetchReminder()
+  }
+}, { immediate: true })
+
 onMounted(() => {
-  fetchReminder()
+  determineFormType()
+  if (formType.value !== 'create') {
+    fetchReminder()
+  }
 })
 </script>
 
@@ -473,6 +752,11 @@ onMounted(() => {
 
 .status-indicator {
   font-size: 1.1rem;
+}
+
+.reminder-form-card {
+  background-color: rgb(var(--v-theme-surface));
+  border: 1px solid rgb(var(--v-theme-outline-variant));
 }
 
 /* Mobile Responsiveness */
