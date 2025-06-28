@@ -263,7 +263,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useBlog } from '@/composables/useBlog'
+import { useBlog } from '@/composables/useBlog.ts'
 import { useCouple } from '@/composables/useCouple'
 import { useNotifications } from '@/composables/useNotifications'
 import { formatDate } from '@/utils/helpers'
