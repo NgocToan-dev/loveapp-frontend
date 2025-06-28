@@ -40,9 +40,12 @@ export default {
     tags: 'Thẻ',
     tagsPlaceholder: 'Nhập các thẻ, phân cách bằng dấu phẩy',
     tagsHelp: 'Ví dụ: tình yêu, kỷ niệm, du lịch',
+    category: 'Danh mục',
     privacy: 'Quyền riêng tư',
     status: 'Trạng thái',
-    coverImage: 'Ảnh bìa'
+    coverImage: 'Ảnh bìa',
+    draft: 'Bản nháp',
+    published: 'Đã xuất bản'
   },
 
   filters: {
@@ -83,6 +86,16 @@ export default {
     title: 'Soạn bài viết',
     editTitle: 'Chỉnh sửa bài viết',
     placeholder: 'Bắt đầu viết câu chuyện của bạn...',
+    toolbar: {
+      bold: 'In đậm',
+      italic: 'In nghiêng',
+      underline: 'Gạch dưới',
+      link: 'Liên kết',
+      image: 'Hình ảnh',
+      quote: 'Trích dẫn',
+      list: 'Danh sách',
+      heading: 'Tiêu đề'
+    },
     bold: 'In đậm',
     italic: 'In nghiêng',
     strikethrough: 'Gạch ngang',
@@ -101,5 +114,23 @@ export default {
     linkUrlPlaceholder: 'https://example.com',
     linkText: 'Văn bản liên kết',
     linkTextPlaceholder: 'Nhập văn bản liên kết...'
+  },
+
+  actions: {
+    read: 'Đọc',
+    edit: 'Chỉnh sửa',
+    delete: 'Xóa',
+    share: 'Chia sẻ',
+    like: 'Thích',
+    comment: 'Bình luận'
+  },
+
+  categories: {
+    love: 'Tình yêu',
+    life: 'Cuộc sống',
+    travel: 'Du lịch',
+    food: 'Ẩm thực',
+    memories: 'Kỷ niệm',
+    thoughts: 'Suy nghĩ'
   }
 }

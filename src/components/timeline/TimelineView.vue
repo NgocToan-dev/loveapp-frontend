@@ -177,8 +177,8 @@ interface TimelineItem {
 const { t } = useI18n()
 const router = useRouter()
 
-const { memories, fetchMemories, isLoading: memoriesLoading } = useMemories()
-const { reminders, fetchReminders, isLoading: remindersLoading } = useReminders()
+const memoriesStore = useMemories()
+const remindersStore = useReminders()
 const { coupleConnection } = useCouple()
 
 // State
@@ -195,15 +195,15 @@ const filterOptions = [
 ]
 
 // Computed
-const isLoading = computed(() => memoriesLoading.value || remindersLoading.value)
+const isLoading = computed(() => memoriesStore.isLoading || remindersStore.isLoading)
 
 const timelineItems = computed(() => {
   const items: TimelineItem[] = []
 
   // Add memories (with enhanced safe guard)
-  if (memories.value && Array.isArray(memories.value) && memories.value.length > 0) {
+  if (memoriesStore.memories && Array.isArray(memoriesStore.memories) && memoriesStore.memories.length > 0) {
     try {
-      memories.value.forEach(memory => {
+      memoriesStore.memories.forEach((memory: any) => {
         if (memory && memory.id && memory.title && memory.createdAt) {
           items.push({
             id: memory.id,
@@ -221,9 +221,9 @@ const timelineItems = computed(() => {
   }
 
   // Add reminders (with enhanced safe guard)
-  if (reminders.value && Array.isArray(reminders.value) && reminders.value.length > 0) {
+  if (remindersStore.reminders && Array.isArray(remindersStore.reminders) && remindersStore.reminders.length > 0) {
     try {
-      reminders.value.forEach(reminder => {
+      remindersStore.reminders.forEach((reminder: any) => {
         if (reminder && reminder.id && reminder.title && reminder.reminderDate) {
           items.push({
             id: reminder.id,
@@ -323,8 +323,8 @@ import ViewIcon from '@/components/icons/ViewIcon.vue'
 // Lifecycle
 onMounted(async () => {
   await Promise.all([
-    fetchMemories(),
-    fetchReminders()
+    memoriesStore.fetchMemories(),
+    remindersStore.fetchReminders()
   ])
 })
 </script>

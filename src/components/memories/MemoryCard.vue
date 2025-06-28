@@ -1,7 +1,7 @@
 <template>
   <div class="memory-card bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
     <!-- Image Gallery -->
-    <div v-if="memory.images.length > 0" class="relative">
+    <div v-if="memory.images && memory.images.length > 0" class="relative">
       <div class="aspect-w-16 aspect-h-9">
         <img 
           :src="memory.images[0]" 
@@ -11,7 +11,7 @@
       </div>
       
       <!-- Image Count Badge -->
-      <div v-if="memory.images.length > 1" 
+      <div v-if="memory.images && memory.images.length > 1" 
            class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
         <svg class="inline w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
@@ -84,7 +84,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          {{ memory.location.name }}
+          {{ memory.location }}
         </span>
       </div>
 
@@ -181,8 +181,8 @@ const getMoodEmoji = (mood: Memory['mood']) => {
     romantic: '🌹',
     nostalgic: '😌',
     grateful: '🙏'
-  }
-  return moodEmojis[mood] || '😊'
+  } as const
+  return mood ? moodEmojis[mood] || '😊' : '😊'
 }
 
 const toggleFavorite = async () => {

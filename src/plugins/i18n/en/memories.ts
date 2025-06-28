@@ -9,6 +9,7 @@ export default {
 
   form: {
     title: 'Memory Title',
+    description: 'Description',
     titlePlaceholder: 'Enter a beautiful title for this memory...',
     createTitle: 'Create New Memory',
     editTitle: 'Edit Memory',
@@ -17,12 +18,14 @@ export default {
     date: 'Date',
     location: 'Location',
     locationPlaceholder: 'Where did this happen?',
+    photos: 'Photos',
     images: 'Photos',
     dragImages: 'Drag and drop images here or click to select',
     selectImages: 'Select Images',
     tags: 'Tags',
     tagsPlaceholder: 'Add tags and press Enter...',
     mood: 'Mood',
+    weather: 'Weather',
     private: 'Private Memory',
     privateDesc: 'Only you and your partner can see this memory'
   },
@@ -35,6 +38,14 @@ export default {
     peaceful: 'Peaceful',
     nostalgic: 'Nostalgic',
     grateful: 'Grateful'
+  },
+
+  weather: {
+    sunny: 'Sunny',
+    cloudy: 'Cloudy', 
+    rainy: 'Rainy',
+    snowy: 'Snowy',
+    windy: 'Windy'
   },
 
   actions: {

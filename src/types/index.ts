@@ -91,6 +91,7 @@ export interface CreateMemoryRequest {
 
 export interface UpdateMemoryRequest extends Partial<CreateMemoryRequest> {
   id: string
+  isFavorite?: boolean
 }
 
 // Reminder types
@@ -149,6 +150,8 @@ export interface BlogPost {
   createdAt: string
   updatedAt: string
   publishedAt?: string
+  isPrivate?: boolean
+  isPublished?: boolean
 }
 
 export interface CreateBlogPostRequest {
@@ -161,10 +164,14 @@ export interface CreateBlogPostRequest {
   tags?: string[]
   privacy?: 'private' | 'couple' | 'public'
   status?: 'draft' | 'published'
+  isPrivate?: boolean
+  isPublished?: boolean
 }
 
 export interface UpdateBlogPostRequest extends Partial<CreateBlogPostRequest> {
   id: string
+  isPublished?: boolean
+  publishedAt?: string
 }
 
 export interface BlogPostFilters {

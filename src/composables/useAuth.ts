@@ -28,11 +28,17 @@ export function useAuth() {
     try {
       const response = await authService.login(credentials)
       
-      user.value = response.user
+      // Transform response.user to match User interface
+      const userData = {
+        ...response.user,
+        _id: response.user.id || (response.user as any)._id || response.user.id
+      }
+      
+      user.value = userData
       token.value = response.token
       
       // Store in localStorage
-      storage.set('user', response.user)
+      storage.set('user', userData)
       storage.set('auth_token', response.token)
       
       if (credentials.rememberMe) {
@@ -55,11 +61,17 @@ export function useAuth() {
     try {
       const response = await authService.register(credentials)
       
-      user.value = response.user
+      // Transform response.user to match User interface
+      const userData = {
+        ...response.user,
+        _id: response.user.id || (response.user as any)._id || response.user.id
+      }
+      
+      user.value = userData
       token.value = response.token
       
       // Store in localStorage
-      storage.set('user', response.user)
+      storage.set('user', userData)
       storage.set('auth_token', response.token)
       
       return response

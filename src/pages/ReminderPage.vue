@@ -114,7 +114,7 @@
       >
         <ReminderForm
           :reminder="editingReminder || undefined"
-          :is-submitting="isCreating || isUpdating"
+          :is-submitting="isLoading"
           @submit="handleFormSubmit"
           @cancel="closeForm"
         />
@@ -155,21 +155,17 @@ const { isConnected } = useCouple()
 const {
   reminders,
   upcomingReminders,
-  overdueReminders,
+  overDueReminders: overdueReminders,
   completedReminders,
   remindersCount,
   isLoading,
-  isCreating,
-  isUpdating,
   error,
   fetchReminders,
-  fetchUpcomingReminders,
   createReminder,
   updateReminder,
   deleteReminder: deleteReminderFromStore,
   markCompleted,
   markIncomplete,
-  snoozeReminder: snoozeReminderInStore,
   clearError
 } = useReminders()
 
@@ -213,7 +209,7 @@ const deleteReminder = async (id: string) => {
 const toggleComplete = async (id: string) => {
   updatingId.value = id
   try {
-    const reminder = reminders.value.find(r => r.id === id)
+    const reminder = reminders.find((r: any) => r.id === id)
     if (reminder) {
       if (reminder.isCompleted) {
         await markIncomplete(id)
@@ -230,7 +226,12 @@ const toggleComplete = async (id: string) => {
 
 const snoozeReminder = async (id: string, snoozeUntil: string) => {
   try {
-    await snoozeReminderInStore(id, snoozeUntil)
+    const updateData = {
+      id: id,
+      reminderDate: snoozeUntil.split('T')[0],
+      reminderTime: snoozeUntil.split('T')[1] || '09:00'
+    }
+    await updateReminder(updateData)
   } catch (error) {
     // Error handled in composable
   }
@@ -239,20 +240,14 @@ const snoozeReminder = async (id: string, snoozeUntil: string) => {
 // Lifecycle
 onMounted(async () => {
   if (isConnected.value) {
-    await Promise.all([
-      fetchReminders(),
-      fetchUpcomingReminders()
-    ])
+    await fetchReminders()
   }
 })
 
 // Watch for connection status changes
 watch(isConnected, async (newValue) => {
   if (newValue) {
-    await Promise.all([
-      fetchReminders(),
-      fetchUpcomingReminders()
-    ])
+    await fetchReminders()
   }
 })
 </script>

@@ -257,9 +257,8 @@ const getReminderIcon = (type: string) => {
   return icons[type as keyof typeof icons] || "⏰";
 };
 
-const handleCreateMemory = async (memoryData: any) => {
+const handleCreateMemory = async () => {
   try {
-    await createMemory(memoryData);
     showCreateMemory.value = false;
     await fetchMemories(); // Refresh memories
   } catch (error) {

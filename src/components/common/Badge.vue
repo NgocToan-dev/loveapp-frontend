@@ -8,7 +8,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'outline'
   size?: 'sm' | 'md' | 'lg'
   rounded?: boolean
   outlined?: boolean
@@ -44,7 +44,8 @@ const badgeClasses = computed(() => [
     'bg-green-100 text-green-800': props.variant === 'success' && !props.outlined,
     'bg-yellow-100 text-yellow-800': props.variant === 'warning' && !props.outlined,
     'bg-red-100 text-red-800': props.variant === 'error' && !props.outlined,
-    'bg-blue-100 text-blue-800': props.variant === 'info' && !props.outlined
+    'bg-blue-100 text-blue-800': props.variant === 'info' && !props.outlined,
+    'border border-gray-300 text-gray-700 bg-transparent': props.variant === 'outline'
   },
   
   // Variant classes - outlined

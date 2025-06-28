@@ -25,6 +25,16 @@ export default {
     title: 'Create Blog Post',
     editTitle: 'Edit Blog Post',
     placeholder: 'Start writing your story...',
+    toolbar: {
+      bold: 'Bold',
+      italic: 'Italic',
+      underline: 'Underline',
+      link: 'Link',
+      image: 'Image',
+      quote: 'Quote',
+      list: 'List',
+      heading: 'Heading'
+    },
     bold: 'Bold',
     italic: 'Italic',
     strikethrough: 'Strikethrough',
@@ -62,17 +72,20 @@ export default {
     selectCoverImage: 'Select Cover Image',
     tags: 'Tags',
     tagsPlaceholder: 'Add tags and press Enter...',
+    category: 'Category',
     settings: 'Settings',
     privacy: 'Privacy',
     private: 'Private Post',
     privateHelp: 'Only you and your partner can see this post',
     publishing: 'Publishing',
     publish: 'Publish Post',
-    publishHelp: 'Make this post visible to others'
+    publishHelp: 'Make this post visible to others',
+    draft: 'Draft',
+    published: 'Published'
   },
 
   actions: {
-    view: 'View',
+    read: 'Read',
     edit: 'Edit',
     delete: 'Delete',
     publish: 'Publish',

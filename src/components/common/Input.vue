@@ -104,7 +104,7 @@
 import { computed, ref, useSlots, useAttrs } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 
-type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'textarea'
+type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'textarea' | 'date' | 'time'
 
 interface Props {
   modelValue?: string | number

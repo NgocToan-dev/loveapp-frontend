@@ -3,12 +3,12 @@
     <!-- Connection Status Display -->
     <div v-if="isConnected" class="connection-status connected">
       <div class="partner-info">
-        <Avatar :src="partner?.avatar" :name="partnerName" size="large" />
+        <Avatar :src="partner?.avatarUrl" :name="partnerName" size="lg" />
         <div class="partner-details">
           <h3>{{ partnerName }}</h3>
           <p class="duration">{{ formatRelationshipDuration() }}</p>
           <p class="next-anniversary">
-            {{ $t('couple.next_anniversary') }}: {{ formatCountdown(nextAnniversary) }}
+            {{ $t('couple.next_anniversary') }}: {{ nextAnniversary ? formatCountdown(nextAnniversary) : '-' }}
           </p>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <Button
           @click="showEditRelationshipDate = true"
           variant="outline"
-          size="small"
+          size="sm"
         >
           {{ $t('couple.edit_relationship_date') }}
         </Button>
@@ -25,7 +25,7 @@
         <Button
           @click="showDisconnectConfirm = true"
           variant="error"
-          size="small"
+          size="sm"
         >
           {{ $t('couple.disconnect') }}
         </Button>
@@ -108,7 +108,7 @@
           <Button
             @click="copyInvitationCode(invitation.invitationCode)"
             variant="ghost"
-            size="small"
+            size="sm"
           >
             {{ $t('couple.copy_code') }}
           </Button>
@@ -119,7 +119,7 @@
     <!-- Error Display -->
     <div v-if="error" class="error-message">
       <p>{{ error }}</p>
-      <Button @click="clearError" variant="ghost" size="small">
+      <Button @click="clearError" variant="ghost" size="sm">
         {{ $t('common.dismiss') }}
       </Button>
     </div>

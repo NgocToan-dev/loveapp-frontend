@@ -11,6 +11,9 @@ import type {
   CreateBlogCommentRequest
 } from '@/types'
 
+// Export types for component usage
+export type { BlogPost } from '@/types'
+
 export const useBlogStore = defineStore('blog', () => {
   // State
   const posts = ref<BlogPost[]>([])

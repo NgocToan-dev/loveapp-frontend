@@ -74,7 +74,7 @@
                 variant="outline"
                 size="sm"
                 class="mt-2"
-                @click="$refs.imageInput.click()"
+                @click="imageInput?.click()"
               >
                 {{ $t('blog.form.selectCoverImage') }}
               </Button>
@@ -227,7 +227,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useBlogStore, type BlogPost, type CreateBlogPostData } from '@/stores/blog'
+import { useBlogStore, type BlogPost } from '@/stores/blog'
+import type { CreateBlogPostRequest } from '@/types'
 import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
@@ -253,11 +254,14 @@ const { t } = useI18n()
 const blogStore = useBlogStore()
 
 // Form state
-const form = ref<CreateBlogPostData>({
+const form = ref<CreateBlogPostRequest>({
   title: '',
   content: '',
+  contentHtml: '',
   excerpt: '',
   tags: [],
+  privacy: 'private',
+  status: 'draft',
   isPrivate: false,
   isPublished: false
 })
@@ -353,6 +357,7 @@ const handleSubmit = async () => {
   try {
     const submitData = {
       ...form.value,
+      contentHtml: form.value.content, // For now, use content as contentHtml
       coverImage: selectedCoverImage.value || undefined
     }
 
@@ -382,7 +387,9 @@ const saveDraft = async () => {
   try {
     const draftData = {
       ...form.value,
+      contentHtml: form.value.content, // For now, use content as contentHtml
       isPublished: false,
+      status: 'draft' as const,
       coverImage: selectedCoverImage.value || undefined
     }
 
@@ -410,7 +417,11 @@ const unpublish = async () => {
   isUnpublishing.value = true
   
   try {
-    await blogStore.unpublishPost(props.post.id)
+    await blogStore.updatePost({
+      id: props.post.id,
+      status: 'draft',
+      isPublished: false
+    })
     emit('success')
     handleClose()
   } catch (error) {
@@ -424,8 +435,11 @@ const resetForm = () => {
   form.value = {
     title: '',
     content: '',
+    contentHtml: '',
     excerpt: '',
     tags: [],
+    privacy: 'private',
+    status: 'draft',
     isPrivate: false,
     isPublished: false
   }
@@ -446,10 +460,13 @@ watch(() => props.post, (post) => {
     form.value = {
       title: post.title,
       content: post.content,
+      contentHtml: post.contentHtml,
       excerpt: post.excerpt,
       tags: [...post.tags],
-      isPrivate: post.isPrivate,
-      isPublished: post.isPublished
+      privacy: post.privacy,
+      status: post.status,
+      isPrivate: post.isPrivate ?? false,
+      isPublished: post.isPublished ?? false
     }
     coverImagePreview.value = post.coverImage || null
     // Note: We don't set selectedCoverImage for existing posts

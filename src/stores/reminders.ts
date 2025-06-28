@@ -7,6 +7,9 @@ import type {
   UpdateReminderRequest 
 } from '@/types'
 
+// Export types for component usage
+export type { Reminder } from '@/types'
+
 export const useRemindersStore = defineStore('reminders', () => {
   // State
   const reminders = ref<Reminder[]>([])
@@ -247,6 +250,60 @@ export const useRemindersStore = defineStore('reminders', () => {
     selectedReminder.value = null
   }
 
+  // Missing methods implementation
+  const snoozeReminder = async (id: string, snoozeUntil: string) => {
+    try {
+      const reminder = reminders.value.find(r => r.id === id)
+      if (!reminder) throw new Error('Reminder not found')
+      
+      const snoozeDate = new Date(snoozeUntil)
+      const updatedReminder = await remindersService.updateReminder({
+        id,
+        reminderDate: snoozeDate.toISOString().split('T')[0],
+        reminderTime: snoozeDate.toTimeString().split(' ')[0].substring(0, 5)
+      })
+      
+      // Update in local state
+      const index = reminders.value.findIndex(r => r.id === id)
+      if (index !== -1) {
+        reminders.value[index] = updatedReminder
+      }
+      
+      // Update selected reminder if it's the same
+      if (selectedReminder.value?.id === id) {
+        selectedReminder.value = updatedReminder
+      }
+      
+      return updatedReminder
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    }
+  }
+
+  const fetchUpcomingReminders = async (days = 7) => {
+    try {
+      isLoading.value = true
+      const endDate = new Date()
+      endDate.setDate(endDate.getDate() + days)
+      
+      // For now, filter from existing reminders
+      // In real app, this would be a separate API call
+      const upcoming = reminders.value.filter(reminder => {
+        const reminderDate = new Date(reminder.reminderDate)
+        const now = new Date()
+        return reminderDate >= now && reminderDate <= endDate && !reminder.isCompleted
+      })
+      
+      return upcoming
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     // State
     reminders,
@@ -273,6 +330,10 @@ export const useRemindersStore = defineStore('reminders', () => {
     markCompleted,
     markIncomplete,
     clearError,
-    clearSelectedReminder
+    clearSelectedReminder,
+    
+    // New methods
+    snoozeReminder,
+    fetchUpcomingReminders
   }
 })

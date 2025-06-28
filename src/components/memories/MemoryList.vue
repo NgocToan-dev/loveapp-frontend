@@ -323,8 +323,8 @@ const getMoodEmoji = (mood: Memory['mood']) => {
     romantic: '🌹',
     nostalgic: '😌',
     grateful: '🙏'
-  }
-  return moodEmojis[mood] || '😊'
+  } as const
+  return mood ? moodEmojis[mood] || '😊' : '😊'
 }
 
 const setSortBy = (field: string, direction: 'asc' | 'desc') => {
@@ -397,7 +397,7 @@ const loadMore = async () => {
 // Watch for search changes
 watch(searchQuery, (newQuery) => {
   memoriesStore.setFilters({ search: newQuery })
-}, { debounced: true, debounceTime: 300 })
+}, { immediate: false })
 
 // Load memories on mount
 onMounted(() => {

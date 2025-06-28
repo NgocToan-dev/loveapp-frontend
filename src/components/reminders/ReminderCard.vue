@@ -24,7 +24,7 @@
         <Button
           @click="toggleComplete"
           :variant="reminder.isCompleted ? 'outline' : 'primary'"
-          size="small"
+          size="sm"
           :loading="isUpdating"
         >
           {{ reminder.isCompleted ? $t('reminders.mark_incomplete') : $t('reminders.mark_complete') }}
@@ -32,7 +32,7 @@
         
         <Dropdown>
           <template #trigger>
-            <Button variant="ghost" size="small" class="more-actions">
+            <Button variant="ghost" size="sm" class="more-actions">
               ⋯
             </Button>
           </template>
@@ -90,7 +90,7 @@
     <div class="reminder-footer">
       <div class="reminder-meta">
         <span class="created-by">
-          {{ $t('reminders.created_by') }}: {{ reminder.author?.firstName || 'Unknown' }}
+          {{ $t('reminders.created_by') }}: {{ reminder.createdBy || 'Unknown' }}
         </span>
         <span class="created-date">
           {{ formatDate(reminder.createdAt, 'relative') }}
@@ -122,16 +122,22 @@
         <div class="custom-snooze">
           <h4>{{ $t('reminders.custom_snooze') }}</h4>
           <div class="snooze-form">
-            <Input
-              v-model="customSnoozeDate"
-              type="date"
-              :label="$t('reminders.snooze_until_date')"
-            />
-            <Input
-              v-model="customSnoozeTime"
-              type="time"
-              :label="$t('reminders.snooze_until_time')"
-            />
+            <div class="input-group">
+              <label>{{ $t('reminders.snooze_until_date') }}</label>
+              <input
+                v-model="customSnoozeDate"
+                type="date"
+                class="form-input"
+              />
+            </div>
+            <div class="input-group">
+              <label>{{ $t('reminders.snooze_until_time') }}</label>
+              <input
+                v-model="customSnoozeTime"
+                type="time"
+                class="form-input"
+              />
+            </div>
             <Button
               @click="handleCustomSnooze"
               :disabled="!customSnoozeDate || !customSnoozeTime"
@@ -447,6 +453,32 @@ const handleCustomSnooze = () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+}
+
+.form-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  }
 }
 
 @media (max-width: 768px) {

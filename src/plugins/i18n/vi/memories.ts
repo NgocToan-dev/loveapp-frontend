@@ -9,6 +9,7 @@ export default {
 
   form: {
     title: 'Tiêu đề kỷ niệm',
+    description: 'Mô tả',
     titlePlaceholder: 'Nhập tiêu đề đẹp cho kỷ niệm này...',
     createTitle: 'Tạo kỷ niệm mới',
     editTitle: 'Chỉnh sửa kỷ niệm',
@@ -17,12 +18,14 @@ export default {
     date: 'Ngày tháng',
     location: 'Địa điểm',
     locationPlaceholder: 'Điều này xảy ra ở đâu?',
+    photos: 'Hình ảnh',
     images: 'Hình ảnh',
     dragImages: 'Kéo thả hình ảnh vào đây hoặc nhấp để chọn',
     selectImages: 'Chọn hình ảnh',
     tags: 'Thẻ',
     tagsPlaceholder: 'Thêm thẻ và nhấn Enter...',
     mood: 'Tâm trạng',
+    weather: 'Thời tiết',
     private: 'Kỷ niệm riêng tư',
     privateDesc: 'Chỉ bạn và người yêu có thể xem kỷ niệm này'
   },
@@ -35,6 +38,14 @@ export default {
     peaceful: 'Bình yên',
     nostalgic: 'Hoài niệm',
     grateful: 'Biết ơn'
+  },
+
+  weather: {
+    sunny: 'Nắng',
+    cloudy: 'Có mây', 
+    rainy: 'Mưa',
+    snowy: 'Tuyết',
+    windy: 'Gió'
   },
 
   actions: {

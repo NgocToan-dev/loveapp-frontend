@@ -2,7 +2,7 @@
   <Modal 
     :is-open="isOpen" 
     :title="isEditMode ? $t('memories.form.editTitle') : $t('memories.form.createTitle')"
-    size="large"
+    size="lg"
     @close="handleClose"
   >
     <form @submit.prevent="handleSubmit" class="space-y-6">
@@ -85,7 +85,7 @@
             variant="outline"
             size="sm"
             class="mt-2"
-            @click="$refs.fileInput.click()"
+            @click="fileInput?.click()"
           >
             {{ $t('memories.form.selectImages') }}
           </Button>
@@ -123,7 +123,7 @@
         </label>
         <Input
           id="location"
-          v-model="form.location.name"
+          v-model="form.location"
           :placeholder="$t('memories.form.locationPlaceholder')"
           :error="errors.location"
         />
@@ -244,7 +244,7 @@ const form = ref<CreateMemoryData>({
   date: new Date().toISOString().split('T')[0],
   images: [],
   tags: [],
-  location: { name: '' },
+  location: '',
   mood: undefined,
   isPrivate: false
 })
@@ -276,8 +276,8 @@ const getMoodEmoji = (mood: Memory['mood']) => {
     romantic: '🌹',
     nostalgic: '😌',
     grateful: '🙏'
-  }
-  return moodEmojis[mood] || '😊'
+  } as const
+  return mood ? moodEmojis[mood] || '😊' : '😊'
 }
 
 const handleFileSelect = (event: Event) => {
@@ -386,7 +386,7 @@ const resetForm = () => {
     date: new Date().toISOString().split('T')[0],
     images: [],
     tags: [],
-    location: { name: '' },
+    location: '',
     mood: undefined,
     isPrivate: false
   }
@@ -408,7 +408,7 @@ watch(() => props.memory, (memory) => {
       content: memory.content,
       date: memory.date,
       tags: [...memory.tags],
-      location: { ...memory.location } || { name: '' },
+      location: memory.location || '',
       mood: memory.mood,
       isPrivate: memory.isPrivate
     }

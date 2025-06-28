@@ -7,6 +7,9 @@ import type {
   UpdateMemoryRequest 
 } from '@/types'
 
+// Export types for component usage
+export type { Memory } from '@/types'
+
 export interface CreateMemoryData {
   title: string
   content: string
@@ -14,6 +17,7 @@ export interface CreateMemoryData {
   images?: File[]
   tags?: string[]
   location?: string
+  mood?: Memory['mood']
   isPrivate?: boolean
 }
 
@@ -43,6 +47,8 @@ export const useMemoriesStore = defineStore('memories', () => {
       direction: 'desc' as 'asc' | 'desc'
     }
   })
+  const sortBy = ref('date')
+  const sortDirection = ref<'asc' | 'desc'>('desc')
 
   // Getters
   const filteredMemories = computed(() => {
@@ -299,6 +305,92 @@ export const useMemoriesStore = defineStore('memories', () => {
     }
   }
 
+  // Missing methods implementation
+  const toggleFavorite = async (id: string) => {
+    try {
+      const memory = memories.value.find(m => m.id === id)
+      if (!memory) throw new Error('Memory not found')
+      
+      const updatedMemory = await memoriesService.updateMemory({
+        id,
+        isFavorite: !memory.isFavorite
+      })
+      
+      // Update in local state
+      const index = memories.value.findIndex(m => m.id === id)
+      if (index !== -1) {
+        memories.value[index] = updatedMemory
+      }
+      
+      // Update selected memory if it's the same
+      if (selectedMemory.value?.id === id) {
+        selectedMemory.value = updatedMemory
+      }
+      
+      return updatedMemory
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    }
+  }
+
+  const setSortBy = (field: string, direction: 'asc' | 'desc' = 'desc') => {
+    sortBy.value = field
+    sortDirection.value = direction
+    // Apply sorting to current memories
+    applySort()
+  }
+
+  const setFilters = (newFilters: Partial<typeof filters.value>) => {
+    filters.value = { ...filters.value, ...newFilters }
+    // Apply filters immediately
+    applyFilters()
+  }
+
+  const loadMoreMemories = async (limit = 20) => {
+    if (isLoading.value) return []
+    
+    try {
+      isLoading.value = true
+      const offset = memories.value.length
+      const response = await memoriesService.getMemories(limit, offset)
+      
+      // Handle paginated response
+      const newMemories = Array.isArray(response) ? response : response.data || []
+      
+      // Append new memories
+      memories.value.push(...newMemories)
+      return newMemories
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Helper methods
+  const applySort = () => {
+    memories.value.sort((a, b) => {
+      const aValue = a[sortBy.value as keyof Memory] || ''
+      const bValue = b[sortBy.value as keyof Memory] || ''
+      
+      if (sortDirection.value === 'asc') {
+        return aValue > bValue ? 1 : -1
+      } else {
+        return aValue < bValue ? 1 : -1
+      }
+    })
+  }
+
+  const applyFilters = () => {
+    // This would typically re-fetch from server with filters
+    // For now, we'll just trigger a re-fetch
+    if (memories.value.length > 0) {
+      fetchMemories()
+    }
+  }
+
   // Filter actions
   const updateFilters = (newFilters: Partial<typeof filters.value>) => {
     filters.value = { ...filters.value, ...newFilters }
@@ -354,6 +446,10 @@ export const useMemoriesStore = defineStore('memories', () => {
     updateMemory,
     deleteMemory,
     searchMemories,
+    toggleFavorite,
+    setSortBy,
+    setFilters,
+    loadMoreMemories,
     updateFilters,
     clearFilters,
     clearError,

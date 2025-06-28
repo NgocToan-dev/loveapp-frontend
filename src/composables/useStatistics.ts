@@ -7,21 +7,21 @@ import { getDaysBetween } from '@/utils/helpers'
 
 export const useStatistics = () => {
   const { user } = useAuth()
-  const { memories } = useMemories()
-  const { reminders } = useReminders()
+  const memoriesStore = useMemories()
+  const remindersStore = useReminders()
   const { coupleConnection } = useCouple()
 
   // Computed statistics
-  const memoriesCount = computed(() => memories.value.length)
+  const memoriesCount = computed(() => memoriesStore.memories.length)
   
-  const remindersCount = computed(() => reminders.value.length)
+  const remindersCount = computed(() => remindersStore.reminders.length)
   
   const pendingRemindersCount = computed(() => 
-    reminders.value.filter(r => r.isCompleted === false).length
+    remindersStore.reminders.filter((r: any) => r.isCompleted === false).length
   )
   
   const completedRemindersCount = computed(() => 
-    reminders.value.filter(r => r.isCompleted === true).length
+    remindersStore.reminders.filter((r: any) => r.isCompleted === true).length
   )
   
   const daysTogethger = computed(() => {
@@ -31,13 +31,13 @@ export const useStatistics = () => {
   
   const upcomingReminders = computed(() => {
     const today = new Date()
-    const upcoming = reminders.value.filter(r => {
+    const upcoming = remindersStore.reminders.filter((r: any) => {
       const reminderDate = new Date(r.reminderDate)
       const diffTime = reminderDate.getTime() - today.getTime()
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
       return diffDays >= 0 && diffDays <= 7 && !r.isCompleted
     })
-    return upcoming.sort((a, b) => new Date(a.reminderDate).getTime() - new Date(b.reminderDate).getTime())
+    return upcoming.sort((a: any, b: any) => new Date(a.reminderDate).getTime() - new Date(b.reminderDate).getTime())
   })
   
   const thisMonthMemories = computed(() => {
@@ -45,7 +45,7 @@ export const useStatistics = () => {
     const thisMonth = today.getMonth()
     const thisYear = today.getFullYear()
     
-    return memories.value.filter(m => {
+    return memoriesStore.memories.filter((m: any) => {
       const memoryDate = new Date(m.createdAt)
       return memoryDate.getMonth() === thisMonth && memoryDate.getFullYear() === thisYear
     }).length
@@ -61,10 +61,10 @@ export const useStatistics = () => {
     }> = []
     
     // Add recent memories
-    memories.value
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    memoriesStore.memories
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 3)
-      .forEach(memory => {
+      .forEach((memory: any) => {
         activities.push({
           id: memory.id,
           type: 'memory',
@@ -75,10 +75,10 @@ export const useStatistics = () => {
       })
     
     // Add recent reminders
-    reminders.value
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    remindersStore.reminders
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 3)
-      .forEach(reminder => {
+      .forEach((reminder: any) => {
         activities.push({
           id: reminder.id,
           type: 'reminder',

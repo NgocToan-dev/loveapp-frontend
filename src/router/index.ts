@@ -30,15 +30,33 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/blog/:id',
+      name: 'blog-detail',
+      component: () => import('@/pages/BlogDetailPage.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/memories',
       name: 'memories',
       component: () => import('@/pages/MemoriesPage.vue'),
       meta: { requiresAuth: true }
     },
     {
+      path: '/memories/:id',
+      name: 'memory-detail',
+      component: () => import('@/pages/MemoryDetailPage.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/reminders',
       name: 'reminders', 
       component: () => import('@/pages/ReminderPage.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/reminders/:id',
+      name: 'reminder-detail',
+      component: () => import('@/pages/ReminderDetailPageNew.vue'),
       meta: { requiresAuth: true }
     },
     {

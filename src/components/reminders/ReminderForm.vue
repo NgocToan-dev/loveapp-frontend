@@ -20,7 +20,7 @@
           type="textarea"
           :label="$t('reminders.form.description')"
           :placeholder="$t('reminders.form.description_placeholder')"
-          rows="3"
+          :rows="3"
         />
       </div>
 
@@ -90,7 +90,7 @@
               @click="form.recurringType = type.value"
               class="recurring-button"
               type="button"
-              size="small"
+              size="sm"
             >
               {{ type.label }}
             </Button>
@@ -161,17 +161,17 @@ const errors = ref<Record<string, string>>({})
 const isEditing = computed(() => !!props.reminder)
 
 const reminderTypes = computed(() => [
-  { value: 'anniversary', label: t('reminders.types.anniversary'), icon: '💕' },
-  { value: 'birthday', label: t('reminders.types.birthday'), icon: '🎂' },
-  { value: 'date', label: t('reminders.types.date'), icon: '💝' },
-  { value: 'custom', label: t('reminders.types.custom'), icon: '⭐' }
+  { value: 'anniversary' as const, label: t('reminders.types.anniversary'), icon: '💕' },
+  { value: 'birthday' as const, label: t('reminders.types.birthday'), icon: '🎂' },
+  { value: 'date' as const, label: t('reminders.types.date'), icon: '💝' },
+  { value: 'custom' as const, label: t('reminders.types.custom'), icon: '⭐' }
 ])
 
 const recurringTypes = computed(() => [
-  { value: 'daily', label: t('reminders.recurring.daily') },
-  { value: 'weekly', label: t('reminders.recurring.weekly') },
-  { value: 'monthly', label: t('reminders.recurring.monthly') },
-  { value: 'yearly', label: t('reminders.recurring.yearly') }
+  { value: 'daily' as const, label: t('reminders.recurring.daily') },
+  { value: 'weekly' as const, label: t('reminders.recurring.weekly') },
+  { value: 'monthly' as const, label: t('reminders.recurring.monthly') },
+  { value: 'yearly' as const, label: t('reminders.recurring.yearly') }
 ])
 
 const isFormValid = computed(() => {
