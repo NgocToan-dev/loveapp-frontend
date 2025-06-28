@@ -20,14 +20,14 @@
           @click="sortOrder = 'desc'"
           :title="$t('timeline.sortDesc')"
         >
-          <DescIcon />
+          <SortDescIcon />
         </button>
         <button
           :class="['sort-btn', { active: sortOrder === 'asc' }]"
           @click="sortOrder = 'asc'"  
           :title="$t('timeline.sortAsc')"
         >
-          <AscIcon />
+          <SortAscIcon />
         </button>
       </div>
     </div>
@@ -316,30 +316,9 @@ const viewReminder = (id: string) => {
 }
 
 // Icon components
-const DescIcon = {
-  template: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="18,15 12,9 6,15"/>
-    </svg>
-  `
-}
-
-const AscIcon = {
-  template: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="6,9 12,15 18,9"/>
-    </svg>
-  `
-}
-
-const ViewIcon = {
-  template: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
-    </svg>
-  `
-}
+import SortDescIcon from '@/components/icons/SortDescIcon.vue'
+import SortAscIcon from '@/components/icons/SortAscIcon.vue'
+import ViewIcon from '@/components/icons/ViewIcon.vue'
 
 // Lifecycle
 onMounted(async () => {

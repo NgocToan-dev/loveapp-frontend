@@ -14,6 +14,12 @@ export default {
     hasAccount: 'Đã có tài khoản?'
   },
   form: {
+    firstName: 'Tên',
+    firstNamePlaceholder: 'Nhập tên của bạn',
+    lastName: 'Họ',
+    lastNamePlaceholder: 'Nhập họ của bạn',
+    username: 'Tên đăng nhập',
+    usernamePlaceholder: 'Chọn tên đăng nhập',
     name: 'Họ và tên',
     namePlaceholder: 'Nhập họ và tên của bạn',
     email: 'Địa chỉ email',

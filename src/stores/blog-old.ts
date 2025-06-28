@@ -40,9 +40,6 @@ export const useBlogStore = defineStore('blog', () => {
 
   // Computed
   const filteredPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     let filtered = [...posts.value]
 
     // Search filter
@@ -99,34 +96,20 @@ export const useBlogStore = defineStore('blog', () => {
   })
 
   const publishedPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     return posts.value.filter(post => post.status === 'published')
   })
 
   const draftPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     return posts.value.filter(post => post.status === 'draft')
   })
 
   const publicPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     return posts.value.filter(post => post.privacy === 'public' && post.status === 'published')
   })
 
-  const postsCount = computed(() => {
-    return Array.isArray(posts.value) ? posts.value.length : 0
-  })
+  const postsCount = computed(() => posts.value.length)
 
   const allTags = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     const tagSet = new Set<string>()
     posts.value.forEach(post => {
       post.tags.forEach(tag => tagSet.add(tag))
@@ -143,28 +126,17 @@ export const useBlogStore = defineStore('blog', () => {
       const response = await blogService.getBlogPosts(page, limit, filters.value)
       
       if (page === 1) {
-        posts.value = Array.isArray(response.data) ? response.data : []
+        posts.value = response.data
       } else {
-        if (Array.isArray(posts.value) && Array.isArray(response.data)) {
-          posts.value.push(...response.data)
-        } else {
-          posts.value = Array.isArray(response.data) ? response.data : []
-        }
+        posts.value.push(...response.data)
       }
       
       totalPages.value = response.pagination.totalPages
-      totalPosts.value = response.pagination.total
+      totalPosts.value = response.pagination.totalItems
       currentPage.value = page
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tải blog posts'
       console.error('Error fetching blog posts:', err)
-      // Ensure posts is always an array even on error
-      posts.value = []
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   const fetchPostById = async (id: string) => {
     isLoading.value = true
     error.value = null
@@ -186,16 +158,50 @@ export const useBlogStore = defineStore('blog', () => {
     
     try {
       const newPost = await blogService.createBlogPost(data)
-      if (Array.isArray(posts.value)) {
-        posts.value.unshift(newPost)
-      } else {
-        posts.value = [newPost]
-      }
+      posts.value.unshift(newPost)
       totalPosts.value++
       return newPost
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tạo bài viết'
       console.error('Error creating blog post:', err)
+      throw err
+    } finally {
+      isCreating.value = false
+    }
+  }
+    isCreating.value = true
+    error.value = null
+    
+    try {
+      // Mock API call - replace with actual API
+      const newPost: BlogPost = {
+        id: Date.now().toString(),
+        title: data.title,
+        content: data.content,
+        contentHtml: data.contentHtml,
+        excerpt: data.excerpt || data.content.substring(0, 150) + '...',
+        coverImageUrl: data.coverImageUrl,
+        author: {
+          id: 'current-user',
+          displayName: 'Tôi',
+          avatarUrl: 'https://picsum.photos/100/100?random=3'
+        },
+        tags: data.tags || [],
+        privacy: data.privacy || 'couple',
+        status: data.status || 'draft',
+        isLiked: false,
+        likesCount: 0,
+        views: 0,
+        readingTime: Math.ceil(data.content.length / 200),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        publishedAt: data.status === 'published' ? new Date().toISOString() : undefined
+      }
+      
+      posts.value.unshift(newPost)
+      return newPost
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Có lỗi xảy ra khi tạo bài viết'
       throw err
     } finally {
       isCreating.value = false
@@ -207,20 +213,36 @@ export const useBlogStore = defineStore('blog', () => {
     error.value = null
     
     try {
-      const updatedPost = await blogService.updateBlogPost(data)
-      if (Array.isArray(posts.value)) {
-        const index = posts.value.findIndex(p => p.id === data.id)
-        if (index !== -1) {
-          posts.value[index] = updatedPost
+      // Mock API call - replace with actual API
+      const index = posts.value.findIndex(p => p.id === data.id)
+      if (index !== -1) {
+        const updatedPost: BlogPost = {
+          ...posts.value[index],
+          title: data.title || posts.value[index].title,
+          content: data.content || posts.value[index].content,
+          contentHtml: data.contentHtml || posts.value[index].contentHtml,
+          excerpt: data.excerpt || posts.value[index].excerpt,
+          coverImageUrl: data.coverImageUrl || posts.value[index].coverImageUrl,
+          tags: data.tags || posts.value[index].tags,
+          privacy: data.privacy || posts.value[index].privacy,
+          status: data.status || posts.value[index].status,
+          updatedAt: new Date().toISOString(),
+          publishedAt: data.status === 'published' && !posts.value[index].publishedAt 
+            ? new Date().toISOString() 
+            : posts.value[index].publishedAt
         }
+        posts.value[index] = updatedPost
+        
+        if (selectedPost.value?.id === data.id) {
+          selectedPost.value = updatedPost
+        }
+        
+        return updatedPost
+      } else {
+        throw new Error('Không tìm thấy bài viết')
       }
-      if (selectedPost.value?.id === data.id) {
-        selectedPost.value = updatedPost
-      }
-      return updatedPost
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi cập nhật bài viết'
-      console.error('Error updating blog post:', err)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Có lỗi xảy ra khi cập nhật bài viết'
       throw err
     } finally {
       isUpdating.value = false
@@ -232,17 +254,19 @@ export const useBlogStore = defineStore('blog', () => {
     error.value = null
     
     try {
-      await blogService.deleteBlogPost(id)
-      if (Array.isArray(posts.value)) {
-        posts.value = posts.value.filter(p => p.id !== id)
+      // Mock API call - replace with actual API
+      const index = posts.value.findIndex(p => p.id === id)
+      if (index !== -1) {
+        posts.value.splice(index, 1)
+        
+        if (selectedPost.value?.id === id) {
+          selectedPost.value = null
+        }
+      } else {
+        throw new Error('Không tìm thấy bài viết')
       }
-      totalPosts.value--
-      if (selectedPost.value?.id === id) {
-        selectedPost.value = null
-      }
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi xóa bài viết'
-      console.error('Error deleting blog post:', err)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Có lỗi xảy ra khi xóa bài viết'
       throw err
     } finally {
       isDeleting.value = false
@@ -251,57 +275,47 @@ export const useBlogStore = defineStore('blog', () => {
 
   const toggleLike = async (id: string) => {
     try {
-      const result = await blogService.toggleLike(id)
+      // Mock API call - replace with actual API
       const post = posts.value.find(p => p.id === id)
       if (post) {
-        post.isLiked = result.isLiked
-        post.likesCount = result.likesCount
+        if (post.isLiked) {
+          post.isLiked = false
+          post.likesCount--
+        } else {
+          post.isLiked = true
+          post.likesCount++
+        }
+        
+        if (selectedPost.value?.id === id) {
+          selectedPost.value = { ...post }
+        }
       }
-      if (selectedPost.value?.id === id) {
-        selectedPost.value.isLiked = result.isLiked
-        selectedPost.value.likesCount = result.likesCount
-      }
-      return result
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi thích bài viết'
-      console.error('Error toggling like:', err)
-      throw err
-    }
-  }
-
-  const fetchComments = async (postId: string) => {
-    try {
-      const commentList = await blogService.getComments(postId)
-      comments.value = commentList
-      return commentList
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi tải bình luận'
-      console.error('Error fetching comments:', err)
-      throw err
-    }
-  }
-
-  const addComment = async (postId: string, data: CreateBlogCommentRequest) => {
-    try {
-      const newComment = await blogService.addComment(postId, data)
-      comments.value.push(newComment)
-      return newComment
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi thêm bình luận'
-      console.error('Error adding comment:', err)
-      throw err
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Có lỗi xảy ra'
     }
   }
 
   const fetchStats = async () => {
     try {
-      const blogStats = await blogService.getBlogStats()
-      stats.value = blogStats
-      return blogStats
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi tải thống kê'
-      console.error('Error fetching stats:', err)
-      throw err
+      // Mock stats - replace with actual API
+      stats.value = {
+        totalPosts: posts.value.length,
+        publishedPosts: publishedPosts.value.length,
+        draftPosts: draftPosts.value.length,
+        totalViews: posts.value.reduce((sum, post) => sum + post.views, 0),
+        totalLikes: posts.value.reduce((sum, post) => sum + post.likesCount, 0),
+        postsThisMonth: posts.value.filter(post => {
+          const postDate = new Date(post.createdAt)
+          const now = new Date()
+          return postDate.getMonth() === now.getMonth() && postDate.getFullYear() === now.getFullYear()
+        }).length,
+        popularTags: allTags.value.slice(0, 10).map(tag => ({
+          tag,
+          count: posts.value.filter(post => post.tags.includes(tag)).length
+        })).sort((a, b) => b.count - a.count)
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Có lỗi xảy ra khi tải thống kê'
     }
   }
 
@@ -321,10 +335,6 @@ export const useBlogStore = defineStore('blog', () => {
 
   const clearError = () => {
     error.value = null
-  }
-
-  const clearSelectedPost = () => {
-    selectedPost.value = null
   }
 
   return {
@@ -359,12 +369,9 @@ export const useBlogStore = defineStore('blog', () => {
     updatePost,
     deletePost,
     toggleLike,
-    fetchComments,
-    addComment,
     fetchStats,
     updateFilters,
     clearFilters,
-    clearError,
-    clearSelectedPost
+    clearError
   }
 })

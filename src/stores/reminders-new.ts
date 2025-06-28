@@ -28,9 +28,6 @@ export const useRemindersStore = defineStore('reminders', () => {
   })
 
   const todayReminders = computed(() => {
-    if (!reminders.value || !Array.isArray(reminders.value)) {
-      return []
-    }
     const today = new Date().toISOString().split('T')[0]
     return reminders.value
       .filter(reminder => reminder.reminderDate === today && !reminder.isCompleted)
@@ -38,23 +35,17 @@ export const useRemindersStore = defineStore('reminders', () => {
   })
 
   const overDueReminders = computed(() => {
-    if (!reminders.value || !Array.isArray(reminders.value)) {
-      return []
-    }
     const today = new Date().toISOString().split('T')[0]
     return reminders.value
       .filter(reminder => reminder.reminderDate < today && !reminder.isCompleted)
       .sort((a, b) => new Date(b.reminderDate).getTime() - new Date(a.reminderDate).getTime())
   })
 
-  const completedReminders = computed(() => {
-    if (!reminders.value || !Array.isArray(reminders.value)) {
-      return []
-    }
-    return reminders.value
+  const completedReminders = computed(() => 
+    reminders.value
       .filter(reminder => reminder.isCompleted)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-  })
+  )
 
   const remindersByType = computed(() => {
     const grouped: Record<Reminder['type'], Reminder[]> = {
@@ -64,10 +55,6 @@ export const useRemindersStore = defineStore('reminders', () => {
       custom: []
     }
     
-    if (!reminders.value || !Array.isArray(reminders.value)) {
-      return grouped
-    }
-    
     reminders.value.forEach(reminder => {
       grouped[reminder.type].push(reminder)
     })
@@ -75,15 +62,9 @@ export const useRemindersStore = defineStore('reminders', () => {
     return grouped
   })
 
-  const remindersCount = computed(() => {
-    return Array.isArray(reminders.value) ? reminders.value.length : 0
-  })
-  const pendingCount = computed(() => {
-    return Array.isArray(reminders.value) ? reminders.value.filter(r => !r.isCompleted).length : 0
-  })
-  const completedCount = computed(() => {
-    return Array.isArray(reminders.value) ? reminders.value.filter(r => r.isCompleted).length : 0
-  })
+  const remindersCount = computed(() => reminders.value.length)
+  const pendingCount = computed(() => reminders.value.filter(r => !r.isCompleted).length)
+  const completedCount = computed(() => reminders.value.filter(r => r.isCompleted).length)
 
   // Actions
   const fetchReminders = async () => {
@@ -92,13 +73,10 @@ export const useRemindersStore = defineStore('reminders', () => {
 
     try {
       const response = await remindersService.getReminders()
-      // The response is a PaginatedResponse, so we need response.data to get the array
-      reminders.value = Array.isArray(response.data) ? response.data : []
+      reminders.value = response.data
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tải nhắc nhở'
       console.error('Error fetching reminders:', err)
-      // Ensure reminders is always an array even on error
-      reminders.value = []
       throw err
     } finally {
       isLoading.value = false
@@ -128,11 +106,7 @@ export const useRemindersStore = defineStore('reminders', () => {
 
     try {
       const newReminder = await remindersService.createReminder(data)
-      if (Array.isArray(reminders.value)) {
-        reminders.value.unshift(newReminder)
-      } else {
-        reminders.value = [newReminder]
-      }
+      reminders.value.unshift(newReminder)
       return newReminder
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tạo nhắc nhở'
@@ -150,11 +124,9 @@ export const useRemindersStore = defineStore('reminders', () => {
     try {
       const updatedReminder = await remindersService.updateReminder(data)
       
-      if (Array.isArray(reminders.value)) {
-        const index = reminders.value.findIndex(r => r.id === data.id)
-        if (index !== -1) {
-          reminders.value[index] = updatedReminder
-        }
+      const index = reminders.value.findIndex(r => r.id === data.id)
+      if (index !== -1) {
+        reminders.value[index] = updatedReminder
       }
       
       if (selectedReminder.value?.id === data.id) {
@@ -177,9 +149,7 @@ export const useRemindersStore = defineStore('reminders', () => {
 
     try {
       await remindersService.deleteReminder(id)
-      if (Array.isArray(reminders.value)) {
-        reminders.value = reminders.value.filter(r => r.id !== id)
-      }
+      reminders.value = reminders.value.filter(r => r.id !== id)
       
       if (selectedReminder.value?.id === id) {
         selectedReminder.value = null
@@ -197,11 +167,9 @@ export const useRemindersStore = defineStore('reminders', () => {
     try {
       const updatedReminder = await remindersService.markCompleted(id)
       
-      if (Array.isArray(reminders.value)) {
-        const index = reminders.value.findIndex(r => r.id === id)
-        if (index !== -1) {
-          reminders.value[index] = updatedReminder
-        }
+      const index = reminders.value.findIndex(r => r.id === id)
+      if (index !== -1) {
+        reminders.value[index] = updatedReminder
       }
       
       if (selectedReminder.value?.id === id) {
@@ -220,11 +188,9 @@ export const useRemindersStore = defineStore('reminders', () => {
     try {
       const updatedReminder = await remindersService.markIncomplete(id)
       
-      if (Array.isArray(reminders.value)) {
-        const index = reminders.value.findIndex(r => r.id === id)
-        if (index !== -1) {
-          reminders.value[index] = updatedReminder
-        }
+      const index = reminders.value.findIndex(r => r.id === id)
+      if (index !== -1) {
+        reminders.value[index] = updatedReminder
       }
       
       if (selectedReminder.value?.id === id) {

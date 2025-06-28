@@ -46,9 +46,6 @@ export const useMemoriesStore = defineStore('memories', () => {
 
   // Getters
   const filteredMemories = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
     let filtered = [...memories.value]
 
     // Search filter
@@ -104,27 +101,18 @@ export const useMemoriesStore = defineStore('memories', () => {
     return filtered
   })
 
-  const favoriteMemories = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
-    return memories.value.filter(memory => memory.isFavorite === true)
-  })
+  const favoriteMemories = computed(() => 
+    memories.value.filter(memory => memory.isFavorite === true)
+  )
 
-  const recentMemories = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
-    return memories.value
+  const recentMemories = computed(() => 
+    memories.value
       .slice()
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5)
-  })
+  )
 
   const memoriesByYear = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return {}
-    }
     const grouped: Record<string, Memory[]> = {}
     memories.value.forEach(memory => {
       const year = new Date(memory.date).getFullYear().toString()
@@ -137,9 +125,6 @@ export const useMemoriesStore = defineStore('memories', () => {
   })
 
   const allTags = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
     const tagSet = new Set<string>()
     memories.value.forEach(memory => {
       memory.tags.forEach(tag => tagSet.add(tag))
@@ -147,12 +132,8 @@ export const useMemoriesStore = defineStore('memories', () => {
     return Array.from(tagSet).sort()
   })
 
-  const memoriesCount = computed(() => {
-    return Array.isArray(memories.value) ? memories.value.length : 0
-  })
-  const favoritesCount = computed(() => {
-    return Array.isArray(favoriteMemories.value) ? favoriteMemories.value.length : 0
-  })
+  const memoriesCount = computed(() => memories.value.length)
+  const favoritesCount = computed(() => favoriteMemories.value.length)
 
   // Actions
   const fetchMemories = async () => {
@@ -161,13 +142,10 @@ export const useMemoriesStore = defineStore('memories', () => {
 
     try {
       const response = await memoriesService.getMemories()
-      // The response is a PaginatedResponse, so we need response.data to get the array
-      memories.value = Array.isArray(response.data) ? response.data : []
+      memories.value = response.data
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tải kỷ niệm'
       console.error('Error fetching memories:', err)
-      // Ensure memories is always an array even on error
-      memories.value = []
       throw error.value
     } finally {
       isLoading.value = false
@@ -207,11 +185,7 @@ export const useMemoriesStore = defineStore('memories', () => {
       }
       
       const newMemory = await memoriesService.createMemory(createData)
-      if (Array.isArray(memories.value)) {
-        memories.value.unshift(newMemory)
-      } else {
-        memories.value = [newMemory]
-      }
+      memories.value.unshift(newMemory)
       return newMemory
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tạo kỷ niệm'
@@ -240,11 +214,9 @@ export const useMemoriesStore = defineStore('memories', () => {
 
       const updatedMemory = await memoriesService.updateMemory(updateData)
       
-      if (Array.isArray(memories.value)) {
-        const index = memories.value.findIndex(m => m.id === data.id)
-        if (index !== -1) {
-          memories.value[index] = updatedMemory
-        }
+      const index = memories.value.findIndex(m => m.id === data.id)
+      if (index !== -1) {
+        memories.value[index] = updatedMemory
       }
       
       if (selectedMemory.value?.id === data.id) {
@@ -267,9 +239,7 @@ export const useMemoriesStore = defineStore('memories', () => {
 
     try {
       await memoriesService.deleteMemory(id)
-      if (Array.isArray(memories.value)) {
-        memories.value = memories.value.filter(m => m.id !== id)
-      }
+      memories.value = memories.value.filter(m => m.id !== id)
       
       if (selectedMemory.value?.id === id) {
         selectedMemory.value = null

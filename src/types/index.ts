@@ -1,17 +1,20 @@
 // User types
 export interface User {
-  id: string
+  _id: string
+  id?: string // Support backend response
   email: string
-  username: string
-  firstName: string
-  lastName: string
-  avatar?: string
+  username?: string
+  firstName?: string
+  lastName?: string
+  displayName: string
+  avatarUrl?: string
   dateOfBirth?: string
   phone?: string
   bio?: string
-  isEmailVerified: boolean
+  coupleId?: string
+  isEmailVerified?: boolean
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
 }
 
 export interface LoginCredentials {
@@ -27,6 +30,7 @@ export interface RegisterCredentials {
   firstName: string
   lastName: string
   username: string
+  displayName?: string
   dateOfBirth?: string
 }
 
@@ -62,10 +66,13 @@ export interface Memory {
   content: string
   imageUrl?: string
   imagePublicId?: string
+  images?: string[] // For frontend compatibility
   location?: string
   date: string
   tags: string[]
+  mood?: 'happy' | 'love' | 'excited' | 'romantic' | 'nostalgic' | 'grateful'
   isPrivate: boolean
+  isFavorite?: boolean // For frontend state
   createdBy: string
   createdAt: string
   updatedAt: string

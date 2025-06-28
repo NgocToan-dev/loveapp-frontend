@@ -15,6 +15,11 @@ export default {
   lastUpdated: 'Cập nhật lần cuối',
   draft: 'Bản nháp',
   
+  loginPrompt: {
+    title: 'Đăng nhập để trải nghiệm đầy đủ',
+    message: 'Hãy đăng nhập để xem thống kê cá nhân, viết bài và quản lý blog của bạn.'
+  },
+  
   status: {
     draft: 'Bản nháp',
     published: 'Đã xuất bản'

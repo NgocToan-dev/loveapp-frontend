@@ -17,18 +17,46 @@
       <!-- Form -->
       <form @submit.prevent="handleSubmit" class="space-y-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg space-y-4">
-          <!-- Name field (register only) -->
-          <div v-if="!isLogin">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('auth.form.name') }}
-            </label>
-            <input
-              v-model="form.name"
-              type="text"
-              :placeholder="$t('auth.form.namePlaceholder')"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              required
-            />
+          <!-- Name fields (register only) -->
+          <div v-if="!isLogin" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {{ $t('auth.form.firstName') }}
+                </label>
+                <input
+                  v-model="form.firstName"
+                  type="text"
+                  :placeholder="$t('auth.form.firstNamePlaceholder')"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {{ $t('auth.form.lastName') }}
+                </label>
+                <input
+                  v-model="form.lastName"
+                  type="text"
+                  :placeholder="$t('auth.form.lastNamePlaceholder')"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {{ $t('auth.form.username') }}
+              </label>
+              <input
+                v-model="form.username"
+                type="text"
+                :placeholder="$t('auth.form.usernamePlaceholder')"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                required
+              />
+            </div>
           </div>
 
           <!-- Email field -->
@@ -242,7 +270,9 @@ const isLoadingForgotPassword = ref(false)
 const forgotPasswordEmail = ref('')
 
 const form = reactive({
-  name: '',
+  firstName: '',
+  lastName: '',
+  username: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -263,8 +293,16 @@ const toggleMode = () => {
 
 const validateForm = () => {
   if (!isLogin.value) {
-    if (!form.name.trim()) {
-      uiStore.showErrorToast(t('common.validation.required'), t('auth.form.name'))
+    if (!form.firstName.trim()) {
+      uiStore.showErrorToast(t('common.validation.required'), t('auth.form.firstName'))
+      return false
+    }
+    if (!form.lastName.trim()) {
+      uiStore.showErrorToast(t('common.validation.required'), t('auth.form.lastName'))
+      return false
+    }
+    if (!form.username.trim()) {
+      uiStore.showErrorToast(t('common.validation.required'), t('auth.form.username'))
       return false
     }
     if (form.password !== form.confirmPassword) {
@@ -288,17 +326,20 @@ const handleSubmit = async () => {
   
   try {
     if (isLogin.value) {
-      await userStore.login({
+      const response = await userStore.login({
         email: form.email,
         password: form.password,
         rememberMe: form.rememberMe
       })
       uiStore.showSuccessToast(t('auth.login.success'))
     } else {
-      await userStore.register({
-        name: form.name,
+      const response = await userStore.register({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        username: form.username,
         email: form.email,
-        password: form.password
+        password: form.password,
+        confirmPassword: form.confirmPassword
       })
       uiStore.showSuccessToast(t('auth.register.success'))
     }
@@ -306,6 +347,7 @@ const handleSubmit = async () => {
     // Redirect to home page
     router.push('/')
   } catch (error) {
+    console.error('Auth error:', error)
     const message = error instanceof Error ? error.message : t('auth.errors.generic')
     uiStore.showErrorToast(t('common.status.error'), message)
   } finally {
@@ -315,9 +357,8 @@ const handleSubmit = async () => {
 
 const handleGoogleLogin = async () => {
   try {
-    await userStore.loginWithGoogle()
-    uiStore.showSuccessToast(t('auth.login.success'))
-    router.push('/')
+    // TODO: Implement Google OAuth
+    uiStore.showErrorToast(t('common.status.error'), 'Google login not implemented yet')
   } catch (error) {
     const message = error instanceof Error ? error.message : t('auth.errors.generic')
     uiStore.showErrorToast(t('common.status.error'), message)
@@ -326,9 +367,8 @@ const handleGoogleLogin = async () => {
 
 const handleFacebookLogin = async () => {
   try {
-    await userStore.loginWithFacebook()
-    uiStore.showSuccessToast(t('auth.login.success'))
-    router.push('/')
+    // TODO: Implement Facebook OAuth
+    uiStore.showErrorToast(t('common.status.error'), 'Facebook login not implemented yet')
   } catch (error) {
     const message = error instanceof Error ? error.message : t('auth.errors.generic')
     uiStore.showErrorToast(t('common.status.error'), message)
@@ -341,7 +381,7 @@ const handleForgotPassword = async () => {
   isLoadingForgotPassword.value = true
   
   try {
-    await userStore.resetPassword(forgotPasswordEmail.value)
+    await userStore.forgotPassword(forgotPasswordEmail.value)
     uiStore.showSuccessToast(t('auth.forgotPassword.success'))
     showForgotPassword.value = false
     forgotPasswordEmail.value = ''

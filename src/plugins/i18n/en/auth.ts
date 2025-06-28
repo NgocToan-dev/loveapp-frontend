@@ -14,6 +14,12 @@ export default {
     hasAccount: 'Already have an account?'
   },
   form: {
+    firstName: 'First Name',
+    firstNamePlaceholder: 'Enter your first name',
+    lastName: 'Last Name',
+    lastNamePlaceholder: 'Enter your last name',
+    username: 'Username',
+    usernamePlaceholder: 'Choose a username',
     name: 'Full Name',
     namePlaceholder: 'Enter your full name',
     email: 'Email Address',

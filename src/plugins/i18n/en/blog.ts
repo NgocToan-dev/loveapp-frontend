@@ -6,6 +6,11 @@ export default {
   firstPost: 'Write your first post!',
   readingTime: 'min read',
   
+  loginPrompt: {
+    title: 'Login for Full Experience',
+    message: 'Please log in to view personal statistics, write posts and manage your blog.'
+  },
+  
   status: {
     draft: 'Draft',
     published: 'Published'

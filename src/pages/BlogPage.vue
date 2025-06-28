@@ -11,6 +11,7 @@
             <p class="text-gray-600">{{ $t('blog.subtitle') }}</p>
           </div>
           <button 
+            v-if="isAuthenticated"
             class="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-medium flex items-center space-x-2 transition-colors"
             @click="showCreateForm = true"
           >
@@ -21,11 +22,30 @@
           </button>
         </div>
 
-        <!-- Statistics -->
+        <!-- Statistics (only show for authenticated users) -->
         <BlogStats 
+          v-if="isAuthenticated"
           :stats="stats" 
           :recent-posts="recentPosts"
         />
+        
+        <!-- Message for non-authenticated users -->
+        <div 
+          v-else
+          class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-8"
+        >
+          <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-blue-900">{{ $t('blog.loginPrompt.title') }}</h3>
+              <p class="text-blue-700">{{ $t('blog.loginPrompt.message') }}</p>
+            </div>
+          </div>
+        </div>
 
         <!-- Filters -->
         <BlogFilters
@@ -209,6 +229,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useBlogStore } from '@/stores/blog'
+import { useUserStore } from '@/stores/user'
 import type { BlogPost, CreateBlogPostRequest, UpdateBlogPostRequest } from '@/types'
 
 import AppLayout from '@/components/layout/AppLayout.vue'
@@ -218,6 +239,8 @@ import BlogPostList from '@/components/blog/BlogPostList.vue'
 import BlogPostDetail from '@/components/blog/BlogPostDetail.vue'
 
 const { t } = useI18n()
+const userStore = useUserStore()
+const { isAuthenticated } = userStore
 
 const blogStore = useBlogStore()
 
@@ -296,7 +319,10 @@ const handleFormSubmit = async (data: CreateBlogPostRequest | UpdateBlogPostRequ
       await createPost(data as CreateBlogPostRequest)
     }
     closeCreateForm()
-    await fetchStats()
+    // Only fetch stats if user is authenticated
+    if (isAuthenticated) {
+      await fetchStats()
+    }
   } catch (err) {
     // Error handled in store
   }
@@ -338,7 +364,10 @@ const handleQuickSubmit = async () => {
   }
   
   closeCreateForm()
-  await fetchStats()
+  // Only fetch stats if user is authenticated
+  if (isAuthenticated) {
+    await fetchStats()
+  }
 }
 
 const loadMorePosts = async () => {
@@ -355,9 +384,17 @@ const clearFilters = () => {
 
 // Lifecycle
 onMounted(async () => {
-  await Promise.all([
-    fetchPosts(),
-    fetchStats()
-  ])
+  // Always fetch posts (public content)
+  await fetchPosts()
+  
+  // Only fetch stats if user is authenticated (personal stats)
+  if (isAuthenticated) {
+    try {
+      await fetchStats()
+    } catch (error) {
+      console.error('Error fetching blog stats:', error)
+      // Don't throw error here as stats are optional
+    }
+  }
 })
 </script>

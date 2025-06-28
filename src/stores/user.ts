@@ -1,74 +1,49 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-
-export interface User {
-  id: string
-  email: string
-  name: string
-  avatar?: string
-  partnerId?: string
-  partnerName?: string
-  partnerAvatar?: string
-  relationshipStartDate?: string
-  isConnected: boolean
-  preferences: {
-    theme: 'light' | 'dark' | 'auto'
-    language: 'en' | 'vi'
-    notifications: {
-      email: boolean
-      push: boolean
-      reminders: boolean
-      anniversaries: boolean
-    }
-  }
-  createdAt: string
-  updatedAt: string
-}
-
-export interface LoginCredentials {
-  email: string
-  password: string
-  rememberMe?: boolean
-}
-
-export interface RegisterData {
-  name: string
-  email: string
-  password: string
-}
+import { authService, type AuthResponse } from '@/services/auth'
+import { storage } from '@/utils/helpers'
+import type { User, LoginCredentials, RegisterCredentials } from '@/types'
 
 export const useUserStore = defineStore('user', () => {
   // State
-  const user = ref<User | null>(null)
+  const user = ref<User | null>(storage.get<User>('user'))
+  const token = ref<string | null>(storage.get<string>('auth_token'))
+  const refreshToken = ref<string | null>(storage.get<string>('refresh_token'))
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  const isAuthenticated = ref(false)
 
   // Getters
-  const hasPartner = computed(() => !!user.value?.partnerId)
-  const relationshipDuration = computed(() => {
-    if (!user.value?.relationshipStartDate) return null
-    
-    const startDate = new Date(user.value.relationshipStartDate)
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - startDate.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    return {
-      days: diffDays,
-      months: Math.floor(diffDays / 30),
-      years: Math.floor(diffDays / 365)
+  const isAuthenticated = computed(() => !!token.value && !!user.value)
+  
+  const hasPartner = computed(() => !!user.value?.coupleId)
+  
+  const userDisplayName = computed(() => {
+    if (!user.value) return ''
+    if (user.value.displayName) return user.value.displayName
+    if (user.value.firstName && user.value.lastName) {
+      return `${user.value.firstName} ${user.value.lastName}`.trim()
     }
+    return user.value.email // Fallback to email
   })
 
   const userInitials = computed(() => {
-    if (!user.value?.name) return ''
-    return user.value.name
-      .split(' ')
-      .map(name => name.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
+    if (!user.value) return ''
+    if (user.value.firstName && user.value.lastName) {
+      return `${user.value.firstName.charAt(0)}${user.value.lastName.charAt(0)}`.toUpperCase()
+    }
+    if (user.value.displayName) {
+      const names = user.value.displayName.split(' ')
+      if (names.length >= 2) {
+        return `${names[0].charAt(0)}${names[names.length - 1].charAt(0)}`.toUpperCase()
+      }
+      return user.value.displayName.substring(0, 2).toUpperCase()
+    }
+    return user.value.email.substring(0, 2).toUpperCase()
+  })
+
+  const relationshipDuration = computed(() => {
+    // TODO: Calculate relationship duration from coupleId data
+    return 0
   })
 
   // Actions
@@ -77,89 +52,92 @@ export const useUserStore = defineStore('user', () => {
     error.value = null
     
     try {
-      // TODO: Replace with actual API call
-      // const response = await authService.login(credentials)
+      const response: AuthResponse = await authService.login(credentials)
       
-      // Mock user data for development
-      const mockUser: User = {
-        id: '1',
-        email: credentials.email,
-        name: 'John Doe',
-        avatar: '',
-        partnerId: '2',
-        partnerName: 'Jane Doe',
-        partnerAvatar: '',
-        relationshipStartDate: '2023-02-14',
-        isConnected: true,
-        preferences: {
-          theme: 'light',
-          language: 'vi',
-          notifications: {
-            email: true,
-            push: true,
-            reminders: true,
-            anniversaries: true
-          }
-        },
-        createdAt: '2023-01-01T00:00:00Z',
-        updatedAt: new Date().toISOString()
+      // Transform backend user to frontend User format
+      const transformedUser: User = {
+        _id: response.user.id,
+        id: response.user.id,
+        email: response.user.email,
+        displayName: response.user.displayName,
+        avatarUrl: response.user.avatarUrl,
+        createdAt: response.user.createdAt,
+        username: '', // Default values for optional fields
+        firstName: '',
+        lastName: '',
+        isEmailVerified: false
       }
       
-      user.value = mockUser
-      isAuthenticated.value = true
+      
+      user.value = transformedUser
+      token.value = response.token
       
       // Store in localStorage
-      localStorage.setItem('loveapp_user', JSON.stringify(mockUser))
-      localStorage.setItem('loveapp_authenticated', 'true')
+      storage.set('user', transformedUser)
+      storage.set('auth_token', response.token)
       
-      return mockUser
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Login failed'
-      throw error.value
+      if (response.refreshToken) {
+        refreshToken.value = response.refreshToken
+        storage.set('refresh_token', response.refreshToken)
+      }
+      
+      if (credentials.rememberMe) {
+        storage.set('remember_user', true)
+      }
+      
+      return response
+    } catch (err: any) {
+      console.error('UserStore: Login error:', err)
+      error.value = err.message || 'Login failed'
+      throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  const register = async (data: RegisterData) => {
+  const register = async (credentials: RegisterCredentials) => {
     isLoading.value = true
     error.value = null
     
     try {
-      // TODO: Replace with actual API call
-      // const response = await authService.register(data)
-      
-      // Mock registration
-      const newUser: User = {
-        id: Date.now().toString(),
-        email: data.email,
-        name: data.name,
-        isConnected: false,
-        preferences: {
-          theme: 'light',
-          language: 'vi',
-          notifications: {
-            email: true,
-            push: true,
-            reminders: true,
-            anniversaries: true
-          }
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      // Ensure displayName is set if not provided
+      const registerData = {
+        ...credentials,
+        displayName: credentials.displayName || `${credentials.firstName} ${credentials.lastName}`.trim()
       }
       
-      user.value = newUser
-      isAuthenticated.value = true
+      const response: AuthResponse = await authService.register(registerData)
+      
+      // Transform backend user to frontend User format
+      const transformedUser: User = {
+        _id: response.user.id,
+        id: response.user.id,
+        email: response.user.email,
+        displayName: response.user.displayName,
+        avatarUrl: response.user.avatarUrl,
+        createdAt: response.user.createdAt,
+        username: credentials.username || '',
+        firstName: credentials.firstName || '',
+        lastName: credentials.lastName || '',
+        isEmailVerified: false
+      }
+      
+      user.value = transformedUser
+      token.value = response.token
       
       // Store in localStorage
-      localStorage.setItem('loveapp_user', JSON.stringify(newUser))
-      localStorage.setItem('loveapp_authenticated', 'true')
+      storage.set('user', transformedUser)
+      storage.set('auth_token', response.token)
       
-      return newUser
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Registration failed'
-      throw error.value
+      if (response.refreshToken) {
+        refreshToken.value = response.refreshToken
+        storage.set('refresh_token', response.refreshToken)
+      }
+      
+      return response
+    } catch (err: any) {
+      error.value = err.message || 'Registration failed'
+      throw err
     } finally {
       isLoading.value = false
     }
@@ -169,97 +147,88 @@ export const useUserStore = defineStore('user', () => {
     isLoading.value = true
     
     try {
-      // TODO: Replace with actual API call
-      // await authService.logout()
+      if (token.value) {
+        await authService.logout()
+      }
       
       user.value = null
-      isAuthenticated.value = false
+      token.value = null
+      refreshToken.value = null
       error.value = null
       
       // Clear localStorage
-      localStorage.removeItem('loveapp_user')
-      localStorage.removeItem('loveapp_authenticated')
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Logout failed'
+      storage.remove('user')
+      storage.remove('auth_token')
+      storage.remove('refresh_token')
+      storage.remove('remember_user')
+    } catch (err: any) {
+      error.value = err.message || 'Logout failed'
     } finally {
       isLoading.value = false
     }
   }
 
   const updateProfile = async (updates: Partial<User>) => {
-    if (!user.value) return
+    if (!user.value) throw new Error('User not authenticated')
     
     isLoading.value = true
     error.value = null
     
     try {
-      // TODO: Replace with actual API call
-      // const response = await userService.updateProfile(updates)
-      
-      user.value = {
-        ...user.value,
-        ...updates,
-        updatedAt: new Date().toISOString()
-      }
-      
-      // Update localStorage
-      localStorage.setItem('loveapp_user', JSON.stringify(user.value))
-      
-      return user.value
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Update failed'
-      throw error.value
+      const updatedUser = await authService.updateProfile(updates)
+      user.value = updatedUser
+      storage.set('user', updatedUser)
+      return updatedUser
+    } catch (err: any) {
+      error.value = err.message || 'Update failed'
+      throw err
     } finally {
       isLoading.value = false
     }
   }
 
   const connectPartner = async (partnerEmail: string) => {
-    if (!user.value) return
+    if (!user.value) throw new Error('User not authenticated')
     
     isLoading.value = true
     error.value = null
     
     try {
-      // TODO: Replace with actual API call
-      // const response = await userService.connectPartner(partnerEmail)
-      
-      // Mock partner connection
-      user.value = {
+      // TODO: Implement partner connection API
+      // For now, update coupleId locally
+      const updatedUser = {
         ...user.value,
-        partnerId: '2',
-        partnerName: 'Partner Name',
-        partnerAvatar: '',
-        relationshipStartDate: new Date().toISOString().split('T')[0],
-        isConnected: true,
+        coupleId: 'temp-couple-id', // This should come from API
         updatedAt: new Date().toISOString()
       }
       
-      // Update localStorage
-      localStorage.setItem('loveapp_user', JSON.stringify(user.value))
-      
-      return user.value
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Connection failed'
-      throw error.value
+      user.value = updatedUser
+      storage.set('user', updatedUser)
+      return updatedUser
+    } catch (err: any) {
+      error.value = err.message || 'Connection failed'
+      throw err
     } finally {
       isLoading.value = false
     }
   }
 
   const initializeAuth = () => {
-    const storedUser = localStorage.getItem('loveapp_user')
-    const storedAuth = localStorage.getItem('loveapp_authenticated')
+    const storedUser = storage.get<User>('user')
+    const storedToken = storage.get<string>('auth_token')
     
-    if (storedUser && storedAuth === 'true') {
-      try {
-        user.value = JSON.parse(storedUser)
-        isAuthenticated.value = true
-      } catch (err) {
-        // Clear invalid data
-        localStorage.removeItem('loveapp_user')
-        localStorage.removeItem('loveapp_authenticated')
+    
+    if (storedUser && storedToken) {
+      user.value = storedUser
+      token.value = storedToken
+      
+      const storedRefreshToken = storage.get<string>('refresh_token')
+      if (storedRefreshToken) {
+        refreshToken.value = storedRefreshToken
       }
+
+    } else {
+      console.log('UserStore: No stored auth data found')
     }
   }
 
@@ -267,115 +236,80 @@ export const useUserStore = defineStore('user', () => {
     error.value = null
   }
 
-  const loginWithGoogle = async () => {
+  const forgotPassword = async (email: string) => {
     isLoading.value = true
     error.value = null
     
     try {
-      // TODO: Implement Google OAuth
-      const mockUser: User = {
-        id: 'google_' + Date.now(),
-        email: 'user@gmail.com',
-        name: 'Google User',
-        isConnected: false,
-        preferences: {
-          theme: 'light',
-          language: 'vi',
-          notifications: {
-            email: true,
-            push: true,
-            reminders: true,
-            anniversaries: true
-          }
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      
-      user.value = mockUser
-      isAuthenticated.value = true
-      
-      localStorage.setItem('loveapp_user', JSON.stringify(mockUser))
-      localStorage.setItem('loveapp_authenticated', 'true')
-      
-      return mockUser
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Google login failed'
-      throw error.value
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const loginWithFacebook = async () => {
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      // TODO: Implement Facebook OAuth
-      const mockUser: User = {
-        id: 'facebook_' + Date.now(),
-        email: 'user@facebook.com',
-        name: 'Facebook User',
-        isConnected: false,
-        preferences: {
-          theme: 'light',
-          language: 'vi',
-          notifications: {
-            email: true,
-            push: true,
-            reminders: true,
-            anniversaries: true
-          }
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      
-      user.value = mockUser
-      isAuthenticated.value = true
-      
-      localStorage.setItem('loveapp_user', JSON.stringify(mockUser))
-      localStorage.setItem('loveapp_authenticated', 'true')
-      
-      return mockUser
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Facebook login failed'
-      throw error.value
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const resetPassword = async (email: string) => {
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      // TODO: Implement password reset
-      // await authService.resetPassword(email)
-      
-      // Mock success
+      await authService.forgotPassword(email)
       return { success: true, message: 'Password reset email sent' }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Password reset failed'
-      throw error.value
+    } catch (err: any) {
+      error.value = err.message || 'Password reset failed'
+      throw err
     } finally {
       isLoading.value = false
+    }
+  }
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      await authService.resetPassword(token, newPassword)
+      return { success: true, message: 'Password reset successfully' }
+    } catch (err: any) {
+      error.value = err.message || 'Password reset failed'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const loginMockUser = () => {
+    // Only for development environment
+    if (import.meta.env.DEV) {
+      const mockUser: User = {
+        _id: 'mock-user-1',
+        id: 'mock-user-1', 
+        email: 'demo@loveapp.com',
+        displayName: 'Demo User',
+        firstName: 'Demo',
+        lastName: 'User',
+        username: 'demouser',
+        avatarUrl: 'https://via.placeholder.com/150/ff6b6b/ffffff?text=DU',
+        isEmailVerified: true,
+        createdAt: new Date().toISOString(),
+        coupleId: undefined
+      }
+      
+      const mockToken = 'mock-jwt-token-for-development'
+      
+      user.value = mockUser
+      token.value = mockToken
+      
+      // Store in localStorage
+      storage.set('user', mockUser)
+      storage.set('auth_token', mockToken)
+      
+      console.log('🔧 Mock user logged in for development')
     }
   }
 
   return {
     // State
     user,
+    token,
+    refreshToken,
     isLoading,
     error,
-    isAuthenticated,
     
     // Getters
+    isAuthenticated,
     hasPartner,
-    relationshipDuration,
+    userDisplayName,
     userInitials,
+    relationshipDuration,
     
     // Actions
     login,
@@ -385,8 +319,8 @@ export const useUserStore = defineStore('user', () => {
     connectPartner,
     initializeAuth,
     clearError,
-    loginWithGoogle,
-    loginWithFacebook,
-    resetPassword
+    forgotPassword,
+    resetPassword,
+    loginMockUser
   }
 })

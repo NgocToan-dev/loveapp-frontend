@@ -6,7 +6,6 @@ export const coupleService = {
   async getCoupleConnection(): Promise<CoupleConnection | null> {
     try {
       const response = await api.get('/couple/connection')
-      debugger
       return response.data
     } catch (error: any) {
       if (error.response?.status === 404) {
@@ -35,8 +34,15 @@ export const coupleService = {
 
   // Get pending invitations
   async getPendingInvitations(): Promise<CoupleInvitation[]> {
-    const response = await api.get('/couple/invitations')
-    return response.data
+    try {
+      const response = await api.get('/couple/invitations')
+      return response.data
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return []
+      }
+      throw error
+    }
   },
 
   // Disconnect from couple

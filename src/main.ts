@@ -11,21 +11,22 @@ const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
-app.use(router)
-app.use(i18n)
 
-// Initialize stores after mounting
-app.mount('#app')
-
-// Initialize user authentication and UI theme
+// Initialize stores before router to ensure auth state is ready
 import { useUserStore } from './stores/user'
 import { useUIStore } from './stores/ui'
 
 const userStore = useUserStore()
 const uiStore = useUIStore()
 
-// Initialize authentication state
+// Initialize authentication state BEFORE router
 userStore.initializeAuth()
 
 // Initialize theme
 uiStore.initializeTheme()
+
+app.use(router)
+app.use(i18n)
+
+// Mount app
+app.mount('#app')

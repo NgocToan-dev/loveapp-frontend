@@ -8,19 +8,21 @@ export function useReminders() {
   const { showSuccess, showError } = useNotifications()
   const remindersStore = useRemindersStore()
 
-  // Return store properties directly instead of destructuring
-  const reminders = remindersStore.reminders
-  const isLoading = remindersStore.isLoading
-  const error = remindersStore.error
-  const selectedReminder = remindersStore.selectedReminder
-  const upcomingReminders = remindersStore.upcomingReminders
-  const todayReminders = remindersStore.todayReminders
-  const overDueReminders = remindersStore.overDueReminders
-  const completedReminders = remindersStore.completedReminders
-  const remindersByType = remindersStore.remindersByType
-  const remindersCount = remindersStore.remindersCount
-  const pendingCount = remindersStore.pendingCount
-  const completedCount = remindersStore.completedCount
+  // Re-export store state and getters
+  const {
+    reminders,
+    isLoading,
+    error,
+    selectedReminder,
+    upcomingReminders,
+    todayReminders,
+    overDueReminders,
+    completedReminders,
+    remindersByType,
+    remindersCount,
+    pendingCount,
+    completedCount
+  } = remindersStore
 
   // Wrapped actions with notifications
   const fetchReminders = async () => {

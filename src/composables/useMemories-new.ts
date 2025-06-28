@@ -8,16 +8,18 @@ export function useMemories() {
   const { showSuccess, showError } = useNotifications()
   const memoriesStore = useMemoriesStore()
 
-  // Return store properties directly instead of destructuring
-  const memories = memoriesStore.memories
-  const isLoading = memoriesStore.isLoading
-  const error = memoriesStore.error
-  const selectedMemory = memoriesStore.selectedMemory
-  const filteredMemories = memoriesStore.filteredMemories
-  const recentMemories = memoriesStore.recentMemories
-  const memoriesCount = memoriesStore.memoriesCount
-  const favoritesCount = memoriesStore.favoritesCount
-  const allTags = memoriesStore.allTags
+  // Re-export store state and getters
+  const {
+    memories,
+    isLoading,
+    error,
+    selectedMemory,
+    filteredMemories,
+    recentMemories,
+    memoriesCount,
+    favoritesCount,
+    allTags
+  } = memoriesStore
 
   // Wrapped actions with notifications
   const fetchMemories = async () => {

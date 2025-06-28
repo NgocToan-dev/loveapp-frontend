@@ -17,7 +17,8 @@
             :key="item.href"
             :to="item.href"
             class="text-gray-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            active-class="text-primary-600 bg-primary-50"
+            active-class="!text-primary-600 !bg-primary-50"
+            exact-active-class="!text-primary-600 !bg-primary-50"
           >
             {{ $t(item.labelKey) }}
           </router-link>
@@ -25,6 +26,17 @@
         
         <!-- User section -->
         <div class="hidden md:flex items-center space-x-4">
+          <!-- Development Panel (only in dev mode) -->
+          <div v-if="isDev && !userStore.isAuthenticated" class="flex items-center space-x-2">
+            <button 
+              @click="userStore.loginMockUser"
+              class="px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full hover:bg-yellow-200 transition-colors"
+              title="Login with mock user for development"
+            >
+              🔧 Dev Login
+            </button>
+          </div>
+          
           <!-- Language Switcher -->
           <LanguageSwitcher />
           
@@ -47,12 +59,12 @@
             <template #trigger>
               <button class="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-50 transition-colors">
                 <Avatar 
-                  :src="userStore.user?.avatar" 
+                  :src="userStore.user?.avatarUrl" 
                   :initials="userStore.userInitials"
                   size="sm"
                 />
                 <span v-if="userStore.user" class="text-sm font-medium text-gray-700">
-                  {{ userStore.user.name }}
+                  {{ userStore.userDisplayName }}
                 </span>
               </button>
             </template>
@@ -109,12 +121,12 @@
           <div class="border-t border-gray-200 pt-4 mt-4">
             <div class="flex items-center px-3 py-2">
               <Avatar 
-                :src="userStore.user?.avatar" 
+                :src="userStore.user?.avatarUrl" 
                 :initials="userStore.userInitials"
                 size="sm"
               />
               <span v-if="userStore.user" class="ml-3 text-base font-medium text-gray-700">
-                {{ userStore.user.name }}
+                {{ userStore.userDisplayName }}
               </span>
             </div>
             <router-link 
@@ -159,6 +171,8 @@ const uiStore = useUIStore()
 const remindersStore = useRemindersStore()
 
 const showNotifications = ref(false)
+
+const isDev = computed(() => import.meta.env.DEV)
 
 const navigation = [
   { href: '/', labelKey: 'navigation.home' },

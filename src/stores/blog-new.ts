@@ -40,9 +40,6 @@ export const useBlogStore = defineStore('blog', () => {
 
   // Computed
   const filteredPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     let filtered = [...posts.value]
 
     // Search filter
@@ -99,34 +96,20 @@ export const useBlogStore = defineStore('blog', () => {
   })
 
   const publishedPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     return posts.value.filter(post => post.status === 'published')
   })
 
   const draftPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     return posts.value.filter(post => post.status === 'draft')
   })
 
   const publicPosts = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     return posts.value.filter(post => post.privacy === 'public' && post.status === 'published')
   })
 
-  const postsCount = computed(() => {
-    return Array.isArray(posts.value) ? posts.value.length : 0
-  })
+  const postsCount = computed(() => posts.value.length)
 
   const allTags = computed(() => {
-    if (!posts.value || !Array.isArray(posts.value)) {
-      return []
-    }
     const tagSet = new Set<string>()
     posts.value.forEach(post => {
       post.tags.forEach(tag => tagSet.add(tag))
@@ -143,13 +126,9 @@ export const useBlogStore = defineStore('blog', () => {
       const response = await blogService.getBlogPosts(page, limit, filters.value)
       
       if (page === 1) {
-        posts.value = Array.isArray(response.data) ? response.data : []
+        posts.value = response.data
       } else {
-        if (Array.isArray(posts.value) && Array.isArray(response.data)) {
-          posts.value.push(...response.data)
-        } else {
-          posts.value = Array.isArray(response.data) ? response.data : []
-        }
+        posts.value.push(...response.data)
       }
       
       totalPages.value = response.pagination.totalPages
@@ -158,8 +137,6 @@ export const useBlogStore = defineStore('blog', () => {
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tải blog posts'
       console.error('Error fetching blog posts:', err)
-      // Ensure posts is always an array even on error
-      posts.value = []
     } finally {
       isLoading.value = false
     }
@@ -186,11 +163,7 @@ export const useBlogStore = defineStore('blog', () => {
     
     try {
       const newPost = await blogService.createBlogPost(data)
-      if (Array.isArray(posts.value)) {
-        posts.value.unshift(newPost)
-      } else {
-        posts.value = [newPost]
-      }
+      posts.value.unshift(newPost)
       totalPosts.value++
       return newPost
     } catch (err: any) {
@@ -208,11 +181,9 @@ export const useBlogStore = defineStore('blog', () => {
     
     try {
       const updatedPost = await blogService.updateBlogPost(data)
-      if (Array.isArray(posts.value)) {
-        const index = posts.value.findIndex(p => p.id === data.id)
-        if (index !== -1) {
-          posts.value[index] = updatedPost
-        }
+      const index = posts.value.findIndex(p => p.id === data.id)
+      if (index !== -1) {
+        posts.value[index] = updatedPost
       }
       if (selectedPost.value?.id === data.id) {
         selectedPost.value = updatedPost
@@ -233,9 +204,7 @@ export const useBlogStore = defineStore('blog', () => {
     
     try {
       await blogService.deleteBlogPost(id)
-      if (Array.isArray(posts.value)) {
-        posts.value = posts.value.filter(p => p.id !== id)
-      }
+      posts.value = posts.value.filter(p => p.id !== id)
       totalPosts.value--
       if (selectedPost.value?.id === id) {
         selectedPost.value = null

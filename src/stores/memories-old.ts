@@ -14,6 +14,7 @@ export interface CreateMemoryData {
   images?: File[]
   tags?: string[]
   location?: string
+  mood?: 'happy' | 'love' | 'excited' | 'romantic' | 'nostalgic' | 'grateful'
   isPrivate?: boolean
 }
 
@@ -46,9 +47,6 @@ export const useMemoriesStore = defineStore('memories', () => {
 
   // Getters
   const filteredMemories = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
     let filtered = [...memories.value]
 
     // Search filter
@@ -68,10 +66,10 @@ export const useMemoriesStore = defineStore('memories', () => {
       )
     }
 
-    // Mood filter - skip since mood property is optional
-    // if (filters.value.mood) {
-    //   filtered = filtered.filter(memory => memory.mood === filters.value.mood)
-    // }
+    // Mood filter
+    if (filters.value.mood) {
+      filtered = filtered.filter(memory => memory.mood === filters.value.mood)
+    }
 
     // Date range filter
     if (filters.value.dateRange.start) {
@@ -81,10 +79,10 @@ export const useMemoriesStore = defineStore('memories', () => {
       filtered = filtered.filter(memory => memory.date <= filters.value.dateRange.end!)
     }
 
-    // Favorites filter - skip since isFavorite is optional
-    // if (filters.value.showFavoritesOnly) {
-    //   filtered = filtered.filter(memory => memory.isFavorite)
-    // }
+    // Favorites filter
+    if (filters.value.showFavoritesOnly) {
+      filtered = filtered.filter(memory => memory.isFavorite)
+    }
 
     // Private filter
     if (filters.value.showPrivateOnly) {
@@ -104,27 +102,11 @@ export const useMemoriesStore = defineStore('memories', () => {
     return filtered
   })
 
-  const favoriteMemories = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
-    return memories.value.filter(memory => memory.isFavorite === true)
-  })
-
-  const recentMemories = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
-    return memories.value
-      .slice()
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5)
-  })
+  const favoriteMemories = computed(() => 
+    memories.value.filter(memory => memory.isFavorite)
+  )
 
   const memoriesByYear = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return {}
-    }
     const grouped: Record<string, Memory[]> = {}
     memories.value.forEach(memory => {
       const year = new Date(memory.date).getFullYear().toString()
@@ -137,9 +119,6 @@ export const useMemoriesStore = defineStore('memories', () => {
   })
 
   const allTags = computed(() => {
-    if (!memories.value || !Array.isArray(memories.value)) {
-      return []
-    }
     const tagSet = new Set<string>()
     memories.value.forEach(memory => {
       memory.tags.forEach(tag => tagSet.add(tag))
@@ -147,12 +126,8 @@ export const useMemoriesStore = defineStore('memories', () => {
     return Array.from(tagSet).sort()
   })
 
-  const memoriesCount = computed(() => {
-    return Array.isArray(memories.value) ? memories.value.length : 0
-  })
-  const favoritesCount = computed(() => {
-    return Array.isArray(favoriteMemories.value) ? favoriteMemories.value.length : 0
-  })
+  const memoriesCount = computed(() => memories.value.length)
+  const favoritesCount = computed(() => favoriteMemories.value.length)
 
   // Actions
   const fetchMemories = async () => {
@@ -161,31 +136,11 @@ export const useMemoriesStore = defineStore('memories', () => {
 
     try {
       const response = await memoriesService.getMemories()
-      // The response is a PaginatedResponse, so we need response.data to get the array
-      memories.value = Array.isArray(response.data) ? response.data : []
+      memories.value = response.data
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Có lỗi khi tải kỷ niệm'
       console.error('Error fetching memories:', err)
-      // Ensure memories is always an array even on error
-      memories.value = []
       throw error.value
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const fetchMemory = async (id: string) => {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const memory = await memoriesService.getMemory(id)
-      selectedMemory.value = memory
-      return memory
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Không tìm thấy kỷ niệm'
-      console.error('Error fetching memory:', err)
-      throw err
     } finally {
       isLoading.value = false
     }
@@ -196,27 +151,30 @@ export const useMemoriesStore = defineStore('memories', () => {
     error.value = null
 
     try {
-      const createData: CreateMemoryRequest = {
+      // TODO: Replace with actual API call
+      // const response = await memoriesService.createMemory(data)
+
+      const newMemory: Memory = {
+        id: Date.now().toString(),
         title: data.title,
         content: data.content,
         date: data.date,
+        images: [], // TODO: Handle image upload
         tags: data.tags || [],
         location: data.location,
-        isPrivate: data.isPrivate ?? false,
-        image: data.images?.[0] // Take first image if any
+        mood: data.mood,
+        isPrivate: data.isPrivate || false,
+        isFavorite: false,
+        createdBy: 'user1', // TODO: Get from auth store
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
-      
-      const newMemory = await memoriesService.createMemory(createData)
-      if (Array.isArray(memories.value)) {
-        memories.value.unshift(newMemory)
-      } else {
-        memories.value = [newMemory]
-      }
+
+      memories.value.unshift(newMemory)
       return newMemory
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi tạo kỷ niệm'
-      console.error('Error creating memory:', err)
-      throw err
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create memory'
+      throw error.value
     } finally {
       isLoading.value = false
     }
@@ -227,35 +185,31 @@ export const useMemoriesStore = defineStore('memories', () => {
     error.value = null
 
     try {
-      const updateData: UpdateMemoryRequest = {
-        id: data.id,
-        title: data.title,
-        content: data.content,
-        date: data.date,
-        tags: data.tags,
-        location: data.location,
-        isPrivate: data.isPrivate,
-        image: data.images?.[0]
+      // TODO: Replace with actual API call
+      // const response = await memoriesService.updateMemory(data)
+
+      const index = memories.value.findIndex(m => m.id === data.id)
+      if (index === -1) {
+        throw new Error('Memory not found')
       }
 
-      const updatedMemory = await memoriesService.updateMemory(updateData)
-      
-      if (Array.isArray(memories.value)) {
-        const index = memories.value.findIndex(m => m.id === data.id)
-        if (index !== -1) {
-          memories.value[index] = updatedMemory
-        }
+      const updatedMemory: Memory = {
+        ...memories.value[index],
+        ...data,
+        images: data.images ? [] : memories.value[index].images, // TODO: Handle image upload properly
+        updatedAt: new Date().toISOString()
       }
+
+      memories.value[index] = updatedMemory
       
       if (selectedMemory.value?.id === data.id) {
         selectedMemory.value = updatedMemory
       }
-      
+
       return updatedMemory
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi cập nhật kỷ niệm'
-      console.error('Error updating memory:', err)
-      throw err
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update memory'
+      throw error.value
     } finally {
       isLoading.value = false
     }
@@ -266,42 +220,46 @@ export const useMemoriesStore = defineStore('memories', () => {
     error.value = null
 
     try {
-      await memoriesService.deleteMemory(id)
-      if (Array.isArray(memories.value)) {
-        memories.value = memories.value.filter(m => m.id !== id)
+      // TODO: Replace with actual API call
+      // await memoriesService.deleteMemory(id)
+
+      const index = memories.value.findIndex(m => m.id === id)
+      if (index === -1) {
+        throw new Error('Memory not found')
       }
+
+      memories.value.splice(index, 1)
       
       if (selectedMemory.value?.id === id) {
         selectedMemory.value = null
       }
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi xóa kỷ niệm'
-      console.error('Error deleting memory:', err)
-      throw err
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete memory'
+      throw error.value
     } finally {
       isLoading.value = false
     }
   }
 
-  const searchMemories = async (query: string, searchFilters?: any) => {
-    isLoading.value = true
-    error.value = null
+  const toggleFavorite = async (id: string) => {
+    const memory = memories.value.find(m => m.id === id)
+    if (!memory) return
 
-    try {
-      const results = await memoriesService.searchMemories(query, searchFilters)
-      return results
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi khi tìm kiếm kỷ niệm'
-      console.error('Error searching memories:', err)
-      throw err
-    } finally {
-      isLoading.value = false
-    }
+    await updateMemory({
+      id,
+      isFavorite: !memory.isFavorite
+    })
   }
 
-  // Filter actions
-  const updateFilters = (newFilters: Partial<typeof filters.value>) => {
-    filters.value = { ...filters.value, ...newFilters }
+  const setSelectedMemory = (memory: Memory | null) => {
+    selectedMemory.value = memory
+  }
+
+  const setFilters = (newFilters: Partial<typeof filters.value>) => {
+    filters.value = {
+      ...filters.value,
+      ...newFilters
+    }
   }
 
   const clearFilters = () => {
@@ -317,7 +275,7 @@ export const useMemoriesStore = defineStore('memories', () => {
       showPrivateOnly: false,
       sortBy: {
         field: 'date',
-        direction: 'desc'
+        direction: 'desc' as 'asc' | 'desc'
       }
     }
   }
@@ -326,8 +284,16 @@ export const useMemoriesStore = defineStore('memories', () => {
     error.value = null
   }
 
-  const clearSelectedMemory = () => {
-    selectedMemory.value = null
+  const setSortBy = (field: string, direction: 'asc' | 'desc') => {
+    // This would normally be handled by the filteredMemories computed
+    // For now, we can store it in filters or implement sorting logic
+    setFilters({ sortBy: { field, direction } })
+  }
+
+  const loadMoreMemories = async () => {
+    // For pagination - would fetch more memories from API
+    // For now, this is a placeholder
+    return Promise.resolve()
   }
 
   return {
@@ -337,26 +303,26 @@ export const useMemoriesStore = defineStore('memories', () => {
     error,
     selectedMemory,
     filters,
-    
-    // Computed
+
+    // Getters
     filteredMemories,
     favoriteMemories,
-    recentMemories,
     memoriesByYear,
     allTags,
     memoriesCount,
     favoritesCount,
-    
+
     // Actions
     fetchMemories,
-    fetchMemory,
     createMemory,
     updateMemory,
     deleteMemory,
-    searchMemories,
-    updateFilters,
+    toggleFavorite,
+    setSelectedMemory,
+    setFilters,
     clearFilters,
     clearError,
-    clearSelectedMemory
+    setSortBy,
+    loadMoreMemories
   }
 })

@@ -24,7 +24,7 @@
         
         <Button
           @click="showDisconnectConfirm = true"
-          variant="danger"
+          variant="error"
           size="small"
         >
           {{ $t('couple.disconnect') }}
@@ -146,12 +146,12 @@
     </Modal>
 
     <!-- Disconnect Confirmation -->
-    <ConfirmModal
+    <BaseConfirmModal
       v-model="showDisconnectConfirm"
       :title="$t('couple.confirm_disconnect')"
       :message="$t('couple.disconnect_warning')"
-      confirmText="couple.disconnect"
-      confirmVariant="danger"
+      :confirm-text="$t('couple.disconnect')"
+      variant="danger"
       @confirm="handleDisconnect"
     />
   </div>
@@ -166,7 +166,7 @@ import Avatar from '@/components/common/Avatar.vue'
 import Button from '@/components/common/Button.vue'
 import Input from '@/components/common/Input.vue'
 import Modal from '@/components/common/Modal.vue'
-import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import BaseConfirmModal from '@/components/common/BaseConfirmModal.vue'
 
 const { t } = useI18n()
 const {

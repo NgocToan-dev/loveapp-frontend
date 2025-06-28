@@ -142,13 +142,21 @@ export default {
     create_failed: 'Không thể tạo lời nhắc',
     update_failed: 'Không thể cập nhật lời nhắc',
     delete_failed: 'Không thể xóa lời nhắc',
-    complete_failed: 'Không thể đánh dấu hoàn thành',
-    incomplete_failed: 'Không thể đánh dấu chưa hoàn thành',
+    mark_completed_failed: 'Không thể đánh dấu hoàn thành',
+    mark_incomplete_failed: 'Không thể đánh dấu chưa hoàn thành',
     fetch_upcoming_failed: 'Không thể tải lời nhắc sắp tới',
     fetch_overdue_failed: 'Không thể tải lời nhắc quá hạn',
     fetch_by_type_failed: 'Không thể tải lời nhắc theo loại',
     search_failed: 'Không thể tìm kiếm lời nhắc',
     snooze_failed: 'Không thể hoãn lời nhắc'
+  },
+
+  success: {
+    created: 'Tạo lời nhắc thành công!',
+    updated: 'Cập nhật lời nhắc thành công!',
+    deleted: 'Xóa lời nhắc thành công!',
+    marked_completed: 'Đánh dấu hoàn thành thành công!',
+    marked_incomplete: 'Đánh dấu chưa hoàn thành thành công!'
   },
 
   actions: {

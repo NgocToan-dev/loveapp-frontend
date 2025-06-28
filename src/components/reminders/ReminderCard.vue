@@ -144,12 +144,12 @@
     </Modal>
 
     <!-- Delete Confirmation -->
-    <ConfirmModal
+    <BaseConfirmModal
       v-model="showDeleteConfirm"
       :title="$t('reminders.confirm_delete')"
       :message="$t('reminders.delete_warning')"
-      confirmText="common.actions.delete"
-      confirmVariant="danger"
+      :confirm-text="$t('common.actions.delete')"
+      variant="danger"
       @confirm="$emit('delete', reminder.id)"
     />
   </div>
@@ -165,7 +165,7 @@ import Dropdown from '@/components/common/Dropdown.vue'
 import DropdownItem from '@/components/common/DropdownItem.vue'
 import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
-import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import BaseConfirmModal from '@/components/common/BaseConfirmModal.vue'
 
 interface Props {
   reminder: Reminder

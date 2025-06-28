@@ -116,8 +116,9 @@ export const usePWA = () => {
     if (!isServiceWorkerSupported) return
 
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js')
-      console.log('Service Worker registered:', registration)
+      // TODO: Enable service worker when PWA plugin is configured
+      // const registration = await navigator.serviceWorker.register('/sw.js')
+      console.log('Service Worker registration disabled in development')
     } catch (error) {
       console.error('Service Worker registration failed:', error)
     }
