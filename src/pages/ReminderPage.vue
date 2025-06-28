@@ -25,28 +25,28 @@
         <div class="stats-grid">
           <QuickActionCard
             :title="$t('reminders.stats.total')"
-            :value="remindersCount.toString()"
+            :description="remindersCount.toString()"
             icon="📝"
             color="primary"
           />
           
           <QuickActionCard
             :title="$t('reminders.stats.completed')"
-            :value="completedReminders.length.toString()"
+            :description="completedReminders.length.toString()"
             icon="✅"
             color="success"
           />
           
           <QuickActionCard
             :title="$t('reminders.stats.upcoming')"
-            :value="upcomingReminders.length.toString()"
+            :description="upcomingReminders.length.toString()"
             icon="⏰"
             color="warning"
           />
           
           <QuickActionCard
             :title="$t('reminders.stats.overdue')"
-            :value="overdueReminders.length.toString()"
+            :description="overdueReminders.length.toString()"
             icon="⚠️"
             color="danger"
           />
@@ -110,10 +110,10 @@
       <Modal 
         v-model="showCreateForm" 
         :title="editingReminder ? $t('reminders.edit.title') : $t('reminders.create.title')"
-        size="large"
+        size="lg"
       >
         <ReminderForm
-          :reminder="editingReminder"
+          :reminder="editingReminder || undefined"
           :is-submitting="isCreating || isUpdating"
           @submit="handleFormSubmit"
           @cancel="closeForm"
@@ -125,7 +125,7 @@
         <div class="error-content">
           <span class="error-icon">❌</span>
           <span class="error-message">{{ error }}</span>
-          <Button @click="clearError" variant="ghost" size="small">
+          <Button @click="clearError" variant="ghost" size="sm">
             {{ $t('common.dismiss') }}
           </Button>
         </div>

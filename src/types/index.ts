@@ -123,48 +123,85 @@ export interface BlogPost {
   id: string
   title: string
   content: string
-  excerpt: string
-  imageUrl?: string
-  imagePublicId?: string
+  contentHtml: string
+  excerpt?: string
+  coverImage?: string
+  coverImageUrl?: string
+  author: {
+    id: string
+    displayName: string
+    avatarUrl?: string
+  }
   tags: string[]
-  isPublished: boolean
-  publishedAt?: string
-  authorId: string
-  author: User
+  privacy: 'private' | 'couple' | 'public'
+  status: 'draft' | 'published'
+  isLiked?: boolean
   likesCount: number
-  commentsCount: number
+  views: number
+  readingTime?: number
   createdAt: string
   updatedAt: string
+  publishedAt?: string
 }
 
 export interface CreateBlogPostRequest {
   title: string
   content: string
-  excerpt: string
-  image?: File
-  tags: string[]
-  isPublished?: boolean
+  contentHtml: string
+  excerpt?: string
+  coverImage?: File
+  coverImageUrl?: string
+  tags?: string[]
+  privacy?: 'private' | 'couple' | 'public'
+  status?: 'draft' | 'published'
 }
 
 export interface UpdateBlogPostRequest extends Partial<CreateBlogPostRequest> {
   id: string
 }
 
+export interface BlogPostFilters {
+  search?: string
+  tags?: string[]
+  privacy?: 'all' | 'private' | 'couple' | 'public'
+  status?: 'all' | 'draft' | 'published'
+  author?: string
+  dateFrom?: string
+  dateTo?: string
+  sortBy?: 'latest' | 'oldest' | 'popular' | 'views'
+}
+
+export interface BlogPostStats {
+  totalPosts: number
+  publishedPosts: number
+  draftPosts: number
+  totalViews: number
+  totalLikes: number
+  postsThisMonth: number
+  popularTags: { tag: string; count: number }[]
+}
+
 export interface BlogComment {
   id: string
   postId: string
+  author: {
+    id: string
+    displayName: string
+    avatarUrl?: string
+  }
   content: string
-  authorId: string
-  author: User
+  parentId?: string
+  replies?: BlogComment[]
+  likesCount: number
+  isLiked?: boolean
   createdAt: string
   updatedAt: string
 }
 
-export interface BlogLike {
-  id: string
+export interface CreateBlogCommentRequest {
   postId: string
-  userId: string
-  createdAt: string
+  content: string
+  parentId?: string
 }
 
 // Timeline types

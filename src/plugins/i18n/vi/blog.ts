@@ -2,9 +2,18 @@ export default {
   title: 'Blog của chúng ta',
   subtitle: 'Chia sẻ suy nghĩ và cảm xúc cùng nhau',
   createPost: 'Viết bài mới',
+  editPost: 'Chỉnh sửa bài viết',
   noPosts: 'Chưa có bài viết nào',
+  noPostsDescription: 'Hãy tạo bài viết đầu tiên để chia sẻ câu chuyện tình yêu của bạn',
+  createFirst: 'Viết bài đầu tiên',
   firstPost: 'Hãy viết bài viết đầu tiên!',
   readingTime: 'phút đọc',
+  loadMore: 'Tải thêm',
+  confirmDelete: 'Bạn có chắc chắn muốn xóa bài viết này?',
+  noImage: 'Không có ảnh',
+  views: 'lượt xem',
+  lastUpdated: 'Cập nhật lần cuối',
+  draft: 'Bản nháp',
   
   status: {
     draft: 'Bản nháp',
@@ -12,8 +21,57 @@ export default {
   },
 
   privacy: {
+    label: 'Quyền riêng tư',
     private: 'Riêng tư',
+    couple: 'Chỉ cặp đôi',
     public: 'Công khai'
+  },
+
+  form: {
+    title: 'Tiêu đề',
+    titlePlaceholder: 'Nhập tiêu đề bài viết...',
+    content: 'Nội dung',
+    contentPlaceholder: 'Viết nội dung bài viết của bạn...',
+    tags: 'Thẻ',
+    tagsPlaceholder: 'Nhập các thẻ, phân cách bằng dấu phẩy',
+    tagsHelp: 'Ví dụ: tình yêu, kỷ niệm, du lịch',
+    privacy: 'Quyền riêng tư',
+    status: 'Trạng thái',
+    coverImage: 'Ảnh bìa'
+  },
+
+  filters: {
+    search: 'Tìm kiếm',
+    searchPlaceholder: 'Tìm kiếm bài viết...',
+    status: 'Trạng thái',
+    allStatus: 'Tất cả trạng thái',
+    published: 'Đã xuất bản',
+    draft: 'Bản nháp',
+    privacy: 'Quyền riêng tư',
+    allPrivacy: 'Tất cả quyền riêng tư',
+    sortBy: 'Sắp xếp',
+    latest: 'Mới nhất',
+    oldest: 'Cũ nhất',
+    popular: 'Phổ biến',
+    mostViewed: 'Xem nhiều nhất',
+    tags: 'Thẻ',
+    activeFilters: 'Bộ lọc đang áp dụng',
+    clearAll: 'Xóa tất cả'
+  },
+
+  stats: {
+    totalPosts: 'Tổng bài viết',
+    published: 'Đã xuất bản',
+    drafts: 'Bản nháp',
+    totalViews: 'Tổng lượt xem',
+    totalLikes: 'Tổng lượt thích',
+    thisMonth: 'Tháng này',
+    avgLikes: 'TB thích',
+    popularTags: 'Thẻ phổ biến',
+    recentActivity: 'Hoạt động gần đây',
+    today: 'Hôm nay',
+    yesterday: 'Hôm qua',
+    daysAgo: '{days} ngày trước'
   },
 
   editor: {
@@ -38,53 +96,5 @@ export default {
     linkUrlPlaceholder: 'https://example.com',
     linkText: 'Văn bản liên kết',
     linkTextPlaceholder: 'Nhập văn bản liên kết...'
-  },
-
-  form: {
-    createTitle: 'Tạo bài viết mới',
-    editTitle: 'Chỉnh sửa bài viết',
-    title: 'Tiêu đề bài viết',
-    titlePlaceholder: 'Nhập tiêu đề hấp dẫn cho bài viết...',
-    content: 'Nội dung',
-    contentPlaceholder: 'Bắt đầu viết câu chuyện của bạn...',
-    excerpt: 'Tóm tắt',
-    excerptPlaceholder: 'Viết tóm tắt ngắn gọn về bài viết...',
-    excerptHelp: 'Mô tả ngắn xuất hiện trong danh sách bài viết',
-    coverImage: 'Ảnh bìa',
-    coverImagePreview: 'Xem trước ảnh bìa',
-    removeCoverImage: 'Xóa ảnh bìa',
-    dragCoverImage: 'Kéo thả ảnh bìa vào đây hoặc nhấp để chọn',
-    selectCoverImage: 'Chọn ảnh bìa',
-    tags: 'Thẻ',
-    tagsPlaceholder: 'Thêm thẻ và nhấn Enter...',
-    settings: 'Cài đặt',
-    privacy: 'Quyền riêng tư',
-    private: 'Bài viết riêng tư',
-    privateHelp: 'Chỉ bạn và người yêu có thể xem bài viết này',
-    publishing: 'Xuất bản',
-    publish: 'Xuất bản bài viết',
-    publishHelp: 'Làm cho bài viết này hiển thị với người khác'
-  },
-
-  actions: {
-    view: 'Xem',
-    edit: 'Chỉnh sửa',
-    delete: 'Xóa',
-    publish: 'Xuất bản',
-    unpublish: 'Hủy xuất bản',
-    saveDraft: 'Lưu bản nháp',
-    update: 'Cập nhật bài viết',
-    share: 'Chia sẻ',
-    like: 'Thích',
-    comment: 'Bình luận'
-  },
-
-  categories: {
-    love: 'Tình yêu',
-    life: 'Cuộc sống',
-    travel: 'Du lịch',
-    food: 'Ẩm thực',
-    memories: 'Kỷ niệm',
-    thoughts: 'Suy nghĩ'
   }
 }

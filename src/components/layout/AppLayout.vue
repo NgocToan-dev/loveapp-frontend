@@ -10,9 +10,6 @@
         <slot />
       </main>
       
-      <!-- Bottom Navigation -->
-      <BottomNavigation class="md:hidden" />
-      
       <!-- Theme Toggle -->
       <ThemeToggle class="fixed bottom-20 right-4 z-40 md:bottom-4" />
       
@@ -35,7 +32,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
 import Header from '@/components/layout/Header.vue'
-import BottomNavigation from '@/components/layout/BottomNavigation.vue'
 import ErrorBoundary from '@/components/common/ErrorBoundary.vue'
 import ThemeToggle from '@/components/common/ThemeToggle.vue'
 import NotificationToast from '@/components/common/NotificationToast.vue'
