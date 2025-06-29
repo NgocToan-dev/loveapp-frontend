@@ -10,7 +10,7 @@
         :loading="isLoading"
         :disabled="isLoading"
       >
-        <EditIcon class="w-4 h-4 mr-2" />
+        <PencilIcon class="w-4 h-4 mr-2" />
         {{ $t('common.actions.edit') }}
       </Button>
 
@@ -48,7 +48,7 @@
       <Dropdown>
         <template #trigger>
           <Button variant="ghost" size="sm" class="more-actions">
-            <MoreVerticalIcon class="w-4 h-4" />
+            <EllipsisVerticalIcon class="w-4 h-4" />
           </Button>
         </template>
 
@@ -58,7 +58,7 @@
           @click="$emit('duplicate')"
           :disabled="isLoading"
         >
-          <CopyIcon class="w-4 h-4 mr-2" />
+          <DocumentDuplicateIcon class="w-4 h-4 mr-2" />
           {{ $t('common.actions.duplicate') }}
         </DropdownItem>
 
@@ -68,7 +68,7 @@
           @click="$emit('export')"
           :disabled="isLoading"
         >
-          <DownloadIcon class="w-4 h-4 mr-2" />
+          <ArrowDownTrayIcon class="w-4 h-4 mr-2" />
           {{ $t('common.actions.export') }}
         </DropdownItem>
 
@@ -78,11 +78,11 @@
           @click="$emit('archive')"
           :disabled="isLoading"
         >
-          <ArchiveIcon class="w-4 h-4 mr-2" />
+          <ArchiveBoxIcon class="w-4 h-4 mr-2" />
           {{ isArchived ? $t('common.actions.unarchive') : $t('common.actions.archive') }}
         </DropdownItem>
 
-        <DropdownDivider v-if="canDelete" />
+        <div v-if="canDelete" class="border-t border-gray-200 my-1"></div>
 
         <!-- Delete Action -->
         <DropdownItem
@@ -104,15 +104,7 @@ import { useI18n } from 'vue-i18n'
 import Button from '@/components/common/Button.vue'
 import Dropdown from '@/components/common/Dropdown.vue'
 import DropdownItem from '@/components/common/DropdownItem.vue'
-import DropdownDivider from '@/components/common/DropdownDivider.vue'
-import EditIcon from '@/components/icons/EditIcon.vue'
-import HeartIcon from '@/components/icons/HeartIcon.vue'
-import ShareIcon from '@/components/icons/ShareIcon.vue'
-import CopyIcon from '@/components/icons/CopyIcon.vue'
-import DownloadIcon from '@/components/icons/DownloadIcon.vue'
-import ArchiveIcon from '@/components/icons/ArchiveIcon.vue'
-import TrashIcon from '@/components/icons/TrashIcon.vue'
-import MoreVerticalIcon from '@/components/icons/MoreVerticalIcon.vue'
+import { PencilIcon, HeartIcon, ShareIcon, DocumentDuplicateIcon, ArrowDownTrayIcon, ArchiveBoxIcon, TrashIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
   canEdit?: boolean

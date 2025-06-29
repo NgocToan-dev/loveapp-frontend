@@ -1,16 +1,21 @@
 <template>
   <Menu as="div" :class="containerClasses" v-slot="{ open }">
+    <!-- Top-positioned label -->
+    <div v-if="label && labelPosition === 'top'" class="mb-1 text-sm font-medium text-gray-700">
+      {{ label }}
+    </div>
+
     <!-- Trigger Button -->
-    <MenuButton :class="triggerClasses" :disabled="disabled">
-      <slot name="trigger" :open="open">
-        <span class="flex items-center justify-between w-full">
+    <MenuButton :class="triggerClasses" class="mr-2" :disabled="disabled">
+      <div class="flex items-center justify-between w-full">
+        <slot name="trigger" :open="open">
           <span :class="labelClasses">{{ label || placeholder }}</span>
-          <ChevronDownIcon 
-            :class="chevronClasses" 
-            :style="{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }"
-          />
-        </span>
-      </slot>
+        </slot>
+        <ChevronDownIcon
+          :class="chevronClasses"
+          :style="{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }"
+        />
+      </div>
     </MenuButton>
 
     <!-- Dropdown Menu -->
@@ -48,8 +53,12 @@ import { Menu, MenuButton, MenuItems } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
+  /** Custom icon component to display before label in trigger */
+  icon?: any
   label?: string
   placeholder?: string
+  /** Show label above the dropdown (top) or inline in trigger (inline) */
+  labelPosition?: 'inline' | 'top'
   position?: 'left' | 'right' | 'center'
   align?: 'top' | 'bottom'
   width?: 'auto' | 'full' | 'trigger' | string
@@ -61,6 +70,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  icon: undefined,
+  labelPosition: 'top',
   placeholder: 'Select option',
   position: 'left',
   align: 'bottom',

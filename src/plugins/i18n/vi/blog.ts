@@ -35,6 +35,8 @@ export default {
   form: {
     title: 'Tiêu đề',
     titlePlaceholder: 'Nhập tiêu đề bài viết...',
+    createTitle: 'Tạo bài viết mới',
+    editTitle: 'Chỉnh sửa bài viết',
     content: 'Nội dung',
     contentPlaceholder: 'Viết nội dung bài viết của bạn...',
     tags: 'Thẻ',
@@ -45,7 +47,20 @@ export default {
     status: 'Trạng thái',
     coverImage: 'Ảnh bìa',
     draft: 'Bản nháp',
-    published: 'Đã xuất bản'
+    published: 'Đã xuất bản',
+    private: 'Riêng tư',
+    couple: 'Chỉ cặp đôi',
+    public: 'Công khai',
+    selectCoverImage: 'Chọn ảnh bìa',
+    publishHelp: 'Chọn "Đã xuất bản" để chia sẻ bài viết với mọi người. Chọn "Bản nháp" để lưu lại và chỉnh sửa sau.',
+    publish: 'Xuất bản',
+    publishing: 'Đang xuất bản...',
+    privateHelp: 'Chọn "Riêng tư" để chỉ bạn và người yêu có thể xem bài viết. Chọn "Công khai" để mọi người đều có thể xem.',
+    settings: 'Cài đặt',
+    excerptHelp: 'Viết một đoạn trích ngắn để mô tả bài viết của bạn. Đoạn trích này sẽ hiển thị trong danh sách bài viết.',
+    excerptPlaceholder: 'Nhập đoạn trích ngắn...',
+    excerpt: 'Đoạn trích',
+    dragCoverImage: 'Kéo và thả ảnh bìa vào đây hoặc nhấp để chọn',
   },
 
   filters: {
@@ -122,7 +137,10 @@ export default {
     delete: 'Xóa',
     share: 'Chia sẻ',
     like: 'Thích',
-    comment: 'Bình luận'
+    comment: 'Bình luận',
+    save: 'Lưu',
+    saveDraft: "Lưu bản nháp",
+    publish: 'Xuất bản',
   },
 
   categories: {
@@ -132,5 +150,13 @@ export default {
     food: 'Ẩm thực',
     memories: 'Kỷ niệm',
     thoughts: 'Suy nghĩ'
+  },
+
+  detail: {
+    title: 'Chi tiết bài viết',
+    not_found: "Bài viết không tìm thấy",
+    back_to_list: "Quay lại blog",
+    not_found_message: "Bài viết bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.",
   }
+  
 }

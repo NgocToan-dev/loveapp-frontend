@@ -1,112 +1,86 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 px-4">
+  <div
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-100 px-4"
+  >
     <div class="max-w-md w-full space-y-8">
       <!-- Logo/Header -->
       <div class="text-center">
-        <div class="mx-auto w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+        <div
+          class="mx-auto w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mb-4"
+        >
           <HeartIcon class="w-8 h-8 text-white" />
         </div>
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-          {{ isLogin ? $t('auth.login.title') : $t('auth.register.title') }}
+        <h2 class="text-3xl font-bold text-gray-900">
+          {{ isLogin ? $t("auth.login.title") : $t("auth.register.title") }}
         </h2>
-        <p class="mt-2 text-gray-600 dark:text-gray-300">
-          {{ isLogin ? $t('auth.login.subtitle') : $t('auth.register.subtitle') }}
+        <p class="mt-2 text-gray-600">
+          {{ isLogin ? $t("auth.login.subtitle") : $t("auth.register.subtitle") }}
         </p>
       </div>
 
       <!-- Form -->
       <form @submit.prevent="handleSubmit" class="space-y-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg space-y-4">
+        <div class="bg-white rounded-lg p-6 shadow-lg space-y-4">
           <!-- Name fields (register only) -->
           <div v-if="!isLogin" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {{ $t('auth.form.firstName') }}
-                </label>
-                <input
-                  v-model="form.firstName"
-                  type="text"
-                  :placeholder="$t('auth.form.firstNamePlaceholder')"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {{ $t('auth.form.lastName') }}
-                </label>
-                <input
-                  v-model="form.lastName"
-                  type="text"
-                  :placeholder="$t('auth.form.lastNamePlaceholder')"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {{ $t('auth.form.username') }}
-              </label>
-              <input
-                v-model="form.username"
-                type="text"
-                :placeholder="$t('auth.form.usernamePlaceholder')"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              <Input
+                v-model:modelValue="form.firstName"
+                :label="$t('auth.form.firstName')"
+                :placeholder="$t('auth.form.firstNamePlaceholder')"
+                required
+              />
+              <Input
+                v-model:modelValue="form.lastName"
+                :label="$t('auth.form.lastName')"
+                :placeholder="$t('auth.form.lastNamePlaceholder')"
                 required
               />
             </div>
-          </div>
-
-          <!-- Email field -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('auth.form.email') }}
-            </label>
-            <input
-              v-model="form.email"
-              type="email"
-              :placeholder="$t('auth.form.emailPlaceholder')"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            <Input
+              v-model:modelValue="form.username"
+              :label="$t('auth.form.username')"
+              :placeholder="$t('auth.form.usernamePlaceholder')"
               required
             />
           </div>
 
+          <!-- Email field -->
+          <Input
+            v-model:modelValue="form.email"
+            type="email"
+            :label="$t('auth.form.email')"
+            :placeholder="$t('auth.form.emailPlaceholder')"
+            required
+          />
+
           <!-- Password field -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('auth.form.password') }}
-            </label>
-            <div class="relative">
-              <input
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                :placeholder="$t('auth.form.passwordPlaceholder')"
-                class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                required
-              />
+          <Input
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            :label="$t('auth.form.password')"
+            :placeholder="$t('auth.form.passwordPlaceholder')"
+            required
+          >
+            <template #trailing-icon>
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                class="text-gray-400 hover:text-gray-600"
               >
                 <EyeIcon v-if="showPassword" class="w-5 h-5" />
                 <EyeSlashIcon v-else class="w-5 h-5" />
               </button>
-            </div>
-          </div>
+            </template>
+          </Input>
 
           <!-- Confirm Password field (register only) -->
           <div v-if="!isLogin">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('auth.form.confirmPassword') }}
-            </label>
-            <input
-              v-model="form.confirmPassword"
+            <Input
+              v-model:modelValue="form.confirmPassword"
               type="password"
+              :label="$t('auth.form.confirmPassword')"
               :placeholder="$t('auth.form.confirmPasswordPlaceholder')"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
@@ -119,41 +93,34 @@
                 type="checkbox"
                 class="rounded border-gray-300 text-pink-600 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
               />
-              <span class="ml-2 text-sm text-gray-600 dark:text-gray-300">
-                {{ $t('auth.form.rememberMe') }}
+              <span class="ml-2 text-sm text-gray-600">
+                {{ $t("auth.form.rememberMe") }}
               </span>
             </label>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               @click="showForgotPassword = true"
-              class="text-sm text-pink-600 hover:text-pink-500"
             >
-              {{ $t('auth.form.forgotPassword') }}
-            </button>
+              {{ $t("auth.form.forgotPassword") }}
+            </Button>
           </div>
 
           <!-- Submit button -->
-          <button
-            type="submit"
-            :disabled="isLoading"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-          >
-            <LoadingSpinner v-if="isLoading" class="w-4 h-4 mr-2" />
-            {{ isLogin ? $t('auth.login.submit') : $t('auth.register.submit') }}
-          </button>
+          <Button type="submit" variant="primary" block :loading="isLoading">
+            {{ isLogin ? $t("auth.login.submit") : $t("auth.register.submit") }}
+          </Button>
         </div>
       </form>
 
       <!-- Switch mode -->
       <div class="text-center">
-        <p class="text-gray-600 dark:text-gray-300">
-          {{ isLogin ? $t('auth.login.noAccount') : $t('auth.register.hasAccount') }}
-          <button
-            @click="toggleMode"
-            class="font-medium text-pink-600 hover:text-pink-500"
-          >
-            {{ isLogin ? $t('auth.register.title') : $t('auth.login.title') }}
-          </button>
+        <p class="text-gray-600">
+          {{ isLogin ? $t("auth.login.noAccount") : $t("auth.register.hasAccount") }}
+          <Button @click="toggleMode" variant="ghost-link" size="sm">
+            {{ isLogin ? $t("auth.register.submit") : $t("auth.login.submit") }}
+          </Button>
         </p>
       </div>
 
@@ -161,40 +128,62 @@
       <div class="mt-6">
         <div class="relative">
           <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-300 dark:border-gray-600" />
+            <div class="w-full border-t border-gray-300" />
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="px-2 bg-gradient-to-br from-pink-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 text-gray-500">
-              {{ $t('auth.social.divider') }}
+            <span
+              class="px-2 bg-gradient-to-br from-pink-50 to-purple-100 text-gray-500"
+            >
+              {{ $t("auth.social.divider") }}
             </span>
           </div>
         </div>
 
-        <div class="mt-6 grid grid-cols-2 gap-3">
-          <button
+        <div class="my-6 grid grid-cols-2 gap-3">
+          <Button
             @click="handleGoogleLogin"
-            type="button"
-            class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+            variant="secondary"
+            block
+            size="md"
           >
-            <svg class="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            <span class="ml-2">Google</span>
-          </button>
+            <template #icon>
+              <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <path
+                  fill="#4285f4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34a853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#fbbc05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#ea4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+            </template>
+            Google
+          </Button>
 
-          <button
+          <Button
             @click="handleFacebookLogin"
-            type="button"
-            class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+            variant="secondary"
+            block
+            size="md"
           >
-            <svg class="w-5 h-5" fill="#1877f2" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-            <span class="ml-2">Facebook</span>
-          </button>
+            <template #icon>
+              <svg class="w-5 h-5" fill="#1877f2" viewBox="0 0 24 24">
+                <path
+                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                />
+              </svg>
+            </template>
+            Facebook
+          </Button>
         </div>
       </div>
     </div>
@@ -202,36 +191,37 @@
     <!-- Forgot Password Modal -->
     <Modal v-if="showForgotPassword" @close="showForgotPassword = false">
       <div class="p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          {{ $t('auth.forgotPassword.title') }}
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          {{ $t("auth.forgotPassword.title") }}
         </h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-          {{ $t('auth.forgotPassword.description') }}
+        <p class="text-gray-600 mb-4">
+          {{ $t("auth.forgotPassword.description") }}
         </p>
         <form @submit.prevent="handleForgotPassword">
-          <input
-            v-model="forgotPasswordEmail"
+          <Input
+            v-model:modelValue="forgotPasswordEmail"
             type="email"
             :placeholder="$t('auth.form.emailPlaceholder')"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:text-white mb-4"
             required
+            class="mb-4"
           />
           <div class="flex space-x-3 justify-end">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               @click="showForgotPassword = false"
-              class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
             >
-              {{ $t('common.buttons.cancel') }}
-            </button>
-            <button
+              {{ $t("common.buttons.cancel") }}
+            </Button>
+            <Button
               type="submit"
-              :disabled="isLoadingForgotPassword"
-              class="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              :loading="isLoadingForgotPassword"
             >
-              <LoadingSpinner v-if="isLoadingForgotPassword" class="w-4 h-4 mr-2" />
-              {{ $t('auth.forgotPassword.submit') }}
-            </button>
+              {{ $t("auth.forgotPassword.submit") }}
+            </Button>
           </div>
         </form>
       </div>
@@ -240,98 +230,100 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { HeartIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
-import { useUserStore } from '@/stores/user'
-import { useUIStore } from '@/stores/ui'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import Modal from '@/components/common/Modal.vue'
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { HeartIcon, EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
+import { useUserStore } from "@/stores/user";
+import { useUIStore } from "@/stores/ui";
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
+import Modal from "@/components/common/Modal.vue";
+import Input from "@/components/common/Input.vue";
+import Button from "@/components/common/Button.vue";
 
 interface Props {
-  mode?: 'login' | 'register'
+  mode?: "login" | "register";
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: 'login'
-})
+  mode: "login",
+});
 
-const router = useRouter()
-const { t } = useI18n()
-const userStore = useUserStore()
-const uiStore = useUIStore()
+const router = useRouter();
+const { t } = useI18n();
+const userStore = useUserStore();
+const uiStore = useUIStore();
 
-const isLogin = ref(props.mode === 'login')
-const showPassword = ref(false)
-const isLoading = ref(false)
-const showForgotPassword = ref(false)
-const isLoadingForgotPassword = ref(false)
-const forgotPasswordEmail = ref('')
+const isLogin = ref(props.mode === "login");
+const showPassword = ref(false);
+const isLoading = ref(false);
+const showForgotPassword = ref(false);
+const isLoadingForgotPassword = ref(false);
+const forgotPasswordEmail = ref("");
 
 const form = reactive({
-  firstName: '',
-  lastName: '',
-  username: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  rememberMe: false
-})
+  firstName: "",
+  lastName: "",
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  rememberMe: false,
+});
 
 const toggleMode = () => {
-  isLogin.value = !isLogin.value
+  isLogin.value = !isLogin.value;
   // Reset form
   Object.assign(form, {
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    rememberMe: false
-  })
-}
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    rememberMe: false,
+  });
+};
 
 const validateForm = () => {
   if (!isLogin.value) {
     if (!form.firstName.trim()) {
-      uiStore.showErrorToast(t('common.validation.required'), t('auth.form.firstName'))
-      return false
+      uiStore.showErrorToast(t("common.validation.required"), t("auth.form.firstName"));
+      return false;
     }
     if (!form.lastName.trim()) {
-      uiStore.showErrorToast(t('common.validation.required'), t('auth.form.lastName'))
-      return false
+      uiStore.showErrorToast(t("common.validation.required"), t("auth.form.lastName"));
+      return false;
     }
     if (!form.username.trim()) {
-      uiStore.showErrorToast(t('common.validation.required'), t('auth.form.username'))
-      return false
+      uiStore.showErrorToast(t("common.validation.required"), t("auth.form.username"));
+      return false;
     }
     if (form.password !== form.confirmPassword) {
-      uiStore.showErrorToast(t('common.validation.passwordMatch'))
-      return false
+      uiStore.showErrorToast(t("common.validation.passwordMatch"));
+      return false;
     }
   }
-  
+
   if (form.password.length < 6) {
-    uiStore.showErrorToast(t('common.validation.minLength', { min: 6 }))
-    return false
+    uiStore.showErrorToast(t("common.validation.minLength", { min: 6 }));
+    return false;
   }
-  
-  return true
-}
+
+  return true;
+};
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
-  
-  isLoading.value = true
-  
+  if (!validateForm()) return;
+
+  isLoading.value = true;
+
   try {
     if (isLogin.value) {
       const response = await userStore.login({
         email: form.email,
         password: form.password,
-        rememberMe: form.rememberMe
-      })
-      uiStore.showSuccessToast(t('auth.login.success'))
+        rememberMe: form.rememberMe,
+      });
+      uiStore.showSuccessToast(t("auth.login.success"));
     } else {
       const response = await userStore.register({
         firstName: form.firstName,
@@ -339,57 +331,60 @@ const handleSubmit = async () => {
         username: form.username,
         email: form.email,
         password: form.password,
-        confirmPassword: form.confirmPassword
-      })
-      uiStore.showSuccessToast(t('auth.register.success'))
+        confirmPassword: form.confirmPassword,
+      });
+      uiStore.showSuccessToast(t("auth.register.success"));
     }
-    
+
     // Redirect to home page
-    router.push('/')
+    router.push("/");
   } catch (error) {
-    console.error('Auth error:', error)
-    const message = error instanceof Error ? error.message : t('auth.errors.generic')
-    uiStore.showErrorToast(t('common.status.error'), message)
+    console.error("Auth error:", error);
+    const message = error instanceof Error ? error.message : t("auth.errors.generic");
+    uiStore.showErrorToast(t("common.status.error"), message);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 const handleGoogleLogin = async () => {
   try {
     // TODO: Implement Google OAuth
-    uiStore.showErrorToast(t('common.status.error'), 'Google login not implemented yet')
+    uiStore.showErrorToast(t("common.status.error"), "Google login not implemented yet");
   } catch (error) {
-    const message = error instanceof Error ? error.message : t('auth.errors.generic')
-    uiStore.showErrorToast(t('common.status.error'), message)
+    const message = error instanceof Error ? error.message : t("auth.errors.generic");
+    uiStore.showErrorToast(t("common.status.error"), message);
   }
-}
+};
 
 const handleFacebookLogin = async () => {
   try {
     // TODO: Implement Facebook OAuth
-    uiStore.showErrorToast(t('common.status.error'), 'Facebook login not implemented yet')
+    uiStore.showErrorToast(
+      t("common.status.error"),
+      "Facebook login not implemented yet"
+    );
   } catch (error) {
-    const message = error instanceof Error ? error.message : t('auth.errors.generic')
-    uiStore.showErrorToast(t('common.status.error'), message)
+    const message = error instanceof Error ? error.message : t("auth.errors.generic");
+    uiStore.showErrorToast(t("common.status.error"), message);
   }
-}
+};
 
 const handleForgotPassword = async () => {
-  if (!forgotPasswordEmail.value) return
-  
-  isLoadingForgotPassword.value = true
-  
+  if (!forgotPasswordEmail.value) return;
+
+  isLoadingForgotPassword.value = true;
+
   try {
-    await userStore.forgotPassword(forgotPasswordEmail.value)
-    uiStore.showSuccessToast(t('auth.forgotPassword.success'))
-    showForgotPassword.value = false
-    forgotPasswordEmail.value = ''
+    await userStore.forgotPassword(forgotPasswordEmail.value);
+    uiStore.showSuccessToast(t("auth.forgotPassword.success"));
+    showForgotPassword.value = false;
+    forgotPasswordEmail.value = "";
   } catch (error) {
-    const message = error instanceof Error ? error.message : t('auth.errors.generic')
-    uiStore.showErrorToast(t('common.status.error'), message)
+    const message = error instanceof Error ? error.message : t("auth.errors.generic");
+    uiStore.showErrorToast(t("common.status.error"), message);
   } finally {
-    isLoadingForgotPassword.value = false
+    isLoadingForgotPassword.value = false;
   }
-}
+};
 </script>

@@ -13,7 +13,10 @@ export default {
     submit: 'Submit',
     upload: 'Upload',
     retry: 'Retry',
-    download: 'Download'
+    download: 'Download',
+    devLogin: 'Dev Login',
+    accept: 'Accept',
+    reject: 'Reject'
   },
   status: {
     loading: 'Loading...',
@@ -40,6 +43,7 @@ export default {
     delete: 'Delete',
     cancel: 'Cancel',
     save: 'Save',
+    add: 'Add',
     loadMore: 'Load More'
   },
   notifications: {
@@ -73,13 +77,23 @@ export default {
   dismiss: 'Dismiss',
   refresh: 'Refresh',
   search: 'Search',
-  filter: 'Filter',
+  filter: {
+    title: 'Filter',
+    clear_all: 'Clear All',
+    date_range: 'Date Range',
+    tags: 'Tags',
+    tags_placeholder: 'Enter tag and press Enter',
+    clear: 'Clear'
+  },
   clear: 'Clear',
   select_all: 'Select all',
   copy: 'Copy',
   copied: 'Copied!',
   share: 'Share',
   settings: 'Settings',
+  remove: 'Remove',
+  addCustom: 'Add "{value}"',
+  noResults: 'No results found',
   
   dashboard: {
     welcome_message: 'Welcome to your love space',

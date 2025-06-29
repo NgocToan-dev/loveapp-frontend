@@ -4,21 +4,19 @@
       <h1>{{ greeting }}, {{ userDisplayName }}! {{ getRandomHeartEmoji() }}</h1>
       <p class="welcome-message">{{ $t("dashboard.welcome") }}</p>
     </div>
+    <!-- Couple Time Display - Featured prominently in center -->
+    <div v-if="isConnected" class="featured-section">
+      <CoupleTimeDisplay />
+    </div>
 
     <!-- Couple Connection Status -->
-    <div class="dashboard-section">
+    <div v-if="!isConnected" class="dashboard-section">
       <CoupleInvitationCard />
     </div>
 
     <!-- Quick Stats -->
     <div v-if="isConnected" class="dashboard-section">
       <div class="stats-grid">
-        <QuickActionCard
-          :title="$t('dashboard.stats.daysTogther')"
-          :description="daysTogethger.toString() + ' ' + $t('dashboard.stats.days')"
-          icon="💕"
-        />
-
         <QuickActionCard
           :title="$t('dashboard.stats.memories')"
           :description="memoriesCount.toString() + ' ' + $t('dashboard.stats.saved')"
@@ -36,7 +34,9 @@
         <QuickActionCard
           v-if="upcomingReminders.length > 0"
           :title="$t('dashboard.stats.upcomingEvents')"
-          :description="upcomingReminders.length.toString() + ' ' + $t('dashboard.stats.upcoming')"
+          :description="
+            upcomingReminders.length.toString() + ' ' + $t('dashboard.stats.upcoming')
+          "
           icon="🎉"
           @click="$router.push('/reminders')"
         />
@@ -68,7 +68,7 @@
               {{ truncateText(activity.description, 100) }}
             </p>
             <p class="activity-date">
-              {{ formatDate(activity.date, 'relative') }}
+              {{ formatDate(activity.date, "relative") }}
             </p>
           </div>
         </div>
@@ -101,8 +101,11 @@
             </p>
           </div>
           <div class="reminder-countdown">
-            {{ getDaysUntil(reminder.reminderDate) === 0 ? $t('timeline.today') : 
-               getDaysUntil(reminder.reminderDate) + ' ' + $t('timeline.daysLeft') }}
+            {{
+              getDaysUntil(reminder.reminderDate) === 0
+                ? $t("timeline.today")
+                : getDaysUntil(reminder.reminderDate) + " " + $t("timeline.daysLeft")
+            }}
           </div>
         </div>
       </div>
@@ -157,25 +160,22 @@
 
     <!-- Create Memory Modal -->
     <Modal v-model="showCreateMemory" :title="$t('memories.create.title')">
-      <MemoryForm 
+      <MemoryForm
         :isOpen="showCreateMemory"
         @success="handleCreateMemory"
-        @close="showCreateMemory = false" 
+        @close="showCreateMemory = false"
       />
     </Modal>
 
     <!-- Create Reminder Modal -->
     <Modal v-model="showCreateReminder" :title="$t('reminders.create.title')">
-      <ReminderForm 
-        @submit="handleCreateReminder" 
-        @cancel="showCreateReminder = false" 
-      />
+      <ReminderForm @submit="handleCreateReminder" @cancel="showCreateReminder = false" />
     </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuth } from "@/composables/useAuth";
@@ -190,9 +190,10 @@ import {
   formatDateTime,
   formatDate,
   getDaysUntil,
-  truncateText
+  truncateText,
 } from "@/utils/helpers";
 import CoupleInvitationCard from "@/components/couple/CoupleInvitationCard.vue";
+import CoupleTimeDisplay from "@/components/couple/CoupleTimeDisplay.vue";
 import QuickActionCard from "@/components/common/QuickActionCard.vue";
 import Button from "@/components/common/Button.vue";
 import Modal from "@/components/common/Modal.vue";
@@ -203,9 +204,11 @@ const { t } = useI18n();
 const router = useRouter();
 
 const { userDisplayName } = useAuth();
-const { isConnected, coupleConnection, fetchCoupleConnection } = useCouple();
 const { fetchMemories, createMemory } = useMemories();
 const { createReminder, fetchReminders } = useReminders();
+const { isConnected, fetchCoupleConnection, coupleConnection } = useCouple();
+
+
 
 // Use statistics composable
 const {
@@ -214,7 +217,7 @@ const {
   daysTogethger,
   upcomingReminders,
   recentActivity,
-  greeting: timeGreeting
+  greeting: timeGreeting,
 } = useStatistics();
 
 // State
@@ -227,12 +230,12 @@ const greeting = computed(() => t(`dashboard.greeting.${timeGreeting.value}`));
 
 // Methods
 const viewActivity = (activity: any) => {
-  if (activity.type === 'memory') {
-    router.push('/memories');
-  } else if (activity.type === 'reminder') {
-    router.push('/reminders');
+  if (activity.type === "memory") {
+    router.push("/memories");
+  } else if (activity.type === "reminder") {
+    router.push("/reminders");
   }
-}
+};
 
 const viewReminder = (id: string) => {
   router.push(`/reminders`);
@@ -278,13 +281,21 @@ const handleCreateReminder = async (reminderData: any) => {
 
 // Lifecycle
 onMounted(async () => {
-  await fetchCoupleConnection();
+  console.log('Dashboard - onMounted, current coupleConnection:', coupleConnection)
+  
+  // Check if couple data is already initialized, if not, ensure it's loaded
+  if (!coupleConnection && !isConnected) {
+    await fetchCoupleConnection(true); // Force refresh only if needed
+  }
 
-  if (isConnected.value) {
+  if (isConnected) {
+    console.log('Dashboard - is connected, fetching memories and reminders')
     await Promise.all([
       fetchMemories(), // Get all memories
       fetchReminders(), // Get all reminders
     ]);
+  } else {
+    console.log('Dashboard - not connected, skipping memories and reminders fetch')
   }
 });
 </script>
@@ -316,6 +327,11 @@ onMounted(async () => {
 
 .dashboard-section {
   margin-bottom: 32px;
+}
+
+.featured-section {
+  margin-bottom: 48px;
+  position: relative;
 }
 
 .section-header {

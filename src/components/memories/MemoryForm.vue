@@ -3,11 +3,12 @@
     :is-open="isOpen" 
     :title="isEditMode ? $t('memories.form.editTitle') : $t('memories.form.createTitle')"
     size="lg"
+    :close-on-backdrop="false"
     @close="handleClose"
   >
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- Title -->
-      <div>
+      <div class="mt-2">
         <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
           {{ $t('memories.form.title') }}
         </label>
@@ -32,6 +33,23 @@
           :error="errors.date"
           required
         />
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+          {{ $t('memories.form.description') }}
+        </label>
+        <textarea
+          id="description"
+          v-model="form.description"
+          :placeholder="$t('memories.form.descriptionPlaceholder')"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+          :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': errors.description }"
+          required
+        />
+        <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
       </div>
 
       <!-- Content -->
@@ -103,15 +121,17 @@
               :alt="`Image ${index + 1}`"
               class="w-full h-24 object-cover rounded-lg"
             />
-            <button
+            <Button
               type="button"
               @click="removeImage(index)"
-              class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              variant="outline"
+              size="sm"
+              class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -134,21 +154,41 @@
         <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">
           {{ $t('memories.form.tags') }}
         </label>
-        <div class="flex flex-wrap gap-2 mb-2">
-          <Badge
-            v-for="tag in form.tags"
-            :key="tag"
-            :label="tag"
-            variant="secondary"
-            removable
-            @remove="removeTag(tag)"
+        
+        <!-- Current Tags Display -->
+        <div v-if="form.tags && form.tags.length > 0" class="mb-2">
+          <div class="flex flex-wrap gap-2">
+            <Badge
+              v-for="tag in form.tags"
+              :key="tag"
+              variant="secondary"
+              class="inline-flex items-center"
+            >
+              {{ $t(`memories.tags.${tag}`) }}
+              <button
+                type="button"
+                @click="removeTag(tag)"
+                class="ml-1 text-gray-400 hover:text-gray-600"
+              >
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </Badge>
+          </div>
+        </div>
+
+        <!-- Tag Selection -->
+        <div class="relative">
+          <ComboBox
+            v-model="selectedTagOption"
+            :options="tagOptions"
+            key-value="id"
+            display-value="name"
+            :placeholder="$t('memories.form.selectTag')"
+            @update:modelValue="handleTagSelection"
           />
         </div>
-        <Input
-          v-model="newTag"
-          :placeholder="$t('memories.form.tagsPlaceholder')"
-          @keydown.enter.prevent="addTag"
-        />
       </div>
 
       <!-- Mood -->
@@ -157,20 +197,17 @@
           {{ $t('memories.form.mood') }}
         </label>
         <div class="grid grid-cols-3 gap-2">
-          <button
+          <Button
             v-for="mood in availableMoods"
             :key="mood"
             type="button"
             @click="form.mood = form.mood === mood ? undefined : mood"
-            class="flex items-center justify-center p-3 border rounded-lg transition-colors"
-            :class="{
-              'border-pink-500 bg-pink-50 text-pink-700': form.mood === mood,
-              'border-gray-300 hover:border-gray-400': form.mood !== mood
-            }"
+            :variant="form.mood === mood ? 'primary' : 'outline'"
+            class="flex items-center justify-center p-3"
           >
             <span class="text-xl mr-2">{{ getMoodEmoji(mood) }}</span>
             <span class="text-sm">{{ $t(`memories.moods.${mood}`) }}</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -218,6 +255,7 @@ import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
 import Badge from '@/components/common/Badge.vue'
+import ComboBox from '@/components/common/ComboBox.vue'
 
 interface Props {
   isOpen: boolean
@@ -240,6 +278,7 @@ const memoriesStore = useMemoriesStore()
 // Form state
 const form = ref<CreateMemoryData>({
   title: '',
+  description: '',
   content: '',
   date: new Date().toISOString().split('T')[0],
   images: [],
@@ -252,6 +291,7 @@ const form = ref<CreateMemoryData>({
 const errors = ref<Record<string, string>>({})
 const selectedImages = ref<Array<{ file: File; preview: string }>>([])
 const newTag = ref('')
+const selectedTag = ref('')
 const isDragging = ref(false)
 const isSubmitting = ref(false)
 const fileInput = ref<HTMLInputElement>()
@@ -263,8 +303,30 @@ const availableMoods: Memory['mood'][] = [
   'happy', 'love', 'excited', 'romantic', 'nostalgic', 'grateful'
 ]
 
+const availableTags = [
+  'anniversary', 'date', 'travel', 'food', 'family', 'friends', 
+  'celebration', 'milestone', 'gift', 'surprise', 'adventure', 'home'
+]
+
+// Transform tags for ComboBox component - only show unselected tags
+const tagOptions = computed(() => 
+  availableTags
+    .filter(tag => !form.value.tags?.includes(tag))
+    .map(tag => ({
+      id: tag,
+      name: t(`memories.tags.${tag}`)
+    }))
+)
+
+// Available tags that haven't been selected yet
+const availableTagsForSelection = computed(() => 
+  availableTags.filter(tag => !form.value.tags?.includes(tag))
+)
+
+const selectedTagOption = ref<{ id: string; name: string }[]>([])
+
 const isFormValid = computed(() => {
-  return form.value.title.trim() && form.value.content.trim() && form.value.date
+  return form.value.title.trim() && form.value.description.trim() && form.value.date
 })
 
 // Methods
@@ -323,6 +385,28 @@ const addTag = () => {
   }
 }
 
+const handleTagSelection = (values: any[]) => {
+  // Check if new tags were added
+  if (values && values.length > 0) {
+    // Get the newly selected tags
+    const currentTags = form.value.tags || []
+    
+    values.forEach(option => {
+      if (option && option.id && !currentTags.includes(option.id)) {
+        if (!form.value.tags) form.value.tags = []
+        form.value.tags.push(option.id)
+      }
+    })
+    
+    // Clear the selection after adding tags
+    selectedTagOption.value = []
+  }
+}
+
+const addCustomTag = () => {
+  addTag()
+}
+
 const removeTag = (tag: string) => {
   if (form.value.tags) {
     const index = form.value.tags.indexOf(tag)
@@ -339,7 +423,11 @@ const validateForm = () => {
     errors.value.title = t('validation.required')
   }
   
-  if (!form.value.content.trim()) {
+  if (!form.value.description.trim()) {
+    errors.value.description = t('validation.required')
+  }
+  
+  if (form.value.content && !form.value.content.trim()) {
     errors.value.content = t('validation.required')
   }
   
@@ -382,6 +470,7 @@ const handleSubmit = async () => {
 const resetForm = () => {
   form.value = {
     title: '',
+    description: '',
     content: '',
     date: new Date().toISOString().split('T')[0],
     images: [],
@@ -392,6 +481,8 @@ const resetForm = () => {
   }
   selectedImages.value = []
   newTag.value = ''
+  selectedTag.value = ''
+  selectedTagOption.value = []
   errors.value = {}
 }
 
@@ -405,9 +496,10 @@ watch(() => props.memory, (memory) => {
   if (memory) {
     form.value = {
       title: memory.title,
-      content: memory.content,
+      description: memory.description || '',
+      content: memory.content || '',
       date: memory.date,
-      tags: [...memory.tags],
+      tags: [...memory.tags || []],
       location: memory.location || '',
       mood: memory.mood,
       isPrivate: memory.isPrivate
@@ -420,9 +512,8 @@ watch(() => props.memory, (memory) => {
 // Watch for modal open/close
 watch(() => props.isOpen, (isOpen) => {
   if (!isOpen) {
-    nextTick(() => {
-      resetForm()
-    })
+    // Reset form when modal closes, but avoid infinite loop
+    resetForm()
   }
 })
 </script>

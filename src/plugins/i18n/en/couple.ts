@@ -13,6 +13,7 @@ export default {
   connection_pending: 'Connection pending',
   waiting_for_partner: 'Waiting for your partner to accept the invitation',
   connection_successful: 'Connection successful!',
+  connected_since: 'Connected since',
   
   next_anniversary: 'Next anniversary',
   edit_relationship_date: 'Edit relationship start date',
@@ -35,6 +36,13 @@ export default {
     memories_created: 'Memories created',
     photos_uploaded: 'Photos uploaded',
     reminders_set: 'Reminders set'
+  },
+
+  stats: {
+    days_together: 'days together',
+    years: 'years',
+    months: 'months',
+    days: 'days'
   },
   
   errors: {

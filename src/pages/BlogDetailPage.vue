@@ -169,10 +169,10 @@
             <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t('blog.share') }}</h3>
             <div class="flex space-x-3">
               <Button @click="shareToFacebook" variant="outline" size="sm">
-                <span class="mr-2">📘</span> Facebook
+                <span class="mr-2">📘</span> {{ $t('common.social.facebook') }}
               </Button>
               <Button @click="shareToTwitter" variant="outline" size="sm">
-                <span class="mr-2">🐦</span> Twitter
+                <span class="mr-2">🐦</span> {{ $t('common.social.twitter') }}
               </Button>
               <Button @click="copyLink" variant="outline" size="sm">
                 <LinkIcon class="w-4 h-4 mr-2" />
@@ -186,7 +186,7 @@
         <div v-if="relatedPosts.length > 0" class="related-section mt-12">
           <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ $t('blog.detail.related_posts') }}</h2>
           <div class="related-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <BlogCard
+            <BlogPostCard
               v-for="relatedPost in relatedPosts"
               :key="relatedPost.id"
               :post="relatedPost"
@@ -270,7 +270,7 @@ import { formatDate } from '@/utils/helpers'
 import type { BlogPost } from '@/types'
 
 import AppLayout from '@/components/layout/AppLayout.vue'
-import BlogCard from '@/components/blog/BlogCard.vue'
+import BlogPostCard from '@/components/blog/BlogPostCard.vue'
 import CrudActions from '@/components/common/CrudActions.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import Button from '@/components/common/Button.vue'
@@ -279,15 +279,15 @@ import Modal from '@/components/common/Modal.vue'
 
 // Icons
 import { 
-  ChevronRightIcon, 
+  ChevronRightIcon,
   ArrowLeftIcon,
   CalendarIcon,
   UserIcon,
   ClockIcon,
-  PencilIcon
+  PencilIcon,
+  LinkIcon,
+  ShareIcon
 } from '@heroicons/vue/24/outline'
-import LinkIcon from '@/components/icons/LinkIcon.vue'
-import ShareIcon from '@/components/icons/ShareIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -316,11 +316,11 @@ const postId = computed(() => route.params.id as string)
 const currentPost = computed(() => selectedPost)
 
 const canEdit = computed(() => {
-  return !!isConnected.value && !!currentPost.value
+  return !!isConnected && !!currentPost.value
 })
 
 const canDelete = computed(() => {
-  return !!isConnected.value && !!currentPost.value
+  return !!isConnected && !!currentPost.value
 })
 
 const canShare = computed(() => {

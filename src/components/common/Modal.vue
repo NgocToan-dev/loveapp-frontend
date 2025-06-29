@@ -1,6 +1,6 @@
 <template>
-  <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" @close="handleClose" class="relative z-50">
+  <TransitionRoot appear :show="isModalOpen" as="template">
+    <Dialog as="div" @close="handleBackdropClose" class="relative z-50">
       <!-- Backdrop -->
       <TransitionChild
         as="template"
@@ -83,6 +83,7 @@ import {
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
+  modelValue?: boolean
   isOpen?: boolean
   title?: string
   description?: string
@@ -95,6 +96,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  modelValue: false,
   isOpen: false,
   size: 'md',
   variant: 'default',
@@ -105,6 +107,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
   close: []
   open: []
 }>()
@@ -112,13 +115,22 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const slots = useSlots()
 
+// Computed property for modal open state
+const isModalOpen = computed(() => props.modelValue || props.isOpen)
+
 const hasHeader = computed(() => !!(props.title || props.description || slots.header))
 const hasFooter = computed(() => !!slots.footer)
 
-const handleClose = () => {
+const handleBackdropClose = () => {
   if (props.closeOnBackdrop) {
+    emit('update:modelValue', false)
     emit('close')
   }
+}
+
+const handleClose = () => {
+  emit('update:modelValue', false)
+  emit('close')
 }
 
 const modalClasses = computed(() => {

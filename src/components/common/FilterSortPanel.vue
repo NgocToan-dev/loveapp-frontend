@@ -69,13 +69,26 @@
         <!-- Mood Filter -->
         <div class="filter-group">
           <label class="filter-label">{{ $t('memories.filter.mood') }}</label>
-          <Select
-            v-model="localFilters.mood"
-            :options="moodOptions"
+          <Dropdown
+            :label="getMoodLabel(localFilters.mood)"
             :placeholder="$t('memories.filter.select_mood')"
-            clearable
-            @change="updateFilters"
-          />
+            width="full"
+          >
+            <DropdownItem
+              v-for="option in moodOptions"
+              :key="option.value"
+              @click="selectMood(option.value)"
+            >
+              {{ option.label }}
+            </DropdownItem>
+            <DropdownItem
+              v-if="localFilters.mood"
+              @click="clearMood"
+              class="text-red-600"
+            >
+              {{ $t('common.filter.clear') }}
+            </DropdownItem>
+          </Dropdown>
         </div>
 
         <!-- Privacy Filter -->
@@ -107,25 +120,51 @@
         <!-- Status Filter -->
         <div class="filter-group">
           <label class="filter-label">{{ $t('reminders.filter.status') }}</label>
-          <Select
-            v-model="localFilters.status"
-            :options="reminderStatusOptions"
+          <Dropdown
+            :label="getReminderStatusLabel(localFilters.status)"
             :placeholder="$t('reminders.filter.select_status')"
-            clearable
-            @change="updateFilters"
-          />
+            width="full"
+          >
+            <DropdownItem
+              v-for="option in reminderStatusOptions"
+              :key="option.value"
+              @click="selectReminderStatus(option.value)"
+            >
+              {{ option.label }}
+            </DropdownItem>
+            <DropdownItem
+              v-if="localFilters.status"
+              @click="clearReminderStatus"
+              class="text-red-600"
+            >
+              {{ $t('common.filter.clear') }}
+            </DropdownItem>
+          </Dropdown>
         </div>
 
         <!-- Type Filter -->
         <div class="filter-group">
           <label class="filter-label">{{ $t('reminders.filter.type') }}</label>
-          <Select
-            v-model="localFilters.type"
-            :options="reminderTypeOptions"
+          <Dropdown
+            :label="getReminderTypeLabel(localFilters.type)"
             :placeholder="$t('reminders.filter.select_type')"
-            clearable
-            @change="updateFilters"
-          />
+            width="full"
+          >
+            <DropdownItem
+              v-for="option in reminderTypeOptions"
+              :key="option.value"
+              @click="selectReminderType(option.value)"
+            >
+              {{ option.label }}
+            </DropdownItem>
+            <DropdownItem
+              v-if="localFilters.type"
+              @click="clearReminderType"
+              class="text-red-600"
+            >
+              {{ $t('common.filter.clear') }}
+            </DropdownItem>
+          </Dropdown>
         </div>
 
         <!-- Recurring Filter -->
@@ -149,25 +188,51 @@
         <!-- Privacy Filter -->
         <div class="filter-group">
           <label class="filter-label">{{ $t('blog.filter.privacy') }}</label>
-          <Select
-            v-model="localFilters.privacy"
-            :options="blogPrivacyOptions"
+          <Dropdown
+            :label="getBlogPrivacyLabel(localFilters.privacy)"
             :placeholder="$t('blog.filter.select_privacy')"
-            clearable
-            @change="updateFilters"
-          />
+            width="full"
+          >
+            <DropdownItem
+              v-for="option in blogPrivacyOptions"
+              :key="option.value"
+              @click="selectBlogPrivacy(option.value)"
+            >
+              {{ option.label }}
+            </DropdownItem>
+            <DropdownItem
+              v-if="localFilters.privacy"
+              @click="clearBlogPrivacy"
+              class="text-red-600"
+            >
+              {{ $t('common.filter.clear') }}
+            </DropdownItem>
+          </Dropdown>
         </div>
 
         <!-- Status Filter -->
         <div class="filter-group">
           <label class="filter-label">{{ $t('blog.filter.status') }}</label>
-          <Select
-            v-model="localFilters.status"
-            :options="blogStatusOptions"
+          <Dropdown
+            :label="getBlogStatusLabel(localFilters.status)"
             :placeholder="$t('blog.filter.select_status')"
-            clearable
-            @change="updateFilters"
-          />
+            width="full"
+          >
+            <DropdownItem
+              v-for="option in blogStatusOptions"
+              :key="option.value"
+              @click="selectBlogStatus(option.value)"
+            >
+              {{ option.label }}
+            </DropdownItem>
+            <DropdownItem
+              v-if="localFilters.status"
+              @click="clearBlogStatus"
+              class="text-red-600"
+            >
+              {{ $t('common.filter.clear') }}
+            </DropdownItem>
+          </Dropdown>
         </div>
       </template>
     </div>
@@ -180,8 +245,9 @@ import { useI18n } from 'vue-i18n'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
 import Badge from '@/components/common/Badge.vue'
-import Select from '@/components/common/Select.vue'
-import PlusIcon from '@/components/icons/PlusIcon.vue'
+import Dropdown from '@/components/common/Dropdown.vue'
+import DropdownItem from '@/components/common/DropdownItem.vue'
+import { PlusIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
   filters: Record<string, any>
@@ -265,6 +331,87 @@ const removeTag = (tagToRemove: string) => {
       updateFilters()
     }
   }
+}
+
+// Dropdown handlers
+const getMoodLabel = (value: string) => {
+  if (!value) return ''
+  const option = moodOptions.value.find(opt => opt.value === value)
+  return option ? option.label : ''
+}
+
+const selectMood = (value: string) => {
+  localFilters.mood = value
+  updateFilters()
+}
+
+const clearMood = () => {
+  localFilters.mood = ''
+  updateFilters()
+}
+
+const getReminderStatusLabel = (value: string) => {
+  if (!value) return ''
+  const option = reminderStatusOptions.value.find(opt => opt.value === value)
+  return option ? option.label : ''
+}
+
+const selectReminderStatus = (value: string) => {
+  localFilters.status = value
+  updateFilters()
+}
+
+const clearReminderStatus = () => {
+  localFilters.status = ''
+  updateFilters()
+}
+
+const getReminderTypeLabel = (value: string) => {
+  if (!value) return ''
+  const option = reminderTypeOptions.value.find(opt => opt.value === value)
+  return option ? option.label : ''
+}
+
+const selectReminderType = (value: string) => {
+  localFilters.type = value
+  updateFilters()
+}
+
+const clearReminderType = () => {
+  localFilters.type = ''
+  updateFilters()
+}
+
+const getBlogPrivacyLabel = (value: string) => {
+  if (!value) return ''
+  const option = blogPrivacyOptions.value.find(opt => opt.value === value)
+  return option ? option.label : ''
+}
+
+const selectBlogPrivacy = (value: string) => {
+  localFilters.privacy = value
+  updateFilters()
+}
+
+const clearBlogPrivacy = () => {
+  localFilters.privacy = ''
+  updateFilters()
+}
+
+const getBlogStatusLabel = (value: string) => {
+  if (!value) return ''
+  const option = blogStatusOptions.value.find(opt => opt.value === value)
+  return option ? option.label : ''
+}
+
+const selectBlogStatus = (value: string) => {
+  localFilters.status = value
+  updateFilters()
+}
+
+const clearBlogStatus = () => {
+  localFilters.status = ''
+  updateFilters()
 }
 </script>
 

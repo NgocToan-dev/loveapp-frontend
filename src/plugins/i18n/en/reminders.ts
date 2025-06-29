@@ -109,6 +109,7 @@ export default {
   
   overdue_section: 'Overdue reminders',
   upcoming_section: 'Upcoming reminders',
+  completed_section: 'Completed reminders',
   all_section: 'All reminders',
 
   mark_complete: 'Mark as complete',
@@ -156,5 +157,17 @@ export default {
     snooze: 'Snooze',
     edit: 'Edit',
     delete: 'Delete'
+  },
+
+  detail: {
+    title: 'Reminder Details',
+    date_time: 'Date & Time',
+    recurring: 'Recurring',
+    created_by: 'Created by',
+    created_at: 'Created on',
+    overdue_title: 'Reminder Overdue',
+    overdue_message: 'This reminder is overdue. Please complete it or snooze for later.',
+    completed_title: 'Completed',
+    completed_message: 'This reminder has been completed successfully.'
   }
 }

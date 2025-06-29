@@ -212,17 +212,19 @@ import Button from '@/components/common/Button.vue'
 import Modal from '@/components/common/Modal.vue'
 import BaseConfirmModal from '@/components/common/BaseConfirmModal.vue'
 
-// Icons
-import CalendarIcon from '@/components/icons/CalendarIcon.vue'
-import RefreshIcon from '@/components/icons/RefreshIcon.vue'
-import UserIcon from '@/components/icons/UserIcon.vue'
-import ClockIcon from '@/components/icons/ClockIcon.vue'
-import WarningIcon from '@/components/icons/WarningIcon.vue'
-import CheckCircleIcon from '@/components/icons/CheckCircleIcon.vue'
-import CheckIcon from '@/components/icons/CheckIcon.vue'
-import EditIcon from '@/components/icons/EditIcon.vue'
-import ShareIcon from '@/components/icons/ShareIcon.vue'
-import TrashIcon from '@/components/icons/TrashIcon.vue'
+// Icons from Heroicons
+import {
+  CalendarIcon,
+  ArrowPathIcon as RefreshIcon,
+  UserIcon,
+  ClockIcon,
+  ExclamationTriangleIcon as WarningIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  PencilIcon as EditIcon,
+  ShareIcon,
+  TrashIcon
+} from '@heroicons/vue/24/outline'
 
 interface Props {
   reminder: Reminder

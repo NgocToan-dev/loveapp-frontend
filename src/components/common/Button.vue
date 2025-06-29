@@ -1,6 +1,7 @@
 <template>
   <button
     :class="buttonClasses"
+    class="cursor-pointer"
     :disabled="disabled || loading"
     @click="handleClick"
   >
@@ -40,7 +41,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'outline' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'outline' | 'ghost' | 'ghost-link'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   disabled?: boolean
   loading?: boolean
@@ -71,13 +72,15 @@ const buttonClasses = computed(() => {
   const base = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
   
   const variants = {
-    primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500 shadow-sm hover:shadow-md',
+    // Use romantic pink for primary buttons to match AuthForm theme
+    primary: 'bg-rose-500 text-white hover:bg-rose-600 focus:ring-rose-500 shadow-sm hover:shadow-md',
     secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500 border border-gray-300',
     success: 'bg-emerald-500 text-white hover:bg-emerald-600 focus:ring-emerald-500 shadow-sm hover:shadow-md',
     warning: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500 shadow-sm hover:shadow-md',
     error: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500 shadow-sm hover:shadow-md',
     outline: 'border-2 border-primary-500 text-primary-600 hover:bg-primary-50 focus:ring-primary-500 bg-white',
-    ghost: 'text-primary-600 hover:bg-primary-50 focus:ring-primary-500'
+    ghost: 'text-primary-600 hover:bg-primary-50 focus:ring-primary-500',
+    'ghost-link': 'text-blue-600 hover:bg-primary-50',
   }
   
   const sizes = {

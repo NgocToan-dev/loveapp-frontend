@@ -15,15 +15,21 @@ app.use(pinia)
 // Initialize stores before router to ensure auth state is ready
 import { useUserStore } from './stores/user'
 import { useUIStore } from './stores/ui'
+import { useCoupleStore } from './stores/couple'
+import { initializeAppDataWatcher } from './utils/appInitializer'
 
 const userStore = useUserStore()
 const uiStore = useUIStore()
+const coupleStore = useCoupleStore()
 
 // Initialize authentication state BEFORE router
 userStore.initializeAuth()
 
 // Initialize theme
 uiStore.initializeTheme()
+
+// Set up data initialization watcher
+initializeAppDataWatcher()
 
 app.use(router)
 app.use(i18n)

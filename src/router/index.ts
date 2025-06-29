@@ -64,6 +64,17 @@ const router = createRouter({
       name: 'timeline',
       component: () => import('@/pages/TimelinePage.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/combo-test',
+      name: 'combo-test',
+      component: () => import('@/views/ComboBoxTestView.vue')
+    },
+    {
+      path: '/couple-time-demo',
+      name: 'couple-time-demo',
+      component: () => import('@/pages/CoupleTimeDemo.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

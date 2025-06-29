@@ -14,9 +14,7 @@
             ]"
             :title="$t('blog.editor.bold')"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M11 3h-1V1h1c2.2 0 4 1.8 4 4 0 1.7-1.1 3.2-2.6 3.7C14 9.2 15 10.5 15 12c0 2.2-1.8 4-4 4h-1v-2h1c1.1 0 2-.9 2-2s-.9-2-2-2h-1V8h1c1.1 0 2-.9 2-2s-.9-2-2-2z"/>
-            </svg>
+            <BoldIcon class="w-4 h-4" />
           </button>
 
           <button
@@ -28,9 +26,7 @@
             ]"
             :title="$t('blog.editor.italic')"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M8.5 2h5l-.5 2h-2.5l-2 12H11l-.5 2H5l.5-2h2.5l2-12H7.5z"/>
-            </svg>
+            <ItalicIcon class="w-4 h-4" />
           </button>
 
           <button
@@ -42,9 +38,7 @@
             ]"
             :title="$t('blog.editor.strikethrough')"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h12M6 4h12M6 20h12"/>
-            </svg>
+            <StrikethroughIcon class="w-4 h-4" />
           </button>
         </div>
 
@@ -113,7 +107,7 @@
             :title="$t('blog.editor.orderedList')"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 6h11M9 12h11M9 18h11M4 6v12M4 6l2-2M4 18l2 2"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h6v4H3V4zm7 0h11v2H10V4zm0 2h11v2H10V6zM3 10h6v4H3v-4zm7 0h11v2H10v-2zm0 2h11v2H10v-2zM3 16h6v4H3v-4zm7 0h11v2H10v-2zm0 2h11v2H10v-2z"/>
             </svg>
           </button>
         </div>
@@ -129,8 +123,8 @@
             ]"
             :title="$t('blog.editor.blockquote')"
           >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M8 12a4 4 0 100-8 4 4 0 000 8zm7-8a1 1 0 11-2 0 1 1 0 012 0z"/>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
             </svg>
           </button>
 
@@ -249,6 +243,12 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
+
+import {
+  BoldIcon,
+  ItalicIcon,
+  StrikethroughIcon
+} from '@heroicons/vue/24/outline'
 
 interface Props {
   modelValue: string

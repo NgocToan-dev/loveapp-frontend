@@ -9,12 +9,13 @@ export default {
 
   form: {
     title: 'Tiêu đề kỷ niệm',
-    description: 'Mô tả',
+    description: 'Mô tả ngắn',
+    descriptionPlaceholder: 'Mô tả ngắn gọn về kỷ niệm này...',
     titlePlaceholder: 'Nhập tiêu đề đẹp cho kỷ niệm này...',
     createTitle: 'Tạo kỷ niệm mới',
     editTitle: 'Chỉnh sửa kỷ niệm',
-    content: 'Mô tả',
-    contentPlaceholder: 'Mô tả khoảnh khắc đặc biệt này...',
+    content: 'Nội dung chi tiết',
+    contentPlaceholder: 'Mô tả chi tiết khoảnh khắc đặc biệt này...',
     date: 'Ngày tháng',
     location: 'Địa điểm',
     locationPlaceholder: 'Điều này xảy ra ở đâu?',
@@ -24,6 +25,8 @@ export default {
     selectImages: 'Chọn hình ảnh',
     tags: 'Thẻ',
     tagsPlaceholder: 'Thêm thẻ và nhấn Enter...',
+    selectTag: 'Chọn thẻ có sẵn',
+    customTagPlaceholder: 'Hoặc nhập thẻ tùy chỉnh...',
     mood: 'Tâm trạng',
     weather: 'Thời tiết',
     private: 'Kỷ niệm riêng tư',
@@ -48,16 +51,32 @@ export default {
     windy: 'Gió'
   },
 
+  tags: {
+    anniversary: 'Kỷ niệm',
+    date: 'Hẹn hò',
+    travel: 'Du lịch',
+    food: 'Ẩm thực',
+    family: 'Gia đình',
+    friends: 'Bạn bè',
+    celebration: 'Kỷ niệm',
+    milestone: 'Cột mốc',
+    gift: 'Quà tặng',
+    surprise: 'Bất ngờ',
+    adventure: 'Phiêu lưu',
+    home: 'Ở nhà'
+  },
+
   actions: {
     create: 'Tạo kỷ niệm',
     createFirst: 'Tạo kỷ niệm đầu tiên',
-    view: 'Xem',
     edit: 'Chỉnh sửa',
-    delete: 'Xóa',
+    delete: 'Xóa kỷ niệm',
     addFavorite: 'Thêm vào yêu thích',
-    removeFavorite: 'Bỏ khỏi yêu thích',
+    removeFavorite: 'Bỏ yêu thích',
     favorite: 'Yêu thích',
-    share: 'Chia sẻ'
+    favorited: 'Đã yêu thích',
+    share: 'Chia sẻ',
+    view: 'Xem chi tiết'
   },
 
   search: {
@@ -65,29 +84,32 @@ export default {
   },
 
   filters: {
+    title: 'Bộ lọc',
+    favorites: 'Yêu thích',
+    private: 'Riêng tư',
+    allMoods: 'Tất cả tâm trạng',
+    mood: 'Tâm trạng',
+    search: 'Tìm kiếm',
+    activeFilters: 'Bộ lọc đang áp dụng',
+    clearAll: 'Xóa tất cả bộ lọc',
     sortBy: 'Sắp xếp theo',
     newestFirst: 'Mới nhất trước',
     oldestFirst: 'Cũ nhất trước',
-    titleAZ: 'Tiêu đề A-Z',
-    allMoods: 'Tất cả tâm trạng',
-    mood: 'Tâm trạng',
-    favorites: 'Yêu thích',
-    private: 'Riêng tư',
-    activeFilters: 'Bộ lọc đang áp dụng',
-    search: 'Tìm kiếm',
-    clearAll: 'Xóa tất cả'
+    titleAZ: 'Tiêu đề A-Z'
   },
 
   empty: {
     noMemories: 'Chưa có kỷ niệm nào',
-    createFirst: 'Tạo kỷ niệm đầu tiên cùng nhau và bắt đầu xây dựng câu chuyện tình yêu đẹp!',
-    noMatches: 'Không có kỷ niệm nào phù hợp với bộ lọc',
-    tryAdjustingFilters: 'Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc để tìm những gì bạn đang tìm kiếm.'
+    noMatches: 'Không tìm thấy kỷ niệm phù hợp',
+    createFirst: 'Hãy tạo kỷ niệm đầu tiên của bạn để bắt đầu hành trình lưu giữ những khoảnh khắc đẹp!',
+    tryAdjustingFilters: 'Hãy thử điều chỉnh bộ lọc để tìm thấy kỷ niệm bạn đang tìm kiếm.'
   },
 
   delete: {
     title: 'Xóa kỷ niệm',
-    message: 'Bạn có chắc chắn muốn xóa kỷ niệm này? Hành động này không thể hoàn tác.'
+    message: 'Bạn có chắc chắn muốn xóa kỷ niệm này? Hành động này không thể hoàn tác.',
+    success: 'Đã xóa kỷ niệm thành công',
+    error: 'Có lỗi xảy ra khi xóa kỷ niệm'
   },
 
   errors: {

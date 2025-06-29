@@ -115,61 +115,54 @@
 
         <!-- Tags -->
         <div>
-          <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
             {{ $t('blog.form.tags') }}
           </label>
-          <div class="flex flex-wrap gap-2 mb-2">
-            <Badge
-              v-for="tag in form.tags"
-              :key="tag"
-              :label="tag"
-              variant="secondary"
-              removable
-              @remove="removeTag(tag)"
-            />
-          </div>
-          <Input
-            v-model="newTag"
+          <ComboBox
+            v-model="selectedTags"
+            :options="tagOptions"
+            key-value="id"
+            display-value="name"
             :placeholder="$t('blog.form.tagsPlaceholder')"
-            @keydown.enter.prevent="addTag"
           />
+          <p v-if="errors.tags" class="mt-1 text-sm text-red-600">{{ errors.tags }}</p>
         </div>
-      </div>
 
-      <!-- Settings Panel -->
-      <div class="border-t border-gray-200 bg-gray-50 p-6 space-y-4">
-        <h3 class="text-lg font-medium text-gray-900">{{ $t('blog.form.settings') }}</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Privacy Settings -->
-          <div>
-            <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $t('blog.form.privacy') }}</h4>
-            <div class="space-y-2">
-              <label class="flex items-center">
-                <input
-                  v-model="form.isPrivate"
-                  type="checkbox"
-                  class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
-                />
-                <span class="ml-2 text-sm text-gray-700">{{ $t('blog.form.private') }}</span>
-              </label>
-              <p class="text-xs text-gray-500">{{ $t('blog.form.privateHelp') }}</p>
+        <!-- Settings Panel -->
+        <div class="border-t border-gray-200 bg-gray-50 p-6 space-y-4 rounded-lg">
+          <h3 class="text-lg font-medium text-gray-900">{{ $t('blog.form.settings') }}</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Privacy Settings -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $t('blog.form.privacy') }}</h4>
+              <div class="space-y-2">
+                <label class="flex items-center">
+                  <input
+                    v-model="form.isPrivate"
+                    type="checkbox"
+                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.form.private') }}</span>
+                </label>
+                <p class="text-xs text-gray-500">{{ $t('blog.form.privateHelp') }}</p>
+              </div>
             </div>
-          </div>
 
-          <!-- Publishing Settings -->
-          <div>
-            <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $t('blog.form.publishing') }}</h4>
-            <div class="space-y-2">
-              <label class="flex items-center">
-                <input
-                  v-model="form.isPublished"
-                  type="checkbox"
-                  class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
-                />
-                <span class="ml-2 text-sm text-gray-700">{{ $t('blog.form.publish') }}</span>
-              </label>
-              <p class="text-xs text-gray-500">{{ $t('blog.form.publishHelp') }}</p>
+            <!-- Publishing Settings -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $t('blog.form.publishing') }}</h4>
+              <div class="space-y-2">
+                <label class="flex items-center">
+                  <input
+                    v-model="form.isPublished"
+                    type="checkbox"
+                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.form.publish') }}</span>
+                </label>
+                <p class="text-xs text-gray-500">{{ $t('blog.form.publishHelp') }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -215,7 +208,7 @@
           >
             {{ form.isPublished 
               ? (isEditMode ? $t('blog.actions.update') : $t('blog.actions.publish'))
-              : $t('blog.actions.saveDraft')
+              : $t('blog.actions.publish')
             }}
           </Button>
         </div>
@@ -232,8 +225,10 @@ import type { CreateBlogPostRequest } from '@/types'
 import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
-import Badge from '@/components/common/Badge.vue'
 import RichTextEditor from './RichTextEditor.vue'
+import ComboBox from '@/components/common/ComboBox.vue'
+// Type for tag options
+interface TagOption { id: string; name: string }
 
 interface Props {
   isOpen: boolean
@@ -251,8 +246,6 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
-const blogStore = useBlogStore()
-
 // Form state
 const form = ref<CreateBlogPostRequest>({
   title: '',
@@ -265,9 +258,35 @@ const form = ref<CreateBlogPostRequest>({
   isPrivate: false,
   isPublished: false
 })
+// Use object-based options for ComboBox
+const selectedTags = ref<TagOption[]>([])
+const tagOptions = computed<TagOption[]>(() => {
+  // Create available tag options from a predefined list
+  const availableTags = ['love', 'relationship', 'memories', 'anniversary', 'date', 'travel', 'food', 'celebration']
+  return availableTags.map(tag => ({ id: tag, name: tag }))
+})
+
+// Sync form.tags -> selectedTags
+watch(
+  () => form.value.tags,
+  tags => { 
+    selectedTags.value = (tags ?? []).map(t => ({ id: t, name: t }))
+  },
+  { immediate: true }
+)
+
+// Sync selectedTags -> form.tags
+watch(
+  selectedTags,
+  val => { 
+    form.value.tags = val.map(o => o.name) 
+  },
+  { deep: true }
+)
+
+const blogStore = useBlogStore()
 
 const errors = ref<Record<string, string>>({})
-const newTag = ref('')
 const isDragging = ref(false)
 const coverImagePreview = ref<string | null>(null)
 const selectedCoverImage = ref<File | null>(null)
@@ -314,24 +333,6 @@ const removeCoverImage = () => {
   coverImagePreview.value = null
   if (imageInput.value) {
     imageInput.value.value = ''
-  }
-}
-
-const addTag = () => {
-  const tag = newTag.value.trim()
-  if (tag && !form.value.tags?.includes(tag)) {
-    if (!form.value.tags) form.value.tags = []
-    form.value.tags.push(tag)
-    newTag.value = ''
-  }
-}
-
-const removeTag = (tag: string) => {
-  if (form.value.tags) {
-    const index = form.value.tags.indexOf(tag)
-    if (index > -1) {
-      form.value.tags.splice(index, 1)
-    }
   }
 }
 
@@ -445,7 +446,6 @@ const resetForm = () => {
   }
   selectedCoverImage.value = null
   coverImagePreview.value = null
-  newTag.value = ''
   errors.value = {}
 }
 
@@ -476,9 +476,8 @@ watch(() => props.post, (post) => {
 // Watch for modal open/close
 watch(() => props.isOpen, (isOpen) => {
   if (!isOpen) {
-    nextTick(() => {
-      resetForm()
-    })
+    // Reset form when modal closes, but avoid infinite loop
+    resetForm()
   }
 })
 </script>

@@ -2,7 +2,7 @@
   <div class="reminder-form">
     <form @submit.prevent="handleSubmit">
       <!-- Title Field -->
-      <div class="form-group">
+      <div class="form-group mt-4">
         <Input
           v-model="form.title"
           :label="$t('reminders.form.title')"

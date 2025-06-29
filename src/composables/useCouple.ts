@@ -1,42 +1,51 @@
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { coupleService } from '@/services/couple'
-import type { CoupleConnection, CoupleInvitation, User } from '@/types'
+import { useUserStore } from '@/stores/user'
+import { useCoupleStore } from '@/stores/couple'
+import type { User } from '@/types'
 
 export function useCouple() {
   const { t } = useI18n()
-  
-  // State
-  const coupleConnection = ref<CoupleConnection | null>(null)
-  const pendingInvitations = ref<CoupleInvitation[]>([])
-  const isLoading = ref(false)
-  const isSendingInvitation = ref(false)
-  const isAcceptingInvitation = ref(false)
-  const error = ref<string | null>(null)
+  const userStore = useUserStore()
+  const coupleStore = useCoupleStore()
 
-  // Computed
-  const isConnected = computed(() => 
-    coupleConnection.value?.status === 'connected'
-  )
-  
-  const isPending = computed(() => 
-    coupleConnection.value?.status === 'pending'
-  )
-  
+  // Computed - Enhanced partner computed that uses user context
   const partner = computed(() => {
-    if (!coupleConnection.value || !isConnected.value) return null
+    if (!coupleStore.coupleConnection || !coupleStore.isConnected) return null
     
-    // Assuming we have access to current user ID somehow
-    const currentUserId = coupleConnection.value.user1Id // This would come from auth
-    return currentUserId === coupleConnection.value.user1Id 
-      ? coupleConnection.value.user2 
-      : coupleConnection.value.user1
+    const currentUserId = userStore.user?._id || userStore.user?.id
+    if (!currentUserId) return null
+    
+    // Handle case where user1Id/user2Id are populated User objects
+    const user1 = typeof coupleStore.coupleConnection.user1Id === 'object' 
+      ? coupleStore.coupleConnection.user1Id 
+      : coupleStore.coupleConnection.user1
+    const user2 = typeof coupleStore.coupleConnection.user2Id === 'object' 
+      ? coupleStore.coupleConnection.user2Id 
+      : coupleStore.coupleConnection.user2
+    
+    if (!user1 || !user2) return null
+    
+    const user1Id = user1._id || user1.id
+    const user2Id = user2._id || user2.id
+    
+    // Return the partner (not the current user)
+    if (currentUserId === user1Id) {
+      return user2
+    } else if (currentUserId === user2Id) {
+      return user1
+    }
+    
+    return null
   })
 
+  // Enhanced computed properties that use the store
   const relationshipDuration = computed(() => {
-    if (!coupleConnection.value?.relationshipStart) return null
+    if (!coupleStore.coupleConnection?.anniversaryDate && !coupleStore.coupleConnection?.createdAt) return null
     
-    const start = new Date(coupleConnection.value.relationshipStart)
+    // Use anniversaryDate if available, otherwise use createdAt
+    const startDate = coupleStore.coupleConnection.anniversaryDate || coupleStore.coupleConnection.createdAt
+    const start = new Date(startDate)
     const now = new Date()
     const diffTime = Math.abs(now.getTime() - start.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -50,9 +59,11 @@ export function useCouple() {
   })
 
   const nextAnniversary = computed(() => {
-    if (!coupleConnection.value?.relationshipStart) return null
+    if (!coupleStore.coupleConnection?.anniversaryDate && !coupleStore.coupleConnection?.createdAt) return null
     
-    const start = new Date(coupleConnection.value.relationshipStart)
+    // Use anniversaryDate if available, otherwise use createdAt
+    const startDate = coupleStore.coupleConnection.anniversaryDate || coupleStore.coupleConnection.createdAt
+    const start = new Date(startDate)
     const now = new Date()
     const currentYear = now.getFullYear()
     
@@ -65,146 +76,94 @@ export function useCouple() {
     return anniversary
   })
 
-  // Methods
-  const fetchCoupleConnection = async () => {
-    isLoading.value = true
-    error.value = null
-    
+  // Wrapper methods that add i18n support
+  const fetchCoupleConnection = async (force = false) => {
     try {
-      coupleConnection.value = await coupleService.getCoupleConnection()
+      return await coupleStore.fetchCoupleConnection(force)
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.fetch_failed')
-    } finally {
-      isLoading.value = false
+      coupleStore.error = err.response?.data?.message || t('couple.errors.fetch_failed')
+      throw err
     }
   }
 
   const sendInvitation = async (email: string) => {
-    isSendingInvitation.value = true
-    error.value = null
-    
     try {
-      const invitation = await coupleService.sendInvitation(email)
-      pendingInvitations.value.push(invitation)
-      return invitation
+      const result = await coupleStore.sendInvitation(email)
+      coupleStore.successMessage = t('couple.messages.invitation_sent')
+      return result
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.send_invitation_failed')
+      coupleStore.error = err.response?.data?.message || t('couple.errors.send_invitation_failed')
       throw err
-    } finally {
-      isSendingInvitation.value = false
     }
   }
 
-  const acceptInvitation = async (invitationCode: string) => {
-    isAcceptingInvitation.value = true
-    error.value = null
-    
+  const acceptInvitation = async (coupleId: string) => {
     try {
-      coupleConnection.value = await coupleService.acceptInvitation(invitationCode)
-      
-      // Remove from pending invitations
-      pendingInvitations.value = pendingInvitations.value.filter(
-        inv => inv.invitationCode !== invitationCode
-      )
-      
-      return coupleConnection.value
+      const result = await coupleStore.acceptInvitation(coupleId)
+      coupleStore.successMessage = t('couple.messages.invitation_accepted')
+      return result
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.accept_invitation_failed')
+      coupleStore.error = err.response?.data?.message || t('couple.errors.accept_invitation_failed')
       throw err
-    } finally {
-      isAcceptingInvitation.value = false
     }
   }
 
-  const rejectInvitation = async (invitationCode: string) => {
-    isLoading.value = true
-    error.value = null
-    
+  const rejectInvitation = async (coupleId: string) => {
     try {
-      await coupleService.rejectInvitation(invitationCode)
-      
-      // Remove from pending invitations
-      pendingInvitations.value = pendingInvitations.value.filter(
-        inv => inv.invitationCode !== invitationCode
-      )
+      await coupleStore.rejectInvitation(coupleId)
+      coupleStore.successMessage = t('couple.messages.invitation_rejected')
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.reject_invitation_failed')
+      coupleStore.error = err.response?.data?.message || t('couple.errors.reject_invitation_failed')
       throw err
-    } finally {
-      isLoading.value = false
     }
   }
 
-  const fetchPendingInvitations = async () => {
-    isLoading.value = true
-    error.value = null
-    
+  const fetchPendingInvitations = async (force = false) => {
     try {
-      pendingInvitations.value = await coupleService.getPendingInvitations()
+      return await coupleStore.fetchPendingInvitations(force)
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.fetch_invitations_failed')
-    } finally {
-      isLoading.value = false
+      coupleStore.error = err.response?.data?.message || t('couple.errors.fetch_invitations_failed')
+      throw err
     }
   }
 
   const disconnectCouple = async () => {
-    isLoading.value = true
-    error.value = null
-    
     try {
-      await coupleService.disconnectCouple()
-      coupleConnection.value = null
+      await coupleStore.disconnectCouple()
+      coupleStore.successMessage = t('couple.messages.disconnected')
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.disconnect_failed')
+      coupleStore.error = err.response?.data?.message || t('couple.errors.disconnect_failed')
       throw err
-    } finally {
-      isLoading.value = false
     }
   }
 
   const updateRelationshipStart = async (date: string) => {
-    isLoading.value = true
-    error.value = null
-    
     try {
-      coupleConnection.value = await coupleService.updateRelationshipStart(date)
+      const result = await coupleStore.updateRelationshipStart(date)
+      coupleStore.successMessage = t('couple.messages.date_updated')
+      return result
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.update_date_failed')
+      coupleStore.error = err.response?.data?.message || t('couple.errors.update_date_failed')
       throw err
-    } finally {
-      isLoading.value = false
     }
   }
 
-  const searchUserByEmail = async (email: string): Promise<User | null> => {
-    error.value = null
-    
+  const searchUserByEmail = async (email: string) => {
     try {
-      return await coupleService.searchUserByEmail(email)
+      return await coupleStore.searchUserByEmail(email)
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.search_user_failed')
-      return null
+      coupleStore.error = err.response?.data?.message || t('couple.errors.search_user_failed')
+      throw err
     }
   }
 
   const generateInvitationCode = async () => {
-    isLoading.value = true
-    error.value = null
-    
     try {
-      const result = await coupleService.generateInvitationCode()
-      return result.invitationCode
+      return await coupleStore.generateInvitationCode()
     } catch (err: any) {
-      error.value = err.response?.data?.message || t('couple.errors.generate_code_failed')
+      coupleStore.error = err.response?.data?.message || t('couple.errors.generate_code_failed')
       throw err
-    } finally {
-      isLoading.value = false
     }
-  }
-
-  const clearError = () => {
-    error.value = null
   }
 
   const formatRelationshipDuration = () => {
@@ -230,22 +189,23 @@ export function useCouple() {
   }
 
   return {
-    // State
-    coupleConnection: computed(() => coupleConnection.value),
-    pendingInvitations: computed(() => pendingInvitations.value),
-    isLoading: computed(() => isLoading.value),
-    isSendingInvitation: computed(() => isSendingInvitation.value),
-    isAcceptingInvitation: computed(() => isAcceptingInvitation.value),
-    error: computed(() => error.value),
+    // State from store
+    coupleConnection: coupleStore.coupleConnection,
+    pendingInvitations: coupleStore.pendingInvitations,
+    isLoading: coupleStore.isLoading,
+    isSendingInvitation: coupleStore.isSendingInvitation,
+    isAcceptingInvitation: coupleStore.isAcceptingInvitation,
+    error: coupleStore.error,
+    successMessage: coupleStore.successMessage,
     
-    // Computed
-    isConnected,
-    isPending,
+    // Computed (enhanced with user context)
+    isConnected: coupleStore.isConnected,
+    isPending: coupleStore.isPending,
     partner,
     relationshipDuration,
     nextAnniversary,
     
-    // Methods
+    // Methods (with i18n support)
     fetchCoupleConnection,
     sendInvitation,
     acceptInvitation,
@@ -255,8 +215,12 @@ export function useCouple() {
     updateRelationshipStart,
     searchUserByEmail,
     generateInvitationCode,
-    clearError,
+    clearError: coupleStore.clearError,
+    clearSuccess: coupleStore.clearSuccess,
     formatRelationshipDuration,
-    getDaysUntilAnniversary
+    getDaysUntilAnniversary,
+    
+    // Store methods
+    initializeCoupleData: coupleStore.initializeCoupleData
   }
 }

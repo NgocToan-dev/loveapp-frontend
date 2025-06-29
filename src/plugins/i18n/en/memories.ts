@@ -9,12 +9,13 @@ export default {
 
   form: {
     title: 'Memory Title',
-    description: 'Description',
+    description: 'Short Description',
+    descriptionPlaceholder: 'Brief description of this memory...',
     titlePlaceholder: 'Enter a beautiful title for this memory...',
     createTitle: 'Create New Memory',
     editTitle: 'Edit Memory',
-    content: 'Description',
-    contentPlaceholder: 'Describe this special moment...',
+    content: 'Detailed Content',
+    contentPlaceholder: 'Describe this special moment in detail...',
     date: 'Date',
     location: 'Location',
     locationPlaceholder: 'Where did this happen?',
@@ -24,6 +25,8 @@ export default {
     selectImages: 'Select Images',
     tags: 'Tags',
     tagsPlaceholder: 'Add tags and press Enter...',
+    selectTag: 'Select existing tag',
+    customTagPlaceholder: 'Or enter custom tag...',
     mood: 'Mood',
     weather: 'Weather',
     private: 'Private Memory',
@@ -48,16 +51,32 @@ export default {
     windy: 'Windy'
   },
 
+  tags: {
+    anniversary: 'Anniversary',
+    date: 'Date',
+    travel: 'Travel',
+    food: 'Food',
+    family: 'Family',
+    friends: 'Friends',
+    celebration: 'Celebration',
+    milestone: 'Milestone',
+    gift: 'Gift',
+    surprise: 'Surprise',
+    adventure: 'Adventure',
+    home: 'Home'
+  },
+
   actions: {
     create: 'Create Memory',
     createFirst: 'Create Your First Memory',
-    view: 'View',
     edit: 'Edit',
-    delete: 'Delete',
+    delete: 'Delete Memory',
     addFavorite: 'Add to Favorites',
     removeFavorite: 'Remove from Favorites',
     favorite: 'Favorite',
-    share: 'Share'
+    favorited: 'Favorited',
+    share: 'Share',
+    view: 'View Details'
   },
 
   search: {
@@ -65,29 +84,32 @@ export default {
   },
 
   filters: {
+    title: 'Filters',
+    favorites: 'Favorites',
+    private: 'Private',
+    allMoods: 'All Moods',
+    mood: 'Mood',
+    search: 'Search',
+    activeFilters: 'Active filters',
+    clearAll: 'Clear All Filters',
     sortBy: 'Sort By',
     newestFirst: 'Newest First',
     oldestFirst: 'Oldest First',
-    titleAZ: 'Title A-Z',
-    allMoods: 'All Moods',
-    mood: 'Mood',
-    favorites: 'Favorites',
-    private: 'Private',
-    activeFilters: 'Active filters',
-    search: 'Search',
-    clearAll: 'Clear All'
+    titleAZ: 'Title A-Z'
   },
 
   empty: {
     noMemories: 'No memories yet',
-    createFirst: 'Create your first memory together and start building your beautiful story!',
-    noMatches: 'No memories match your filters',
-    tryAdjustingFilters: 'Try adjusting your search terms or filters to find what you\'re looking for.'
+    noMatches: 'No matching memories found',
+    createFirst: 'Create your first memory to start capturing beautiful moments together!',
+    tryAdjustingFilters: 'Try adjusting your filters to find the memories you\'re looking for.'
   },
 
   delete: {
     title: 'Delete Memory',
-    message: 'Are you sure you want to delete this memory? This action cannot be undone.'
+    message: 'Are you sure you want to delete this memory? This action cannot be undone.',
+    success: 'Memory deleted successfully',
+    error: 'Failed to delete memory'
   },
 
   errors: {

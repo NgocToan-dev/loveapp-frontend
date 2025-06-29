@@ -6,6 +6,7 @@
       overdue: isOverdue,
       upcoming: isUpcoming 
     }"
+    @click="handleCardClick"
   >
     <!-- Reminder Header -->
     <div class="reminder-header">
@@ -183,6 +184,7 @@ interface Emits {
   delete: [id: string]
   toggleComplete: [id: string]
   snooze: [id: string, snoozeUntil: string]
+  click: [reminder: Reminder]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -246,6 +248,16 @@ const getReminderIcon = (type: string) => {
   return icons[type as keyof typeof icons] || '⏰'
 }
 
+const handleCardClick = (event: Event) => {
+  // Prevent card click when clicking on buttons or dropdowns
+  const target = event.target as HTMLElement
+  if (target.closest('button') || target.closest('.dropdown')) {
+    return
+  }
+  
+  emit('click', props.reminder)
+}
+
 const toggleComplete = () => {
   emit('toggleComplete', props.reminder.id)
 }
@@ -279,9 +291,11 @@ const handleCustomSnooze = () => {
   border: 1px solid #e0e0e0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
   }
 
   &.completed {

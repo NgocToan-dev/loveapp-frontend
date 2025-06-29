@@ -28,7 +28,8 @@ export const useUIStore = defineStore('ui', () => {
   const loadingMessage = ref('')
   const toasts = ref<Toast[]>([])
   const modals = ref<Modal[]>([])
-  const theme = ref<'light' | 'dark' | 'auto'>('light')
+  // Simplify theme to always light, dark mode disabled
+  const theme = ref<'light'>('light')
 
   // Getters
   const hasActiveToasts = computed(() => toasts.value.length > 0)
@@ -152,45 +153,15 @@ export const useUIStore = defineStore('ui', () => {
     modals.value = []
   }
 
-  const setTheme = (newTheme: 'light' | 'dark' | 'auto') => {
-    theme.value = newTheme
-    localStorage.setItem('loveapp_theme', newTheme)
-    
-    // Apply theme to document
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else if (newTheme === 'light') {
-      document.documentElement.classList.remove('dark')
-    } else {
-      // Auto mode - check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      if (prefersDark) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    }
+  // Override theme setter to always light and remove dark class
+  const setTheme = () => {
+    theme.value = 'light'
+    document.documentElement.classList.remove('dark')
   }
 
+  // Initialize theme to light only, disable dark mode
   const initializeTheme = () => {
-    const storedTheme = localStorage.getItem('loveapp_theme') as 'light' | 'dark' | 'auto' | null
-    if (storedTheme) {
-      setTheme(storedTheme)
-    } else {
-      // Default to auto mode
-      setTheme('auto')
-    }
-    
-    // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (theme.value === 'auto') {
-        if (e.matches) {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-        }
-      }
-    })
+    setTheme()
   }
 
   const resetUI = () => {

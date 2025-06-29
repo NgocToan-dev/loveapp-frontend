@@ -7,17 +7,53 @@ import type {
   FileUploadResponse 
 } from '@/types'
 
+// Helper function to normalize memory data
+const normalizeMemory = (memory: any): Memory => {
+  return {
+    ...memory,
+    id: memory._id || memory.id, // Handle both _id and id
+    images: memory.images || [],
+    tags: memory.tags || [],
+    content: memory.content || '',
+    location: memory.location || '',
+    isPrivate: Boolean(memory.isPrivate),
+    isFavorite: Boolean(memory.isFavorite),
+    // Transform userId to author for frontend compatibility
+    author: memory.userId || memory.author || {
+      _id: memory.createdBy,
+      displayName: 'Unknown User',
+      avatarUrl: ''
+    }
+  }
+}
+
+// Helper function to normalize memory array
+const normalizeMemories = (memories: any[]): Memory[] => {
+  return memories.map(normalizeMemory)
+}
+
 export const memoriesService = {
   // Get all memories for the couple
   async getMemories(page = 1, limit = 10): Promise<PaginatedResponse<Memory>> {
     const response = await api.get(`/memories?page=${page}&limit=${limit}`)
-    return response.data
+    
+    // Transform the API response to match our PaginatedResponse interface
+    return {
+      success: true,
+      data: normalizeMemories(response.data.memories || []),
+      pagination: {
+        page: response.data.pagination?.currentPage || page,
+        limit: limit,
+        total: response.data.pagination?.totalMemories || 0,
+        totalPages: response.data.pagination?.totalPages || 1
+      }
+    }
   },
 
   // Get single memory by ID
   async getMemory(id: string): Promise<Memory> {
     const response = await api.get(`/memories/${id}`)
-    return response.data
+    return normalizeMemory(response.data)
   },
 
   // Create new memory
@@ -25,9 +61,12 @@ export const memoriesService = {
     const formData = new FormData()
     
     formData.append('title', data.title)
-    formData.append('content', data.content)
+    formData.append('description', data.description)
+    if (data.content) {
+      formData.append('content', data.content)
+    }
     formData.append('date', data.date)
-    formData.append('tags', JSON.stringify(data.tags))
+    formData.append('tags', JSON.stringify(data.tags || []))
     
     if (data.location) {
       formData.append('location', data.location)
@@ -46,7 +85,7 @@ export const memoriesService = {
         'Content-Type': 'multipart/form-data'
       }
     })
-    return response.data
+    return normalizeMemory(response.data)
   },
 
   // Update memory
@@ -58,7 +97,7 @@ export const memoriesService = {
     Object.entries(updateData).forEach(([key, value]) => {
       if (value !== undefined) {
         if (key === 'tags') {
-          formData.append(key, JSON.stringify(value))
+          formData.append(key, JSON.stringify(value || []))
         } else if (key === 'image' && value instanceof File) {
           formData.append(key, value)
         } else if (key !== 'image') {
@@ -72,7 +111,7 @@ export const memoriesService = {
         'Content-Type': 'multipart/form-data'
       }
     })
-    return response.data
+    return normalizeMemory(response.data)
   },
 
   // Delete memory
@@ -99,19 +138,19 @@ export const memoriesService = {
     if (filters?.isPrivate !== undefined) params.append('isPrivate', filters.isPrivate.toString())
 
     const response = await api.get(`/memories/search?${params.toString()}`)
-    return response.data
+    return normalizeMemories(response.data || [])
   },
 
   // Get memories by tag
   async getMemoriesByTag(tag: string): Promise<Memory[]> {
     const response = await api.get(`/memories/tag/${encodeURIComponent(tag)}`)
-    return response.data
+    return normalizeMemories(response.data || [])
   },
 
   // Get popular tags
   async getPopularTags(): Promise<string[]> {
     const response = await api.get('/memories/tags')
-    return response.data
+    return response.data || []
   },
 
   // Get memories for timeline
@@ -121,7 +160,7 @@ export const memoriesService = {
     if (month) params.append('month', month.toString())
 
     const response = await api.get(`/memories/timeline?${params.toString()}`)
-    return response.data
+    return normalizeMemories(response.data || [])
   },
 
   // Upload image

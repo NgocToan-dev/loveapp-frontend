@@ -12,7 +12,8 @@ export type { Memory } from '@/types'
 
 export interface CreateMemoryData {
   title: string
-  content: string
+  description: string
+  content?: string
   date: string
   images?: File[]
   tags?: string[]
@@ -63,14 +64,14 @@ export const useMemoriesStore = defineStore('memories', () => {
       filtered = filtered.filter(memory =>
         memory.title.toLowerCase().includes(searchTerm) ||
         memory.content.toLowerCase().includes(searchTerm) ||
-        memory.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+        memory.tags?.some(tag => tag.toLowerCase().includes(searchTerm))
       )
     }
 
     // Tags filter
     if (filters.value.tags.length > 0) {
       filtered = filtered.filter(memory =>
-        filters.value.tags.some(tag => memory.tags.includes(tag))
+        filters.value.tags.some(tag => memory.tags?.includes(tag))
       )
     }
 
@@ -148,7 +149,7 @@ export const useMemoriesStore = defineStore('memories', () => {
     }
     const tagSet = new Set<string>()
     memories.value.forEach(memory => {
-      memory.tags.forEach(tag => tagSet.add(tag))
+      memory.tags?.forEach(tag => tagSet.add(tag))
     })
     return Array.from(tagSet).sort()
   })
@@ -204,6 +205,7 @@ export const useMemoriesStore = defineStore('memories', () => {
     try {
       const createData: CreateMemoryRequest = {
         title: data.title,
+        description: data.description,
         content: data.content,
         date: data.date,
         tags: data.tags || [],

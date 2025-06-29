@@ -13,6 +13,7 @@ export default {
   connection_pending: 'Đang chờ kết nối',
   waiting_for_partner: 'Đang chờ người yêu chấp nhận lời mời',
   connection_successful: 'Kết nối thành công!',
+  connected_since: 'Kết nối từ',
   
   next_anniversary: 'Kỷ niệm tiếp theo',
   edit_relationship_date: 'Chỉnh sửa ngày bắt đầu',
@@ -35,6 +36,13 @@ export default {
     memories_created: 'Kỷ niệm đã tạo',
     photos_uploaded: 'Ảnh đã tải lên',
     reminders_set: 'Lời nhắc đã đặt'
+  },
+
+  stats: {
+    days_together: 'ngày bên nhau',
+    years: 'năm',
+    months: 'tháng',
+    days: 'ngày'
   },
   
   errors: {

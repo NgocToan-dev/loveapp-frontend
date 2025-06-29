@@ -13,10 +13,13 @@ export default {
     submit: 'Gửi',
     upload: 'Tải lên',
     retry: 'Thử lại',
-    download: 'Tải xuống'
+    download: 'Tải xuống',
+    devLogin: 'Đăng nhập Dev',
+    accept: 'Chấp nhận',
+    reject: 'Từ chối'
   },
   status: {
-    loading: 'Đang tải...',
+    loading: 'Đang tải',
     saving: 'Đang lưu...',
     success: 'Thành công!',
     error: 'Có lỗi xảy ra',
@@ -40,6 +43,7 @@ export default {
     delete: 'Xóa',
     cancel: 'Hủy',
     save: 'Lưu',
+    add: 'Thêm',
     loadMore: 'Tải thêm'
   },
   notifications: {
@@ -73,13 +77,23 @@ export default {
   dismiss: 'Bỏ qua',
   refresh: 'Làm mới',
   search: 'Tìm kiếm',
-  filter: 'Lọc',
+  filter: {
+    title: 'Bộ lọc',
+    clear_all: 'Xóa tất cả',
+    date_range: 'Khoảng thời gian',
+    tags: 'Thẻ',
+    tags_placeholder: 'Nhập thẻ và nhấn Enter',
+    clear: 'Xóa'
+  },
   clear: 'Xóa',
   select_all: 'Chọn tất cả',
   copy: 'Sao chép',
   copied: 'Đã sao chép!',
   share: 'Chia sẻ',
   settings: 'Cài đặt',
+  remove: 'Xóa',
+  addCustom: 'Thêm "{value}"',
+  noResults: 'Không tìm thấy kết quả',
   
   dashboard: {
     welcome_message: 'Chào mừng đến không gian tình yêu của bạn',

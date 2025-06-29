@@ -17,7 +17,7 @@ export function useAuth() {
   const isAuthenticated = computed(() => !!token.value && !!user.value)
   const userDisplayName = computed(() => {
     if (!user.value) return ''
-    return `${user.value.firstName} ${user.value.lastName}`.trim()
+    return `${user.value.displayName}`.trim()
   })
 
   // Methods

@@ -1,25 +1,29 @@
 # GitHub Copilot Instructions for LoveApp Frontend
 
 ## Project Overview
-This is a **Vue 3 + Vite + TypeScript + Vuetify** love/couple management application with internationalization support. The app helps couples store memories, share notes, and celebrate their relationship.
+This is a **Vue 3 + Vite + TypeScript + TailwindCSS** love/couple management application with internationalization support. The app helps couples store memories, share notes, celebrate their relationship, and includes features like blog posts, reminders, timeline, and real-time chat.
 
 ## Core Technologies
 - **Vue 3** with Composition API
 - **Vite** for build tooling
 - **TypeScript** for type safety
-- **Vuetify 3** for Material Design components
+- **TailwindCSS** for modern utility-first styling
+- **Headless UI Vue** for unstyled, accessible UI components
 - **Vue Router 4** for navigation
 - **Pinia** for state management
 - **Vue I18n** for internationalization
 - **Axios** for API calls
-- **Firebase** for backend services
-- **PWA** capabilities with Vite PWA plugin
+- **Node.js/Express** backend with MongoDB
+- **Vee-Validate + Zod** for form validation
+- **TipTap** for rich text editing
+- **Vue Toastification** for notifications
+- **Heroicons** for icons
 
 ## Code Generation Guidelines
 
 ### 1. Internationalization (i18n) - MANDATORY
 - **ALWAYS** use `useI18n()` from `vue-i18n` for all user-facing text
-- Store translation keys in `src/plugins/i18n/en/` and `src/plugins/i18n/vn/` directories
+- Store translation keys in `src/plugins/i18n/en/` and `src/plugins/i18n/vi/` directories
 - Use descriptive translation keys with dot notation (e.g., `common.buttons.save`, `memories.form.title`)
 - Default locale is Vietnamese (`vi`), fallback is English (`en`)
 
@@ -31,7 +35,7 @@ const { t } = useI18n()
 const buttonText = t('common.buttons.save')
 
 // In template
-<v-btn>{{ $t('common.buttons.save') }}</v-btn>
+<button>{{ $t('common.buttons.save') }}</button>
 ```
 
 ### 2. Vue 3 Composition API Standards
@@ -64,28 +68,31 @@ const isLoading = ref(false)
 </script>
 ```
 
-### 3. Vuetify 3 Component Usage
-- Use Vuetify components following Material Design 3 principles
-- Leverage the custom theme system already configured
-- Use responsive breakpoints with Vuetify's grid system
-- Follow the existing color scheme (Spring theme with primary: #4caf50)
+### 3. TailwindCSS + Headless UI Usage
+- Use TailwindCSS utility classes for styling following modern design principles
+- Leverage Headless UI Vue components for accessible, unstyled components
+- Use responsive breakpoints with Tailwind's grid system
+- Follow the existing color scheme (Green theme with primary: #22c55e)
+- Use Heroicons for consistent iconography
 
 ```vue
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>{{ $t('memories.title') }}</v-card-title>
-          <v-card-text>
-            <v-btn color="primary" :loading="isLoading">
-              {{ $t('common.buttons.save') }}
-            </v-btn>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+          {{ $t('memories.title') }}
+        </h2>
+        <button 
+          class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-md transition-colors"
+          :disabled="isLoading"
+        >
+          <span v-if="!isLoading">{{ $t('common.buttons.save') }}</span>
+          <div v-else class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 ```
 
@@ -153,6 +160,7 @@ src/
 - Implement proper error handling with user-friendly messages
 - Use TypeScript interfaces for API responses
 - Handle loading states consistently
+- Backend is Node.js/Express with MongoDB
 
 ```typescript
 // services/memories.ts
@@ -180,11 +188,12 @@ export const memoriesService = {
 - Implement proper loading and error states
 
 ### 8. Styling Guidelines
-- Use Vuetify's built-in classes when possible
-- Custom styles should be in SCSS files in `src/assets/styles/`
-- Follow the existing theme structure
+- Use TailwindCSS utility classes when possible
+- Custom styles should be in CSS files in `src/assets/`
+- Follow the existing green theme structure (primary: #22c55e)
 - Use CSS variables for consistent theming
-- Implement responsive design with Vuetify's breakpoint system
+- Implement responsive design with Tailwind's breakpoint system
+- Leverage @tailwindcss/forms and @tailwindcss/typography plugins
 
 ### 9. Love App Specific Features
 - Handle couple connections and invitations
@@ -194,6 +203,10 @@ export const memoriesService = {
 - Implement file upload with proper validation
 - Add notification system for important dates
 - Ensure privacy and security for couple data
+- Blog system for couples to share stories
+- Timeline view for relationship milestones
+- Reminder system for special dates
+- Real-time chat functionality
 
 ### 10. TypeScript Guidelines
 - Define interfaces in `src/types/index.ts`
@@ -222,7 +235,7 @@ export interface CreateMemoryRequest {
 ### 11. Performance Best Practices
 - Use `defineAsyncComponent` for lazy loading
 - Implement proper image optimization
-- Use Vuetify's virtual scrolling for large lists
+- Use virtual scrolling for large lists
 - Optimize bundle size with proper imports
 - Leverage Vite's fast HMR for development
 
@@ -238,32 +251,54 @@ export interface CreateMemoryRequest {
 ### Complete Component Example:
 ```vue
 <template>
-  <v-card>
-    <v-card-title>{{ $t('memories.create.title') }}</v-card-title>
-    <v-card-text>
-      <v-form @submit.prevent="handleSubmit">
-        <v-text-field
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+      {{ $t('memories.create.title') }}
+    </h2>
+    <form @submit.prevent="handleSubmit" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          {{ $t('memories.form.title') }}
+        </label>
+        <input
           v-model="form.title"
-          :label="$t('memories.form.title')"
-          :rules="titleRules"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          :class="{ 'border-red-500': titleError }"
           required
         />
-        <v-textarea
+        <p v-if="titleError" class="mt-1 text-sm text-red-600">
+          {{ titleError }}
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          {{ $t('memories.form.content') }}
+        </label>
+        <textarea
           v-model="form.content"
-          :label="$t('memories.form.content')"
-          :rules="contentRules"
-        />
-        <v-btn
-          type="submit"
-          color="primary"
-          :loading="isSubmitting"
-          block
-        >
-          {{ $t('common.buttons.create') }}
-        </v-btn>
-      </v-form>
-    </v-card-text>
-  </v-card>
+          rows="4"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          :class="{ 'border-red-500': contentError }"
+          required
+        ></textarea>
+        <p v-if="contentError" class="mt-1 text-sm text-red-600">
+          {{ contentError }}
+        </p>
+      </div>
+      <button
+        type="submit"
+        class="w-full bg-primary-500 hover:bg-primary-600 text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="isSubmitting"
+      >
+        <div v-if="isSubmitting" class="flex items-center justify-center">
+          <div class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+          {{ $t('common.loading') }}
+        </div>
+        <span v-else>{{ $t('common.buttons.create') }}</span>
+      </button>
+    </form>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -282,22 +317,28 @@ const form = ref<CreateMemoryRequest>({
 
 const isSubmitting = ref(false)
 
-const titleRules = computed(() => [
-  (v: string) => !!v || t('validation.required'),
-  (v: string) => v.length >= 3 || t('validation.minLength', { min: 3 })
-])
+const titleError = computed(() => {
+  if (!form.value.title) return t('validation.required')
+  if (form.value.title.length < 3) return t('validation.minLength', { min: 3 })
+  return null
+})
 
-const contentRules = computed(() => [
-  (v: string) => !!v || t('validation.required')
-])
+const contentError = computed(() => {
+  if (!form.value.content) return t('validation.required')
+  return null
+})
 
 const handleSubmit = async () => {
+  if (titleError.value || contentError.value) return
+  
   isSubmitting.value = true
   try {
     await memoriesStore.createMemory(form.value)
-    // Handle success
+    // Handle success (show toast, redirect, etc.)
+    form.value = { title: '', content: '' }
   } catch (error) {
-    // Handle error
+    // Handle error (show error toast)
+    console.error('Failed to create memory:', error)
   } finally {
     isSubmitting.value = false
   }
@@ -310,5 +351,5 @@ const handleSubmit = async () => {
 - Always test components with both Vietnamese and English locales
 - Consider mobile-first design approach
 - Implement proper accessibility features
-- Use semantic HTML elements within Vuetify components
-- Maintain consistency with the existing Spring theme design
+- Use semantic HTML elements within TailwindCSS components
+- Maintain consistency with the existing green theme design

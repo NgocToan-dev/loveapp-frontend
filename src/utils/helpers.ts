@@ -23,6 +23,14 @@ export function formatDate(date: Date | string, format = 'DD/MM/YYYY'): string {
     return `${Math.floor(diffDays / 30)} tháng trước`
   }
   
+  if (format === 'date') {
+    return d.toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+  
   const day = d.getDate().toString().padStart(2, '0')
   const month = (d.getMonth() + 1).toString().padStart(2, '0')
   const year = d.getFullYear()
@@ -198,14 +206,20 @@ export function formatRelativeDate(date: Date | string): string {
   const d = new Date(date)
   const now = new Date()
   const diffMs = now.getTime() - d.getTime()
+  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Yesterday'
-  if (diffDays < 7) return `${diffDays} days ago`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
-  return `${Math.floor(diffDays / 365)} years ago`
+  const diffWeeks = Math.floor(diffDays / 7)
+  const diffMonths = Math.floor(diffDays / 30)
+  const diffYears = Math.floor(diffDays / 365)
+
+  if (diffMinutes < 1) return 'Vừa xong'
+  if (diffMinutes < 60) return `${diffMinutes} phút trước`
+  if (diffHours < 24) return `${diffHours} giờ trước`
+  if (diffDays < 7) return `${diffDays} ngày trước`
+  if (diffWeeks < 4) return `${diffWeeks} tuần trước`
+  if (diffMonths < 12) return `${diffMonths} tháng trước`
+  return `${diffYears} năm trước`
 }
 
 // Generate couple invitation code

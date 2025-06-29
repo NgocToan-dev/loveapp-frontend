@@ -109,6 +109,7 @@ export default {
   
   overdue_section: 'Lời nhắc quá hạn',
   upcoming_section: 'Lời nhắc sắp tới',
+  completed_section: 'Lời nhắc đã hoàn thành',
   all_section: 'Tất cả lời nhắc',
 
   mark_complete: 'Đánh dấu hoàn thành',
@@ -164,5 +165,17 @@ export default {
     snooze: 'Hoãn',
     edit: 'Chỉnh sửa',
     delete: 'Xóa'
+  },
+
+  detail: {
+    title: 'Chi tiết lời nhắc',
+    date_time: 'Ngày & Thời gian',
+    recurring: 'Lặp lại',
+    created_by: 'Tạo bởi',
+    created_at: 'Ngày tạo',
+    overdue_title: 'Lời nhắc quá hạn',
+    overdue_message: 'Lời nhắc này đã quá thời hạn. Vui lòng hoàn thành hoặc hoãn lại.',
+    completed_title: 'Đã hoàn thành',
+    completed_message: 'Lời nhắc này đã được hoàn thành thành công.'
   }
 }

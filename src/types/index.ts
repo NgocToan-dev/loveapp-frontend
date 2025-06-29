@@ -37,39 +37,54 @@ export interface RegisterCredentials {
 // Couple & Relationship types
 export interface CoupleConnection {
   id: string
-  user1Id: string
-  user2Id: string
-  user1: User
-  user2: User
-  relationshipStart: string
-  status: 'pending' | 'connected' | 'disconnected'
+  _id?: string // For backend response compatibility
+  user1Id: User | string // Can be populated or just ID
+  user2Id: User | string // Can be populated or just ID
+  user1?: User // Separate populated fields
+  user2?: User // Separate populated fields
+  relationshipTitle?: string
+  relationshipStart?: string
+  status: 'pending' | 'accepted' | 'connected' | 'disconnected' | 'declined'
+  requestedBy?: User | string
+  isActive: boolean
   invitationCode?: string
+  requestedAt?: string
+  connectedAt?: string
+  anniversaryDate?: string
+  coupleNickname?: string
   createdAt: string
   updatedAt: string
 }
 
 export interface CoupleInvitation {
-  id: string
-  fromUserId: string
-  toEmail: string
-  invitationCode: string
-  status: 'pending' | 'accepted' | 'rejected' | 'expired'
-  expiresAt: string
+  _id: string
+  id?: string // For frontend compatibility
+  user1Id: User | string
+  user2Id: User | string  
+  status: 'pending' | 'accepted' | 'declined'
+  requestedBy: User | string
+  relationshipTitle: string
+  isActive: boolean
+  requestedAt: string
+  connectedAt?: string
   createdAt: string
+  updatedAt: string
 }
 
 // Memory types
 export interface Memory {
   id: string
+  _id?: string // For backend compatibility
   coupleId: string
   title: string
+  description: string
   content: string
   imageUrl?: string
   imagePublicId?: string
   images?: string[] // For frontend compatibility
   location?: string
   date: string
-  tags: string[]
+  tags?: string[] // Made optional to match API response
   mood?: 'happy' | 'love' | 'excited' | 'romantic' | 'nostalgic' | 'grateful'
   isPrivate: boolean
   isFavorite?: boolean // For frontend state
@@ -77,15 +92,17 @@ export interface Memory {
   createdAt: string
   updatedAt: string
   author: User
+  userId?: User // For API response compatibility
 }
 
 export interface CreateMemoryRequest {
   title: string
-  content: string
+  description: string
+  content?: string
   image?: File
   location?: string
   date: string
-  tags: string[]
+  tags?: string[] // Made optional
   isPrivate?: boolean
 }
 

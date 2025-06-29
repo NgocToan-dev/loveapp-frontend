@@ -6,7 +6,11 @@
         <Avatar :src="partner?.avatarUrl" :name="partnerName" size="lg" />
         <div class="partner-details">
           <h3>{{ partnerName }}</h3>
+          <p class="email">{{ partner?.email }}</p>
           <p class="duration">{{ formatRelationshipDuration() }}</p>
+          <p class="connection-date" v-if="coupleConnection?.connectedAt">
+            {{ $t('couple.connected_since') }}: {{ formatDate(coupleConnection.connectedAt, 'date') }}
+          </p>
           <p class="next-anniversary">
             {{ $t('couple.next_anniversary') }}: {{ nextAnniversary ? formatCountdown(nextAnniversary) : '-' }}
           </p>
@@ -73,7 +77,7 @@
 
         <div class="join-with-code">
           <h4>{{ $t('couple.have_invitation_code') }}</h4>
-          <form @submit.prevent="handleAcceptInvitation">
+          <form @submit.prevent="() => handleAcceptInvitation()">
             <Input
               v-model="invitationCode"
               :label="$t('couple.invitation_code')"
@@ -99,18 +103,31 @@
     <!-- Pending Invitations -->
     <div v-if="pendingInvitations.length > 0" class="pending-invitations">
       <h4>{{ $t('couple.pending_invitations') }}</h4>
-      <div v-for="invitation in pendingInvitations" :key="invitation.id" class="invitation-item">
+      <div v-for="invitation in pendingInvitations" :key="invitation._id || invitation.id" class="invitation-item">
         <div class="invitation-info">
-          <span class="email">{{ invitation.toEmail }}</span>
-          <span class="date">{{ formatDate(invitation.createdAt, 'relative') }}</span>
+          <Avatar :src="getInvitationPartner(invitation)?.avatarUrl" :name="getInvitationPartnerName(invitation)" size="sm" />
+          <div class="invitation-details">
+            <span class="name">{{ getInvitationPartnerName(invitation) }}</span>
+            <span class="email">{{ getInvitationPartner(invitation)?.email }}</span>
+            <span class="date">{{ formatDate(invitation.createdAt, 'relative') }}</span>
+          </div>
         </div>
         <div class="invitation-actions">
           <Button
-            @click="copyInvitationCode(invitation.invitationCode)"
+            @click="() => handleAcceptInvitation(invitation._id || invitation.id || '')"
+            variant="primary"
+            size="sm"
+            :loading="isAcceptingInvitation"
+          >
+            {{ $t('common.buttons.accept') }}
+          </Button>
+          <Button
+            @click="() => handleRejectInvitation(invitation._id || invitation.id || '')"
             variant="ghost"
             size="sm"
+            :loading="isLoading"
           >
-            {{ $t('couple.copy_code') }}
+            {{ $t('common.buttons.reject') }}
           </Button>
         </div>
       </div>
@@ -120,6 +137,14 @@
     <div v-if="error" class="error-message">
       <p>{{ error }}</p>
       <Button @click="clearError" variant="ghost" size="sm">
+        {{ $t('common.dismiss') }}
+      </Button>
+    </div>
+
+    <!-- Success Display -->
+    <div v-if="successMessage" class="success-message">
+      <p>{{ successMessage }}</p>
+      <Button @click="clearSuccess" variant="ghost" size="sm">
         {{ $t('common.dismiss') }}
       </Button>
     </div>
@@ -136,10 +161,10 @@
         
         <div class="modal-actions">
           <Button @click="showEditRelationshipDate = false" variant="outline">
-            {{ $t('common.cancel') }}
+            {{ $t('common.buttons.cancel') }}
           </Button>
           <Button type="submit" :loading="isLoading">
-            {{ $t('common.save') }}
+            {{ $t('common.buttons.save') }}
           </Button>
         </div>
       </form>
@@ -161,6 +186,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCouple } from '@/composables/useCouple'
+import { useUserStore } from '@/stores/user'
 import { formatDate, formatCountdown, copyToClipboard } from '@/utils/helpers'
 import Avatar from '@/components/common/Avatar.vue'
 import Button from '@/components/common/Button.vue'
@@ -169,6 +195,7 @@ import Modal from '@/components/common/Modal.vue'
 import BaseConfirmModal from '@/components/common/BaseConfirmModal.vue'
 
 const { t } = useI18n()
+const userStore = useUserStore()
 const {
   coupleConnection,
   pendingInvitations,
@@ -176,6 +203,7 @@ const {
   isSendingInvitation,
   isAcceptingInvitation,
   error,
+  successMessage,
   isConnected,
   isPending,
   partner,
@@ -183,10 +211,12 @@ const {
   fetchCoupleConnection,
   sendInvitation,
   acceptInvitation,
+  rejectInvitation,
   fetchPendingInvitations,
   disconnectCouple,
   updateRelationshipStart,
   clearError,
+  clearSuccess,
   formatRelationshipDuration
 } = useCouple()
 
@@ -200,7 +230,13 @@ const newRelationshipDate = ref('')
 // Computed
 const partnerName = computed(() => {
   if (!partner.value) return ''
-  return `${partner.value.firstName} ${partner.value.lastName}`.trim()
+  
+  // Handle displayName or construct from firstName/lastName
+  if (partner.value.displayName) return partner.value.displayName
+  if (partner.value.firstName || partner.value.lastName) {
+    return `${partner.value.firstName || ''} ${partner.value.lastName || ''}`.trim()
+  }
+  return partner.value.email || ''
 })
 
 // Methods
@@ -208,19 +244,58 @@ const handleSendInvitation = async () => {
   try {
     await sendInvitation(invitationEmail.value)
     invitationEmail.value = ''
-    await fetchPendingInvitations()
+    // No need to manually refresh - store will handle updates automatically
   } catch (error) {
     // Error is handled in the composable
   }
 }
 
-const handleAcceptInvitation = async () => {
+const handleAcceptInvitation = async (coupleIdParam?: string) => {
   try {
-    await acceptInvitation(invitationCode.value)
-    invitationCode.value = ''
+    if (coupleIdParam) {
+      // Accept from pending invitations list
+      await acceptInvitation(coupleIdParam)
+    } else {
+      // Accept with invitation code
+      await acceptInvitation(invitationCode.value)
+      invitationCode.value = ''
+    }
+    // No need to manually refresh - store handles updates
   } catch (error) {
     // Error is handled in the composable
   }
+}
+
+const handleRejectInvitation = async (coupleId: string) => {
+  try {
+    await rejectInvitation(coupleId)
+  } catch (error) {
+    // Error is handled in the composable
+  }
+}
+
+const getInvitationPartner = (invitation: any) => {
+  const currentUserId = userStore.user?._id || userStore.user?.id
+  if (!currentUserId) return null
+  
+  // Check which user is the partner (not the current user)
+  if (typeof invitation.user1Id === 'object' && invitation.user1Id._id !== currentUserId) {
+    return invitation.user1Id
+  } else if (typeof invitation.user2Id === 'object' && invitation.user2Id._id !== currentUserId) {
+    return invitation.user2Id
+  }
+  
+  return null
+}
+
+const getInvitationPartnerName = (invitation: any) => {
+  const partner = getInvitationPartner(invitation)
+  if (!partner) return ''
+  
+  return partner.displayName || 
+         `${partner.firstName || ''} ${partner.lastName || ''}`.trim() || 
+         partner.email || 
+         'Unknown User'
 }
 
 const handleUpdateRelationshipDate = async () => {
@@ -251,10 +326,18 @@ const copyInvitationCode = async (code: string) => {
 
 // Lifecycle
 onMounted(async () => {
-  await fetchCoupleConnection()
-  await fetchPendingInvitations()
-  if (coupleConnection.value?.relationshipStart) {
-    newRelationshipDate.value = coupleConnection.value.relationshipStart.split('T')[0]
+  // Check if data is already initialized before fetching
+  if (!coupleConnection || !pendingInvitations.length) {
+    // Only fetch if not already initialized by the store
+    await fetchCoupleConnection(true) // Force refresh
+    await fetchPendingInvitations(true) // Force refresh
+  }
+  
+  // Set initial date value if connection exists
+  if (coupleConnection?.anniversaryDate) {
+    // Extract date part from ISO datetime string
+    const dateStr = new Date(coupleConnection.anniversaryDate).toISOString().split('T')[0]
+    newRelationshipDate.value = dateStr
   }
 })
 </script>
@@ -284,13 +367,25 @@ onMounted(async () => {
     flex: 1;
 
     h3 {
-      margin: 0 0 8px 0;
+      margin: 0 0 4px 0;
       font-size: 1.25rem;
       font-weight: 600;
     }
 
+    .email {
+      color: #888;
+      font-size: 0.9rem;
+      margin: 0 0 8px 0;
+    }
+
     .duration {
       color: #666;
+      margin: 0 0 4px 0;
+    }
+
+    .connection-date {
+      color: #666;
+      font-size: 0.9rem;
       margin: 0 0 4px 0;
     }
 
@@ -399,15 +494,36 @@ onMounted(async () => {
     margin-bottom: 8px;
 
     .invitation-info {
-      .email {
-        font-weight: 500;
-        display: block;
-      }
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
 
-      .date {
-        font-size: 0.875rem;
-        color: #666;
+      .invitation-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .name {
+          font-weight: 500;
+          font-size: 0.9rem;
+        }
+
+        .email {
+          font-size: 0.875rem;
+          color: #666;
+        }
+
+        .date {
+          font-size: 0.75rem;
+          color: #999;
+        }
       }
+    }
+
+    .invitation-actions {
+      display: flex;
+      gap: 8px;
     }
   }
 }
@@ -419,6 +535,22 @@ onMounted(async () => {
   border: 1px solid #f44336;
   border-radius: 8px;
   color: #c62828;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  p {
+    margin: 0;
+  }
+}
+
+.success-message {
+  margin-top: 16px;
+  padding: 12px;
+  background: #e8f5e8;
+  border: 1px solid #4caf50;
+  border-radius: 8px;
+  color: #2e7d32;
   display: flex;
   justify-content: space-between;
   align-items: center;

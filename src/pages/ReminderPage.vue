@@ -1,21 +1,20 @@
 <template>
   <AppLayout>
     <div class="reminder-page">
+      <!-- Couple Time Banner -->
+      <CoupleTimeBanner />
+
       <!-- Page Header -->
       <div class="page-header">
         <div class="header-content">
-          <h1>{{ $t('reminders.title') }}</h1>
-          <p class="page-description">{{ $t('reminders.description') }}</p>
+          <h1>{{ $t("reminders.title") }}</h1>
+          <p class="page-description">{{ $t("reminders.description") }}</p>
         </div>
-        
+
         <div class="header-actions">
-          <Button
-            @click="showCreateForm = true"
-            variant="primary"
-            class="create-button"
-          >
+          <Button @click="handleCreateClick" variant="primary" class="create-button">
             <span class="button-icon">⏰</span>
-            {{ $t('reminders.create.title') }}
+            {{ $t("reminders.create.title") }}
           </Button>
         </div>
       </div>
@@ -29,21 +28,21 @@
             icon="📝"
             color="primary"
           />
-          
+
           <QuickActionCard
             :title="$t('reminders.stats.completed')"
             :description="completedReminders.length.toString()"
             icon="✅"
             color="success"
           />
-          
+
           <QuickActionCard
             :title="$t('reminders.stats.upcoming')"
             :description="upcomingReminders.length.toString()"
             icon="⏰"
             color="warning"
           />
-          
+
           <QuickActionCard
             :title="$t('reminders.stats.overdue')"
             :description="overdueReminders.length.toString()"
@@ -59,36 +58,53 @@
         <div v-if="!isConnected" class="no-connection">
           <div class="empty-state">
             <div class="empty-icon">💕</div>
-            <h3>{{ $t('reminders.no_connection_title') }}</h3>
-            <p>{{ $t('reminders.no_connection_message') }}</p>
+            <h3>{{ $t("reminders.no_connection_title") }}</h3>
+            <p>{{ $t("reminders.no_connection_message") }}</p>
           </div>
         </div>
 
         <!-- Loading State -->
         <div v-else-if="isLoading && reminders.length === 0" class="loading-state">
           <LoadingSpinner />
-          <p>{{ $t('common.status.loading') }}</p>
+          <p>{{ $t("common.status.loading") }}</p>
         </div>
 
         <!-- Empty State -->
         <div v-else-if="!isLoading && reminders.length === 0" class="empty-state">
           <div class="empty-icon">📅</div>
-          <h3>{{ $t('reminders.no_reminders_title') }}</h3>
-          <p>{{ $t('reminders.no_reminders_message') }}</p>
-          <Button
-            @click="showCreateForm = true"
-            variant="primary"
-          >
-            {{ $t('reminders.create_first') }}
+          <h3>{{ $t("reminders.no_reminders_title") }}</h3>
+          <p>{{ $t("reminders.no_reminders_message") }}</p>
+          <Button @click="showCreateForm = true" variant="primary">
+            {{ $t("reminders.create_first") }}
           </Button>
         </div>
 
         <!-- Reminders List -->
         <div v-else class="reminders-container">
+          <!-- Overdue Reminders -->
+          <div v-if="overdueReminders.length > 0" class="reminders-section">
+            <h2 class="section-title overdue">
+              ⚠️ {{ $t("reminders.overdue_section") }} ({{ overdueReminders.length }})
+            </h2>
+            <div class="reminders-grid">
+              <ReminderCard
+                v-for="reminder in overdueReminders.slice(0, 6)"
+                :key="reminder.id"
+                :reminder="reminder"
+                :is-updating="updatingId === reminder.id"
+                @edit="editReminder"
+                @delete="deleteReminder"
+                @toggle-complete="toggleComplete"
+                @snooze="snoozeReminder"
+                @click="showReminderDetail"
+              />
+            </div>
+          </div>
+
           <!-- Upcoming Reminders -->
           <div v-if="upcomingReminders.length > 0" class="reminders-section">
             <h2 class="section-title upcoming">
-              ⏰ {{ $t('reminders.upcoming_section') }} ({{ upcomingReminders.length }})
+              ⏰ {{ $t("reminders.upcoming_section") }} ({{ upcomingReminders.length }})
             </h2>
             <div class="reminders-grid">
               <ReminderCard
@@ -100,6 +116,27 @@
                 @delete="deleteReminder"
                 @toggle-complete="toggleComplete"
                 @snooze="snoozeReminder"
+                @click="showReminderDetail"
+              />
+            </div>
+          </div>
+
+          <!-- Completed Reminders -->
+          <div v-if="completedReminders.length > 0" class="reminders-section">
+            <h2 class="section-title completed">
+              ✅ {{ $t("reminders.completed_section") }} ({{ completedReminders.length }})
+            </h2>
+            <div class="reminders-grid">
+              <ReminderCard
+                v-for="reminder in completedReminders.slice(0, 6)"
+                :key="reminder.id"
+                :reminder="reminder"
+                :is-updating="updatingId === reminder.id"
+                @edit="editReminder"
+                @delete="deleteReminder"
+                @toggle-complete="toggleComplete"
+                @snooze="snoozeReminder"
+                @click="showReminderDetail"
               />
             </div>
           </div>
@@ -107,9 +144,12 @@
       </div>
 
       <!-- Create/Edit Modal -->
-      <Modal 
-        v-model="showCreateForm" 
-        :title="editingReminder ? $t('reminders.edit.title') : $t('reminders.create.title')"
+      <Modal
+        v-if="showCreateForm"
+        v-model="showCreateForm"
+        :title="
+          editingReminder ? $t('reminders.edit.title') : $t('reminders.create.title')
+        "
         size="lg"
       >
         <ReminderForm
@@ -120,13 +160,31 @@
         />
       </Modal>
 
+      <!-- Detail Modal -->
+      <Modal
+        v-model="showDetailModal"
+        :title="selectedReminder?.title || $t('reminders.detail.title')"
+        size="xl"
+        variant="default"
+      >
+        <ReminderDetail
+          v-if="selectedReminder"
+          :reminder="selectedReminder"
+          :is-updating="updatingId === selectedReminder.id"
+          @edit="editReminderFromDetail"
+          @delete="deleteReminderFromDetail"
+          @toggle-complete="toggleCompleteFromDetail"
+          @snooze="snoozeReminderFromDetail"
+        />
+      </Modal>
+
       <!-- Error Display -->
       <div v-if="error" class="error-banner">
         <div class="error-content">
           <span class="error-icon">❌</span>
           <span class="error-message">{{ error }}</span>
           <Button @click="clearError" variant="ghost" size="sm">
-            {{ $t('common.dismiss') }}
+            {{ $t("common.dismiss") }}
           </Button>
         </div>
       </div>
@@ -135,22 +193,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useCouple } from '@/composables/useCouple'
-import { useReminders } from '@/composables/useReminders'
-import type { Reminder, CreateReminderRequest, UpdateReminderRequest } from '@/types'
+import { ref, computed, onMounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { useCouple } from "@/composables/useCouple";
+import { useReminders } from "@/composables/useReminders";
+import type { Reminder, CreateReminderRequest, UpdateReminderRequest } from "@/types";
 
-import AppLayout from '@/components/layout/AppLayout.vue'
-import QuickActionCard from '@/components/common/QuickActionCard.vue'
-import Button from '@/components/common/Button.vue'
-import Modal from '@/components/common/Modal.vue'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import ReminderCard from '@/components/reminders/ReminderCard.vue'
-import ReminderForm from '@/components/reminders/ReminderForm.vue'
+import AppLayout from "@/components/layout/AppLayout.vue";
+import CoupleTimeBanner from "@/components/couple/CoupleTimeBanner.vue";
+import QuickActionCard from "@/components/common/QuickActionCard.vue";
+import Button from "@/components/common/Button.vue";
+import Modal from "@/components/common/Modal.vue";
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
+import ReminderCard from "@/components/reminders/ReminderCard.vue";
+import ReminderForm from "@/components/reminders/ReminderForm.vue";
+import ReminderDetail from "@/components/reminders/ReminderDetail.vue";
 
-const { t } = useI18n()
-const { isConnected } = useCouple()
+const { t } = useI18n();
+const { isConnected } = useCouple();
 
 const {
   reminders,
@@ -166,90 +226,143 @@ const {
   deleteReminder: deleteReminderFromStore,
   markCompleted,
   markIncomplete,
-  clearError
-} = useReminders()
+  clearError,
+} = useReminders();
 
 // Local state
-const showCreateForm = ref(false)
-const editingReminder = ref<Reminder | null>(null)
-const updatingId = ref<string | null>(null)
+const showCreateForm = ref(false);
+const showDetailModal = ref(false);
+const editingReminder = ref<Reminder | null>(null);
+const selectedReminder = ref<Reminder | null>(null);
+const updatingId = ref<string | null>(null);
 
 // Methods
+const handleCreateClick = () => {
+  console.log("Create button clicked");
+  showCreateForm.value = true;
+};
+
+const showReminderDetail = (reminder: Reminder) => {
+  selectedReminder.value = reminder;
+  showDetailModal.value = true;
+};
+
+const closeDetailModal = () => {
+  showDetailModal.value = false;
+  selectedReminder.value = null;
+};
+
 const editReminder = (reminder: Reminder) => {
-  editingReminder.value = reminder
-  showCreateForm.value = true
-}
+  editingReminder.value = reminder;
+  showCreateForm.value = true;
+};
+
+const editReminderFromDetail = () => {
+  if (selectedReminder.value) {
+    closeDetailModal();
+    editReminder(selectedReminder.value);
+  }
+};
+
+const deleteReminderFromDetail = async () => {
+  if (selectedReminder.value) {
+    await deleteReminder(selectedReminder.value.id);
+    closeDetailModal();
+  }
+};
+
+const toggleCompleteFromDetail = async () => {
+  if (selectedReminder.value) {
+    await toggleComplete(selectedReminder.value.id);
+    // Update the selected reminder to reflect the change
+    const updatedReminder = reminders.find(
+      (r: any) => r.id === selectedReminder.value?.id
+    );
+    if (updatedReminder) {
+      selectedReminder.value = updatedReminder;
+    }
+  }
+};
+
+const snoozeReminderFromDetail = async (snoozeUntil: string) => {
+  if (selectedReminder.value) {
+    await snoozeReminder(selectedReminder.value.id, snoozeUntil);
+    // Update the selected reminder to reflect the change
+    const updatedReminder = reminders.find(
+      (r: any) => r.id === selectedReminder.value?.id
+    );
+    if (updatedReminder) {
+      selectedReminder.value = updatedReminder;
+    }
+  }
+};
 
 const closeForm = () => {
-  showCreateForm.value = false
-  editingReminder.value = null
-}
+  showCreateForm.value = false;
+  editingReminder.value = null;
+};
 
 const handleFormSubmit = async (data: CreateReminderRequest | UpdateReminderRequest) => {
   try {
     if (editingReminder.value) {
-      await updateReminder(data as UpdateReminderRequest)
+      await updateReminder(data as UpdateReminderRequest);
     } else {
-      await createReminder(data as CreateReminderRequest)
+      await createReminder(data as CreateReminderRequest);
     }
-    closeForm()
+    closeForm();
   } catch (error) {
     // Error handled in composable
   }
-}
+};
 
 const deleteReminder = async (id: string) => {
   try {
-    await deleteReminderFromStore(id)
+    await deleteReminderFromStore(id);
   } catch (error) {
     // Error handled in composable
   }
-}
+};
 
 const toggleComplete = async (id: string) => {
-  updatingId.value = id
+  updatingId.value = id;
   try {
-    const reminder = reminders.find((r: any) => r.id === id)
+    const reminder = reminders.find((r: any) => r.id === id);
     if (reminder) {
       if (reminder.isCompleted) {
-        await markIncomplete(id)
+        await markIncomplete(id);
       } else {
-        await markCompleted(id)
+        await markCompleted(id);
       }
     }
   } catch (error) {
     // Error handled in composable
   } finally {
-    updatingId.value = null
+    updatingId.value = null;
   }
-}
+};
 
 const snoozeReminder = async (id: string, snoozeUntil: string) => {
   try {
     const updateData = {
       id: id,
-      reminderDate: snoozeUntil.split('T')[0],
-      reminderTime: snoozeUntil.split('T')[1] || '09:00'
-    }
-    await updateReminder(updateData)
+      reminderDate: snoozeUntil.split("T")[0],
+      reminderTime: snoozeUntil.split("T")[1] || "09:00",
+    };
+    await updateReminder(updateData);
   } catch (error) {
     // Error handled in composable
   }
-}
+};
 
 // Lifecycle
 onMounted(async () => {
-  if (isConnected.value) {
-    await fetchReminders()
-  }
-})
+  await fetchReminders();
+});
 
-// Watch for connection status changes
-watch(isConnected, async (newValue) => {
-  if (newValue) {
-    await fetchReminders()
-  }
-})
+// Debug watcher for modal state
+watch(showCreateForm, (newValue) => {
+  console.log("showCreateForm changed to:", newValue);
+});
 </script>
 
 <style scoped>
@@ -346,6 +459,14 @@ watch(isConnected, async (newValue) => {
 
 .section-title.upcoming {
   color: #4caf50;
+}
+
+.section-title.overdue {
+  color: #f44336;
+}
+
+.section-title.completed {
+  color: #9e9e9e;
 }
 
 .reminders-grid {
