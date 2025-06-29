@@ -2,13 +2,13 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { authService } from '@/services/auth'
 import { storage } from '@/utils/helpers'
-import type { User, LoginCredentials, RegisterCredentials } from '@/types'
+import type { IUser, LoginCredentials, RegisterCredentials } from '@/types'
 
 export function useAuth() {
   const { t } = useI18n()
   
   // State
-  const user = ref<User | null>(storage.get<User>('user'))
+  const user = ref<IUser | null>(storage.get<IUser>('user'))
   const token = ref<string | null>(storage.get<string>('auth_token'))
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -104,7 +104,7 @@ export function useAuth() {
     }
   }
 
-  const updateProfile = async (data: Partial<User>) => {
+  const updateProfile = async (data: Partial<IUser>) => {
     if (!user.value) throw new Error('User not authenticated')
     
     isLoading.value = true
@@ -184,7 +184,7 @@ export function useAuth() {
   // Initialize auth state on mount
   const initializeAuth = async () => {
     const savedToken = storage.get<string>('auth_token')
-    const savedUser = storage.get<User>('user')
+    const savedUser = storage.get<IUser>('user')
     
     if (savedToken && savedUser) {
       token.value = savedToken

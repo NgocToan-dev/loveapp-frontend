@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCouple } from '@/composables/useCouple'
 import { useAuth } from '@/composables/useAuth'
@@ -72,17 +72,8 @@ const {
   isConnected, 
   partner, 
   relationshipDuration, 
-  nextAnniversary,
-  fetchCoupleConnection,
-  coupleConnection
+  nextAnniversary
 } = useCouple()
-
-// Ensure data is loaded only if not already initialized
-onMounted(async () => {
-  if (!coupleConnection) {
-    await fetchCoupleConnection(true) // Force refresh only if needed
-  }
-})
 
 // Computed properties
 const coupleNames = computed(() => {

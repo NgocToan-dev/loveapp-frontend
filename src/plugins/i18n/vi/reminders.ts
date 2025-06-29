@@ -138,6 +138,7 @@ export default {
   },
 
   errors: {
+    no_couple: 'Bạn cần kết nối với người yêu trước khi tạo lời nhắc',
     fetch_failed: 'Không thể tải danh sách lời nhắc',
     fetch_single_failed: 'Không thể tải chi tiết lời nhắc',
     create_failed: 'Không thể tạo lời nhắc',

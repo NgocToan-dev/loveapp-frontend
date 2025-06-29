@@ -1,5 +1,5 @@
 // User types
-export interface User {
+export interface IUser {
   _id: string
   id?: string // Support backend response
   email: string
@@ -35,17 +35,17 @@ export interface RegisterCredentials {
 }
 
 // Couple & Relationship types
-export interface CoupleConnection {
+export interface ICoupleConnection {
   id: string
   _id?: string // For backend response compatibility
-  user1Id: User | string // Can be populated or just ID
-  user2Id: User | string // Can be populated or just ID
-  user1?: User // Separate populated fields
-  user2?: User // Separate populated fields
+  user1Id: IUser | string // Can be populated or just ID
+  user2Id: IUser | string // Can be populated or just ID
+  user1?: IUser // Separate populated fields
+  user2?: IUser // Separate populated fields
   relationshipTitle?: string
   relationshipStart?: string
   status: 'pending' | 'accepted' | 'connected' | 'disconnected' | 'declined'
-  requestedBy?: User | string
+  requestedBy?: IUser | string
   isActive: boolean
   invitationCode?: string
   requestedAt?: string
@@ -59,10 +59,10 @@ export interface CoupleConnection {
 export interface CoupleInvitation {
   _id: string
   id?: string // For frontend compatibility
-  user1Id: User | string
-  user2Id: User | string  
+  user1Id: IUser | string
+  user2Id: IUser | string  
   status: 'pending' | 'accepted' | 'declined'
-  requestedBy: User | string
+  requestedBy: IUser | string
   relationshipTitle: string
   isActive: boolean
   requestedAt: string
@@ -91,8 +91,8 @@ export interface Memory {
   createdBy: string
   createdAt: string
   updatedAt: string
-  author: User
-  userId?: User // For API response compatibility
+  author: IUser
+  userId?: IUser // For API response compatibility
 }
 
 export interface CreateMemoryRequest {
@@ -131,11 +131,13 @@ export interface Reminder {
 export interface CreateReminderRequest {
   title: string
   description?: string
-  reminderDate: string
-  reminderTime: string
+  reminderDate?: string // Frontend field
+  reminderTime?: string // Frontend field
+  datetime?: string // Backend field - required
+  repeat?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' // Backend field
   type: 'anniversary' | 'birthday' | 'date' | 'custom'
-  isRecurring?: boolean
-  recurringType?: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  isRecurring?: boolean // Frontend field
+  recurringType?: 'daily' | 'weekly' | 'monthly' | 'yearly' // Frontend field
 }
 
 export interface UpdateReminderRequest extends Partial<CreateReminderRequest> {
@@ -410,5 +412,5 @@ export interface CoupleStatistics {
 export type NotificationType = Notification['type']
 export type ReminderType = Reminder['type']
 export type MemoryType = 'text' | 'photo' | 'video'
-export type ConnectionStatus = CoupleConnection['status']
+export type ConnectionStatus = ICoupleConnection['status']
 export type ThemeMode = ThemeConfig['mode']

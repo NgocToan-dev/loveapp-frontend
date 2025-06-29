@@ -175,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuth } from "@/composables/useAuth";
@@ -206,15 +206,12 @@ const router = useRouter();
 const { userDisplayName } = useAuth();
 const { fetchMemories, createMemory } = useMemories();
 const { createReminder, fetchReminders } = useReminders();
-const { isConnected, fetchCoupleConnection, coupleConnection } = useCouple();
-
-
+const { isConnected, coupleConnection } = useCouple();
 
 // Use statistics composable
 const {
   memoriesCount,
   remindersCount,
-  daysTogethger,
   upcomingReminders,
   recentActivity,
   greeting: timeGreeting,
@@ -281,21 +278,12 @@ const handleCreateReminder = async (reminderData: any) => {
 
 // Lifecycle
 onMounted(async () => {
-  console.log('Dashboard - onMounted, current coupleConnection:', coupleConnection)
-  
-  // Check if couple data is already initialized, if not, ensure it's loaded
-  if (!coupleConnection && !isConnected) {
-    await fetchCoupleConnection(true); // Force refresh only if needed
-  }
-
+  // Fetch memories and reminders after global connection initialization
   if (isConnected) {
-    console.log('Dashboard - is connected, fetching memories and reminders')
     await Promise.all([
-      fetchMemories(), // Get all memories
-      fetchReminders(), // Get all reminders
+      fetchMemories(),
+      fetchReminders(),
     ]);
-  } else {
-    console.log('Dashboard - not connected, skipping memories and reminders fetch')
   }
 });
 </script>

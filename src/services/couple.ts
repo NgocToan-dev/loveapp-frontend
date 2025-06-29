@@ -1,5 +1,5 @@
 import api from './api'
-import type { CoupleConnection, CoupleInvitation, User } from '@/types'
+import type { ICoupleConnection, CoupleInvitation, IUser } from '@/types'
 
 // Helper function to format date for API
 const formatDateForApi = (dateString: string): string => {
@@ -15,20 +15,20 @@ const formatDateForApi = (dateString: string): string => {
 
 export const coupleService = {
   // Get current couple connection
-  async getCoupleConnection(): Promise<CoupleConnection | null> {
+  async getCoupleConnection(): Promise<ICoupleConnection | undefined> {
     try {
       const response = await api.get('/couple/connection')
       return response.data.couple || response.data
     } catch (error: any) {
       if (error.response?.status === 404) {
-        return null
+        return undefined
       }
       throw error
     }
   },
 
   // Send couple invitation
-  async sendInvitation(email: string, anniversaryDate?: string): Promise<CoupleConnection> {
+  async sendInvitation(email: string, anniversaryDate?: string): Promise<ICoupleConnection> {
     const requestData: any = { partnerEmail: email }
     if (anniversaryDate) {
       requestData.anniversaryDate = formatDateForApi(anniversaryDate)
@@ -38,7 +38,7 @@ export const coupleService = {
   },
 
   // Accept couple invitation
-  async acceptInvitation(coupleId: string): Promise<CoupleConnection> {
+  async acceptInvitation(coupleId: string): Promise<ICoupleConnection> {
     const response = await api.post('/couple/respond', { coupleId, action: 'accept' })
     return response.data.couple || response.data
   },
@@ -72,7 +72,7 @@ export const coupleService = {
     relationshipTitle?: string
     coupleNickname?: string
     anniversaryDate?: string
-  }): Promise<CoupleConnection> {
+  }): Promise<ICoupleConnection> {
     // Convert date to ISO format if provided
     const updateData = { ...data }
     if (updateData.anniversaryDate) {
@@ -83,7 +83,7 @@ export const coupleService = {
   },
 
   // Update relationship start date
-  async updateRelationshipStart(date: string): Promise<CoupleConnection> {
+  async updateRelationshipStart(date: string): Promise<ICoupleConnection> {
     // Convert date string to ISO datetime format for backend validation
     const isoDate = formatDateForApi(date)
     const response = await api.put('/couple/update', { anniversaryDate: isoDate })
@@ -91,7 +91,7 @@ export const coupleService = {
   },
 
   // Search user by email
-  async searchUserByEmail(email: string): Promise<User | null> {
+  async searchUserByEmail(email: string): Promise<IUser | null> {
     try {
       const response = await api.get(`/users/search?email=${encodeURIComponent(email)}`)
       return response.data

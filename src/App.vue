@@ -25,9 +25,16 @@ import NotificationContainer from "@/components/common/NotificationContainer.vue
 import OfflineIndicator from "@/components/common/OfflineIndicator.vue";
 import { useUIStore } from "@/stores/ui";
 import { useOnlineStatus } from "@/composables/useOnlineStatus";
+import { useCouple } from "@/composables/useCouple";
+import { onMounted } from 'vue';
 
 const uiStore = useUIStore();
 const { isOnline } = useOnlineStatus();
+// Global fetch of couple connection when app starts
+const { fetchCoupleConnection } = useCouple();
+onMounted(async () => {
+  await fetchCoupleConnection(true);
+});
 
 function getPageTransition(route: { meta?: { transition?: string } }) {
   return route.meta?.transition || "fade";

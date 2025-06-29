@@ -2,7 +2,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 import { useCoupleStore } from '@/stores/couple'
-import type { User } from '@/types'
+import type { IUser } from '@/types'
 
 export function useCouple() {
   const { t } = useI18n()

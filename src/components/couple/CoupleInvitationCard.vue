@@ -208,7 +208,6 @@ const {
   isPending,
   partner,
   nextAnniversary,
-  fetchCoupleConnection,
   sendInvitation,
   acceptInvitation,
   rejectInvitation,
@@ -326,15 +325,13 @@ const copyInvitationCode = async (code: string) => {
 
 // Lifecycle
 onMounted(async () => {
-  // Check if data is already initialized before fetching
-  if (!coupleConnection || !pendingInvitations.length) {
-    // Only fetch if not already initialized by the store
-    await fetchCoupleConnection(true) // Force refresh
+  // Fetch pending invitations if not loaded
+  if (!pendingInvitations.length) {
     await fetchPendingInvitations(true) // Force refresh
   }
-  
-  // Set initial date value if connection exists
-  if (coupleConnection?.anniversaryDate) {
+   
+   // Set initial date value if connection exists
+   if (coupleConnection?.anniversaryDate) {
     // Extract date part from ISO datetime string
     const dateStr = new Date(coupleConnection.anniversaryDate).toISOString().split('T')[0]
     newRelationshipDate.value = dateStr

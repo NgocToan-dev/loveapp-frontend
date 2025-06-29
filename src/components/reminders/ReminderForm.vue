@@ -1,5 +1,11 @@
 <template>
-  <div class="reminder-form">
+  <div class="reminder-form relative">
+    <div
+      v-if="!isConnected"
+      class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10"
+    >
+      <p class="text-red-500 font-medium">{{ $t('reminders.errors.no_couple') }}</p>
+    </div>
     <form @submit.prevent="handleSubmit">
       <!-- Title Field -->
       <div class="form-group mt-4">
@@ -126,6 +132,7 @@ import { useI18n } from 'vue-i18n'
 import type { CreateReminderRequest, UpdateReminderRequest, Reminder } from '@/types'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
+import { useCouple } from '@/composables/useCouple'
 
 interface Props {
   reminder?: Reminder
@@ -143,6 +150,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 const { t } = useI18n()
+const { isConnected } = useCouple()
 
 // Form state
 const form = ref<CreateReminderRequest & { id?: string }>({
@@ -223,17 +231,31 @@ const handleSubmit = () => {
   validateForm()
   
   if (isFormValid.value) {
-    const data = { ...form.value }
+    const data: any = { ...form.value }
     
     // Remove id if it's a create request
     if (!isEditing.value) {
       delete data.id
     }
-    
-    // Clean up recurring type if not recurring
-    if (!data.isRecurring) {
-      data.recurringType = undefined
+
+    // Combine reminderDate and reminderTime into datetime field for backend
+    if (data.reminderDate && data.reminderTime) {
+      const datetime = new Date(`${data.reminderDate}T${data.reminderTime}`)
+      data.datetime = datetime.toISOString()
     }
+
+    // Map frontend fields to backend fields
+    if (data.isRecurring && data.recurringType) {
+      data.repeat = data.recurringType
+    } else {
+      data.repeat = 'none'
+    }
+
+    // Clean up frontend-only fields
+    delete data.reminderDate
+    delete data.reminderTime
+    delete data.isRecurring
+    delete data.recurringType
 
     emit('submit', data as CreateReminderRequest | UpdateReminderRequest)
   }

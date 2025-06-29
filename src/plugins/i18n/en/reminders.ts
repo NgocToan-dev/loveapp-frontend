@@ -138,6 +138,7 @@ export default {
   },
 
   errors: {
+    no_couple: 'You must connect with your partner before creating reminders',
     fetch_failed: 'Failed to load reminders',
     fetch_single_failed: 'Failed to load reminder details',
     create_failed: 'Failed to create reminder',

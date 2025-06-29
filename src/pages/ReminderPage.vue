@@ -12,7 +12,21 @@
         </div>
 
         <div class="header-actions">
-          <Button @click="handleCreateClick" variant="primary" class="create-button">
+          <Button
+            v-if="isConnected"
+            @click="handleCreateClick"
+            variant="primary"
+            class="create-button"
+          >
+            <span class="button-icon">⏰</span>
+            {{ $t("reminders.create.title") }}
+          </Button>
+          <Button
+            v-else
+            variant="outline"
+            class="create-button"
+            disabled
+          >
             <span class="button-icon">⏰</span>
             {{ $t("reminders.create.title") }}
           </Button>
