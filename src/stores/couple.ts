@@ -1,349 +1,300 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
 import { coupleService } from "@/services/couple";
-import type { ICoupleConnection, CoupleInvitation, IUser } from "@/types";
+import type { ICoupleConnection, CoupleInvitation } from "@/types";
 
-export const useCoupleStore = defineStore("couple", () => {
-  // State
-  const coupleConnection = ref<ICoupleConnection | undefined>();
-  const pendingInvitations = ref<CoupleInvitation[]>([]);
-  const isLoading = ref(false);
-  const isSendingInvitation = ref(false);
-  const isAcceptingInvitation = ref(false);
-  const error = ref<string | null>(null);
-  const successMessage = ref<string | null>(null);
-  const isInitialized = ref(false); // Track if we've already fetched connection
+interface CoupleState {
+  coupleConnection: ICoupleConnection | undefined;
+  pendingInvitations: CoupleInvitation[];
+  isLoading: boolean;
+  isSendingInvitation: boolean;
+  isAcceptingInvitation: boolean;
+  error: string | null;
+  successMessage: string | null;
+  isInitialized: boolean;
+}
 
-  // Computed
-  const isConnected = computed(() => {
-    return coupleConnection.value?.status === "accepted";
-  });
+export const useCoupleStore = defineStore("couple", {
+  state: (): CoupleState => ({
+    coupleConnection: undefined,
+    pendingInvitations: [],
+    isLoading: false,
+    isSendingInvitation: false,
+    isAcceptingInvitation: false,
+    error: null,
+    successMessage: null,
+    isInitialized: false,
+  }),
 
-  const isPending = computed(
-    () => coupleConnection.value?.status === "pending"
-  );
-
-  const partner = computed(() => {
-    if (!coupleConnection.value || !isConnected.value) return null;
-
-    // Get current user ID from user store - using dynamic import to avoid circular dependency
-    const userStore = () =>
-      import("@/stores/user").then((m) => m.useUserStore());
-
-    // For now, we'll handle this in the component/composable where user context is available
-    // This computed will be enhanced when used with user context
-    return null;
-  });
-
-  const relationshipDuration = computed(() => {
-    if (
-      !coupleConnection.value?.anniversaryDate &&
-      !coupleConnection.value?.createdAt
-    )
+  getters: {
+    isConnected: (state) => state.coupleConnection?.status === "accepted",
+    
+    isPending: (state) => state.coupleConnection?.status === "pending",
+    
+    partner: (state) => {
+      if (!state.coupleConnection || state.coupleConnection.status !== "accepted") return null;
+      
+      // Get current user ID from user store - using dynamic import to avoid circular dependency
+      // For now, we'll handle this in the component/composable where user context is available
+      // This getter will be enhanced when used with user context
       return null;
+    },
+    
+    relationshipDuration: (state) => {
+      if (!state.coupleConnection?.anniversaryDate && !state.coupleConnection?.createdAt) {
+        return null;
+      }
 
-    // Use anniversaryDate if available, otherwise use createdAt
-    const startDate =
-      coupleConnection.value.anniversaryDate ||
-      coupleConnection.value.createdAt;
-    const start = new Date(startDate);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // Use anniversaryDate if available, otherwise use createdAt
+      const startDate = state.coupleConnection.anniversaryDate || state.coupleConnection.createdAt;
+      const start = new Date(startDate);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    return {
-      days: diffDays,
-      years: Math.floor(diffDays / 365),
-      months: Math.floor((diffDays % 365) / 30),
-      remainingDays: diffDays % 30,
-    };
-  });
+      return {
+        days: diffDays,
+        years: Math.floor(diffDays / 365),
+        months: Math.floor((diffDays % 365) / 30),
+        remainingDays: diffDays % 30,
+      };
+    },
+    
+    nextAnniversary: (state) => {
+      if (!state.coupleConnection?.anniversaryDate && !state.coupleConnection?.createdAt) {
+        return null;
+      }
 
-  const nextAnniversary = computed(() => {
-    if (
-      !coupleConnection.value?.anniversaryDate &&
-      !coupleConnection.value?.createdAt
-    )
-      return null;
+      // Use anniversaryDate if available, otherwise use createdAt
+      const startDate = state.coupleConnection.anniversaryDate || state.coupleConnection.createdAt;
+      const start = new Date(startDate);
+      const now = new Date();
+      const currentYear = now.getFullYear();
 
-    // Use anniversaryDate if available, otherwise use createdAt
-    const startDate =
-      coupleConnection.value.anniversaryDate ||
-      coupleConnection.value.createdAt;
-    const start = new Date(startDate);
-    const now = new Date();
-    const currentYear = now.getFullYear();
+      let anniversary = new Date(currentYear, start.getMonth(), start.getDate());
 
-    let anniversary = new Date(currentYear, start.getMonth(), start.getDate());
+      if (anniversary < now) {
+        anniversary = new Date(currentYear + 1, start.getMonth(), start.getDate());
+      }
 
-    if (anniversary < now) {
-      anniversary = new Date(
-        currentYear + 1,
-        start.getMonth(),
-        start.getDate()
-      );
-    }
+      return anniversary;
+    },
 
-    return anniversary;
-  });
+    formattedRelationshipDuration(): string {
+      if (!this.relationshipDuration) return "";
 
-  // Actions
-  const fetchCoupleConnection = async (force = false) => {
-    // If already initialized and not forcing, skip fetch
-    if (isInitialized.value && !force) {
-      return coupleConnection.value;
-    }
+      const { years, months, remainingDays } = this.relationshipDuration;
 
-    // Prevent multiple simultaneous requests
-    if (isLoading.value) return coupleConnection.value;
+      if (years > 0) {
+        return `${years} năm ${months} tháng ${remainingDays} ngày`;
+      } else if (months > 0) {
+        return `${months} tháng ${remainingDays} ngày`;
+      } else {
+        return `${remainingDays} ngày`;
+      }
+    },
 
-    isLoading.value = true;
-    error.value = null;
+    daysUntilAnniversary(): number {
+      if (!this.nextAnniversary) return 0;
 
-    try {
-      const connectionData = await coupleService.getCoupleConnection();
-      // Only assign after successfully getting data
-      coupleConnection.value = connectionData;
-      isInitialized.value = true;
-      return connectionData;
-    } catch (err: any) {
-      error.value =
-        err.response?.data?.message || "Failed to fetch couple connection";
-      console.error("Error fetching couple connection:", err);
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
+      const now = new Date();
+      const diffTime = this.nextAnniversary.getTime() - now.getTime();
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    },
+  },
 
-  const sendInvitation = async (email: string) => {
-    isSendingInvitation.value = true;
-    error.value = null;
-    successMessage.value = null;
+  actions: {
+    async fetchCoupleConnection(force = false) {
+      // If already initialized and not forcing, skip fetch
+      if (this.isInitialized && !force) {
+        return this.coupleConnection;
+      }
 
-    try {
-      const result = await coupleService.sendInvitation(email);
-      // If we get a couple connection back, it means the connection was established
-      coupleConnection.value = result;
-      successMessage.value = "Connection successful!";
-      return result;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || "Failed to send invitation";
-      throw err;
-    } finally {
-      isSendingInvitation.value = false;
-    }
-  };
+      // Prevent multiple simultaneous requests
+      if (this.isLoading) return this.coupleConnection;
 
-  const acceptInvitation = async (coupleId: string) => {
-    isAcceptingInvitation.value = true;
-    error.value = null;
-    successMessage.value = null;
+      this.isLoading = true;
+      this.error = null;
 
-    try {
-      const result = await coupleService.acceptInvitation(coupleId);
-      coupleConnection.value = result;
+      try {
+        const connectionData = await coupleService.getCoupleConnection();
+        // Only assign after successfully getting data
+        this.coupleConnection = connectionData;
+        this.isInitialized = true;
+        return connectionData;
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to fetch couple connection";
+        console.error("Error fetching couple connection:", err);
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
-      // Remove from pending invitations
-      pendingInvitations.value = pendingInvitations.value.filter(
-        (inv) => (inv._id || inv.id) !== coupleId
-      );
+    async sendInvitation(email: string) {
+      this.isSendingInvitation = true;
+      this.error = null;
+      this.successMessage = null;
 
-      // Set success message
-      successMessage.value = "Connection successful!";
+      try {
+        const result = await coupleService.sendInvitation(email);
+        // If we get a couple connection back, it means the connection was established
+        this.coupleConnection = result;
+        this.successMessage = "Connection successful!";
+        return result;
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to send invitation";
+        throw err;
+      } finally {
+        this.isSendingInvitation = false;
+      }
+    },
 
-      return coupleConnection.value;
-    } catch (err: any) {
-      error.value =
-        err.response?.data?.message || "Failed to accept invitation";
-      throw err;
-    } finally {
-      isAcceptingInvitation.value = false;
-    }
-  };
+    async acceptInvitation(coupleId: string) {
+      this.isAcceptingInvitation = true;
+      this.error = null;
+      this.successMessage = null;
 
-  const rejectInvitation = async (coupleId: string) => {
-    isLoading.value = true;
-    error.value = null;
+      try {
+        const result = await coupleService.acceptInvitation(coupleId);
+        this.coupleConnection = result;
 
-    try {
-      await coupleService.rejectInvitation(coupleId);
+        // Remove from pending invitations
+        this.pendingInvitations = this.pendingInvitations.filter(
+          (inv) => (inv._id || inv.id) !== coupleId
+        );
 
-      // Remove from pending invitations
-      pendingInvitations.value = pendingInvitations.value.filter(
-        (inv) => (inv._id || inv.id) !== coupleId
-      );
-    } catch (err: any) {
-      error.value =
-        err.response?.data?.message || "Failed to reject invitation";
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
+        // Set success message
+        this.successMessage = "Connection successful!";
 
-  const fetchPendingInvitations = async (force = false) => {
-    // If already have invitations and not forcing, skip fetch unless empty
-    if (pendingInvitations.value.length > 0 && !force) {
-      return pendingInvitations.value;
-    }
+        return this.coupleConnection;
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to accept invitation";
+        throw err;
+      } finally {
+        this.isAcceptingInvitation = false;
+      }
+    },
 
-    isLoading.value = true;
-    error.value = null;
+    async rejectInvitation(coupleId: string) {
+      this.isLoading = true;
+      this.error = null;
 
-    try {
-      pendingInvitations.value = await coupleService.getPendingInvitations();
-      return pendingInvitations.value;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || "Failed to load invitations";
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
+      try {
+        await coupleService.rejectInvitation(coupleId);
 
-  const updateRelationshipStart = async (date: string) => {
-    isLoading.value = true;
-    error.value = null;
+        // Remove from pending invitations
+        this.pendingInvitations = this.pendingInvitations.filter(
+          (inv) => (inv._id || inv.id) !== coupleId
+        );
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to reject invitation";
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
-    try {
-      const result = await coupleService.updateRelationshipStart(date);
-      coupleConnection.value = result;
-      return result;
-    } catch (err: any) {
-      error.value = err.response?.data?.message || "Failed to update date";
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
+    async fetchPendingInvitations(force = false) {
+      // If already have invitations and not forcing, skip fetch unless empty
+      if (this.pendingInvitations.length > 0 && !force) {
+        return this.pendingInvitations;
+      }
 
-  const searchUserByEmail = async (email: string) => {
-    try {
-      return await coupleService.searchUserByEmail(email);
-    } catch (err: any) {
-      error.value = err.response?.data?.message || "Failed to search user";
-      throw err;
-    }
-  };
+      this.isLoading = true;
+      this.error = null;
 
-  const generateInvitationCode = async () => {
-    try {
-      return await coupleService.generateInvitationCode();
-    } catch (err: any) {
-      error.value =
-        err.response?.data?.message || "Failed to generate invitation code";
-      throw err;
-    }
-  };
+      try {
+        this.pendingInvitations = await coupleService.getPendingInvitations();
+        return this.pendingInvitations;
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to load invitations";
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
-  // Initialize connection data - to be called once when app starts
-  const initializeCoupleData = async () => {
-    try {
-      await Promise.all([fetchCoupleConnection(), fetchPendingInvitations()]);
-    } catch (error) {
-      console.error("Failed to initialize couple data:", error);
-    }
-  };
+    async updateRelationshipStart(date: string) {
+      this.isLoading = true;
+      this.error = null;
 
-  const setCoupleConnection = (connection: ICoupleConnection | undefined) => {
-    coupleConnection.value = connection;
-  };
+      try {
+        const result = await coupleService.updateRelationshipStart(date);
+        this.coupleConnection = result;
+        return result;
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to update date";
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
-  const clearError = () => {
-    error.value = null;
-  };
+    async searchUserByEmail(email: string) {
+      try {
+        return await coupleService.searchUserByEmail(email);
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to search user";
+        throw err;
+      }
+    },
 
-  const clearSuccess = () => {
-    successMessage.value = null;
-  };
+    async generateInvitationCode() {
+      try {
+        return await coupleService.generateInvitationCode();
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to generate invitation code";
+        throw err;
+      }
+    },
 
-  const disconnectCouple = async () => {
-    isLoading.value = true;
-    error.value = null;
+    // Initialize connection data - to be called once when app starts
+    async initializeCoupleData() {
+      try {
+        await Promise.all([this.fetchCoupleConnection(), this.fetchPendingInvitations()]);
+      } catch (error) {
+        console.error("Failed to initialize couple data:", error);
+      }
+    },
 
-    try {
-      await coupleService.disconnectCouple();
-      coupleConnection.value = undefined;
-      isInitialized.value = false; // Reset initialization flag
-    } catch (err: any) {
-      error.value =
-        err.response?.data?.message || "Failed to disconnect couple";
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
+    setCoupleConnection(connection: ICoupleConnection | undefined) {
+      this.coupleConnection = connection;
+    },
 
-  // Utility methods
-  const formatRelationshipDuration = () => {
-    if (!relationshipDuration.value) return "";
+    clearError() {
+      this.error = null;
+    },
 
-    const { years, months, remainingDays } = relationshipDuration.value;
+    clearSuccess() {
+      this.successMessage = null;
+    },
 
-    if (years > 0) {
-      return `${years} năm ${months} tháng ${remainingDays} ngày`;
-    } else if (months > 0) {
-      return `${months} tháng ${remainingDays} ngày`;
-    } else {
-      return `${remainingDays} ngày`;
-    }
-  };
+    async disconnectCouple() {
+      this.isLoading = true;
+      this.error = null;
 
-  const getDaysUntilAnniversary = () => {
-    if (!nextAnniversary.value) return 0;
+      try {
+        await coupleService.disconnectCouple();
+        this.coupleConnection = undefined;
+        this.isInitialized = false; // Reset initialization flag
+      } catch (err: any) {
+        this.error = err.response?.data?.message || "Failed to disconnect couple";
+        throw err;
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
-    const now = new Date();
-    const diffTime = nextAnniversary.value.getTime() - now.getTime();
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
-
-  // Reset store state
-  const $reset = () => {
-    coupleConnection.value = undefined;
-    pendingInvitations.value = [];
-    isLoading.value = false;
-    isSendingInvitation.value = false;
-    isAcceptingInvitation.value = false;
-    error.value = null;
-    successMessage.value = null;
-    isInitialized.value = false;
-  };
-
-  return {
-    // State
-    coupleConnection,
-    pendingInvitations,
-    isLoading,
-    isSendingInvitation,
-    isAcceptingInvitation,
-    error,
-    successMessage,
-    isInitialized,
-
-    // Computed
-    isConnected,
-    isPending,
-    partner,
-    relationshipDuration,
-    nextAnniversary,
-
-    // Actions
-    fetchCoupleConnection,
-    sendInvitation,
-    acceptInvitation,
-    rejectInvitation,
-    fetchPendingInvitations,
-    updateRelationshipStart,
-    searchUserByEmail,
-    generateInvitationCode,
-    initializeCoupleData,
-    setCoupleConnection,
-    clearError,
-    clearSuccess,
-    disconnectCouple,
-    formatRelationshipDuration,
-    getDaysUntilAnniversary,
-    $reset,
-  };
+    // Reset store state
+    $reset() {
+      this.coupleConnection = undefined;
+      this.pendingInvitations = [];
+      this.isLoading = false;
+      this.isSendingInvitation = false;
+      this.isAcceptingInvitation = false;
+      this.error = null;
+      this.successMessage = null;
+      this.isInitialized = false;
+    },
+  },
 });

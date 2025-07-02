@@ -20,7 +20,7 @@
 
       <!-- Status Badge -->
       <div
-        v-if="post.status === 'draft'"
+        v-if="post.status === StatusEnum.draft"
         class="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-medium"
       >
         {{ $t("blog.draft") }}
@@ -47,7 +47,7 @@
 
       <!-- Status Badge for no-image posts -->
       <div
-        v-if="post.status === 'draft'"
+        v-if="post.status === StatusEnum.draft"
         class="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-medium"
       >
         {{ $t("blog.draft") }}
@@ -90,17 +90,17 @@
           +{{ post.tags.length - 3 }}
         </span>
       </div>
-
+      {{ post.author }}
       <!-- Author & Date -->
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center space-x-2">
           <img
-            :src="post.author.avatarUrl || '/default-avatar.png'"
-            :alt="post.author.displayName"
+            :src="post?.author?.avatarUrl || '/default-avatar.png'"
+            :alt="post?.author?.displayName"
             class="w-8 h-8 rounded-full object-cover"
           />
           <span class="text-sm text-gray-700 font-medium">{{
-            post.author.displayName
+            post?.author?.displayName
           }}</span>
         </div>
         <time class="text-xs text-gray-500">
@@ -192,13 +192,17 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { BlogPost } from "@/types";
+import { BlogPostEntity } from "@/types/model/blog/BlogPostEntity";
+import { PrivacyEnum, StatusEnum } from "@/utils/enum";
+import type { IBlogPostEntity } from "@/types/model/blog/IBlogPostEntity";
 
-interface Props {
-  post: BlogPost;
-}
-
-const props = defineProps<Props>();
+const props = defineProps({
+  post: {
+    type: Object as () => IBlogPostEntity,
+    default: new BlogPostEntity(),
+    required: true,
+  },
+});
 
 
 const { t } = useI18n();
@@ -211,11 +215,11 @@ const estimatedReadingTime = computed(() => {
 
 const privacyLabel = computed(() => {
   switch (props.post.privacy) {
-    case "public":
+    case PrivacyEnum.public:
       return t("blog.privacy.public");
-    case "couple":
+    case PrivacyEnum.couple:
       return t("blog.privacy.couple");
-    case "private":
+    case PrivacyEnum.private:
       return t("blog.privacy.private");
     default:
       return "";
@@ -224,11 +228,11 @@ const privacyLabel = computed(() => {
 
 const privacyBadgeClass = computed(() => {
   switch (props.post.privacy) {
-    case "public":
+    case PrivacyEnum.public:
       return "bg-green-500";
-    case "couple":
+    case PrivacyEnum.couple:
       return "bg-blue-500";
-    case "private":
+    case PrivacyEnum.private:
       return "bg-gray-500";
     default:
       return "bg-gray-500";

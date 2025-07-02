@@ -1,6 +1,6 @@
+import { BlogPostEntity } from '@/types/model/blog/BlogPostEntity';
 import api from './api'
 import type { 
-  BlogPost, 
   CreateBlogPostRequest, 
   UpdateBlogPostRequest, 
   BlogPostFilters,
@@ -16,7 +16,7 @@ export const blogService = {
     page = 1, 
     limit = 12, 
     filters?: BlogPostFilters
-  ): Promise<PaginatedResponse<BlogPost>> {
+  ): Promise<PaginatedResponse<BlogPostEntity>> {
     const params = new URLSearchParams()
     params.append('page', page.toString())
     params.append('limit', limit.toString())
@@ -28,61 +28,145 @@ export const blogService = {
     if (filters?.sortBy) params.append('sortBy', filters.sortBy)
     
     const response = await api.get(`/blog?${params.toString()}`)
-    return response.data
+    
+    // Map backend response to frontend format
+    const mappedData = {
+      data: response.data.posts.map((post: any) => ({
+        ...post,
+        id: post._id,
+        likesCount: post.likes?.length || 0,
+        commentsCount: post.comments?.length || 0,
+        // Safe navigation for userId object
+        userId: post.userId ? {
+          _id: post.userId._id,
+          displayName: post.userId.displayName || 'Unknown User',
+          avatarUrl: post.userId.avatarUrl || ''
+        } : null
+      })),
+      pagination: {
+        ...response.data.pagination,
+        total: response.data.pagination.totalPosts
+      },
+      success: true
+    }
+    
+    return mappedData
   },
 
   // Get single blog post by ID
-  async getBlogPost(id: string): Promise<BlogPost> {
+  async getBlogPost(id: string): Promise<BlogPostEntity> {
     const response = await api.get(`/blog/${id}`)
-    return response.data
+    
+    // Map backend response to frontend format
+    return {
+      ...response.data,
+      id: response.data._id,
+      likesCount: response.data.likes?.length || 0,
+      commentsCount: response.data.comments?.length || 0,
+      // Safe navigation for userId object
+      userId: response.data.userId ? {
+        _id: response.data.userId._id,
+        displayName: response.data.userId.displayName || 'Unknown User',
+        avatarUrl: response.data.userId.avatarUrl || ''
+      } : null
+    }
   },
 
   // Create new blog post
-  async createBlogPost(data: CreateBlogPostRequest): Promise<BlogPost> {
-    const formData = new FormData()
+  async createBlogPost(data: CreateBlogPostRequest): Promise<BlogPostEntity> {
+    console.log('blogService.createBlogPost called with:', data) // Debug log
     
-    formData.append('title', data.title)
-    formData.append('content', data.content)
-    formData.append('contentHtml', data.contentHtml)
-    formData.append('tags', JSON.stringify(data.tags))
+    // Validate required fields
+    if (!data.title?.trim()) {
+      throw new Error('Title is required')
+    }
+    if (!data.content?.trim()) {
+      throw new Error('Content is required')
+    }
+    if (!data.contentHtml?.trim()) {
+      throw new Error('Content HTML is required')
+    }
     
-    if (data.privacy) formData.append('privacy', data.privacy)
-    if (data.status) formData.append('status', data.status)
-    if (data.excerpt) formData.append('excerpt', data.excerpt)
-    if (data.coverImage) formData.append('coverImage', data.coverImage)
+    // Handle cover image upload separately if present
+    let coverImageUrl = ''
+    if (data.coverImage && data.coverImage instanceof File) {
+      const imageResult = await this.uploadCoverImage(data.coverImage)
+      coverImageUrl = imageResult.url
+    }
+    
+    // Prepare JSON payload
+    const payload = {
+      title: data.title.trim(),
+      content: data.content.trim(),
+      contentHtml: data.contentHtml.trim(),
+      tags: data.tags || [],
+      privacy: data.privacy || 'private',
+      status: data.status || 'draft',
+      excerpt: data.excerpt?.trim() || '',
+      ...(coverImageUrl && { coverImageUrl })
+    }
 
-    const response = await api.post('/blog', formData, {
+    console.log('Sending JSON payload:', payload) // Debug log
+
+    const response = await api.post('/blog', payload, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'application/json'
       }
     })
-    return response.data
+    
+    // Map backend response to frontend format
+    return {
+      ...response.data,
+      id: response.data._id,
+      likesCount: response.data.likes?.length || 0,
+      commentsCount: response.data.comments?.length || 0,
+      // Safe navigation for userId object
+      userId: response.data.userId ? {
+        _id: response.data.userId._id,
+        displayName: response.data.userId.displayName || 'Unknown User',
+        avatarUrl: response.data.userId.avatarUrl || ''
+      } : null
+    }
   },
 
   // Update blog post
-  async updateBlogPost(data: UpdateBlogPostRequest): Promise<BlogPost> {
-    const { id, ...updateData } = data
+  async updateBlogPost(data: UpdateBlogPostRequest): Promise<BlogPostEntity> {
+    const { id, coverImage, ...updateData } = data
     
-    const formData = new FormData()
+    // If there's a cover image, handle it separately
+    if (coverImage && coverImage instanceof File) {
+      // First upload the image
+      const imageResult = await this.uploadCoverImage(coverImage)
+      updateData.coverImageUrl = imageResult.url
+    }
     
-    Object.entries(updateData).forEach(([key, value]) => {
-      if (value !== undefined) {
-        if (key === 'tags') {
-          formData.append(key, JSON.stringify(value))
-        } else if (key === 'coverImage' && value instanceof File) {
-          formData.append(key, value)
-        } else if (key !== 'coverImage') {
-          formData.append(key, value.toString())
-        }
-      }
-    })
+    // Send JSON payload for other fields
+    const payload = {
+      ...updateData,
+      tags: updateData.tags || []
+    }
 
-    const response = await api.put(`/blog/${id}`, formData, {
+    console.log('Updating blog post with JSON payload:', payload) // Debug log
+
+    const response = await api.put(`/blog/${id}`, payload, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'application/json'
       }
     })
-    return response.data
+    
+    // Map backend response to frontend format
+    return {
+      ...response.data,
+      id: response.data._id,
+      likesCount: response.data.likes?.length || 0,
+      commentsCount: response.data.comments?.length || 0,
+      // Safe navigation for userId object
+      userId: response.data.userId ? {
+        _id: response.data.userId._id,
+        displayName: response.data.userId.displayName || 'Unknown User',
+        avatarUrl: response.data.userId.avatarUrl || ''
+      } : null
+    }
   },
 
   // Delete blog post
@@ -110,13 +194,21 @@ export const blogService = {
 
   // Add comment to blog post
   async addComment(postId: string, data: CreateBlogCommentRequest): Promise<BlogComment> {
-    const response = await api.post(`/blog/${postId}/comments`, data)
+    const response = await api.post(`/blog/${postId}/comments`, data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
     return response.data
   },
 
   // Update comment
   async updateComment(postId: string, commentId: string, content: string): Promise<BlogComment> {
-    const response = await api.put(`/blog/${postId}/comments/${commentId}`, { content })
+    const response = await api.put(`/blog/${postId}/comments/${commentId}`, { content }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
     return response.data
   },
 
@@ -151,7 +243,7 @@ export const blogService = {
   },
 
   // Search blog posts
-  async searchBlogPosts(query: string): Promise<BlogPost[]> {
+  async searchBlogPosts(query: string): Promise<BlogPostEntity[]> {
     const response = await api.get(`/blog/search?q=${encodeURIComponent(query)}`)
     return response.data
   }

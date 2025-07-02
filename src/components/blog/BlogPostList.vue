@@ -66,11 +66,11 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { BlogPost } from '@/types'
 import BlogPostCard from './BlogPostCard.vue'
+import type { BlogPostEntity } from '@/types/model/blog/BlogPostEntity'
 
 interface Props {
-  posts: BlogPost[]
+  posts: BlogPostEntity[]
   isLoading?: boolean
   hasMore?: boolean
 }
@@ -81,9 +81,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  selectPost: [post: BlogPost]
+  selectPost: [post: BlogPostEntity]
   toggleLike: [postId: string]
-  editPost: [post: BlogPost]
+  editPost: [post: BlogPostEntity]
   deletePost: [postId: string]
   createPost: []
   loadMore: []

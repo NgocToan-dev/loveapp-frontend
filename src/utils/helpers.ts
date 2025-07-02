@@ -8,8 +8,15 @@ export function generateId(prefix = 'id'): string {
 }
 
 // Format date for display
-export function formatDate(date: Date | string, format = 'DD/MM/YYYY'): string {
+export function formatDate(date: Date | string | null | undefined, format = 'DD/MM/YYYY'): string {
+  if (!date) return 'N/A'
+  
   const d = new Date(date)
+  
+  // Check if date is valid
+  if (isNaN(d.getTime())) {
+    return 'Invalid Date'
+  }
   
   if (format === 'relative') {
     const now = new Date()

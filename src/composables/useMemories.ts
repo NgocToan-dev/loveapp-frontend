@@ -2,6 +2,7 @@ import { useI18n } from 'vue-i18n'
 import { useNotifications } from './useNotifications'
 import { useMemoriesStore } from '@/stores/memories'
 import type { CreateMemoryData, UpdateMemoryData } from '@/stores/memories'
+import { computed } from 'vue'
 
 export function useMemories() {
   const { t } = useI18n()
@@ -9,15 +10,15 @@ export function useMemories() {
   const memoriesStore = useMemoriesStore()
 
   // Return store properties directly instead of destructuring
-  const memories = memoriesStore.memories
-  const isLoading = memoriesStore.isLoading
-  const error = memoriesStore.error
-  const selectedMemory = memoriesStore.selectedMemory
-  const filteredMemories = memoriesStore.filteredMemories
-  const recentMemories = memoriesStore.recentMemories
-  const memoriesCount = memoriesStore.memoriesCount
-  const favoritesCount = memoriesStore.favoritesCount
-  const allTags = memoriesStore.allTags
+  const memories = computed(() => memoriesStore.memories)
+  const isLoading = computed(() => memoriesStore.isLoading)
+  const error = computed(() => memoriesStore.error)
+  const selectedMemory = computed(() => memoriesStore.selectedMemory)
+  const filteredMemories = computed(() => memoriesStore.filteredMemories)
+  const recentMemories = computed(() => memoriesStore.recentMemories)
+  const memoriesCount = computed(() => memoriesStore.memoriesCount)
+  const favoritesCount = computed(() => memoriesStore.favoritesCount)
+  const allTags = computed(() => memoriesStore.allTags)
 
   // Wrapped actions with notifications
   const fetchMemories = async () => {
@@ -80,7 +81,7 @@ export function useMemories() {
   }
 
   // Helper functions
-  const hasMemories = () => memoriesCount > 0
+  const hasMemories = () => memoriesCount.value > 0
 
   const clearError = () => {
     memoriesStore.clearError()

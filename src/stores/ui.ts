@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 
 export interface Toast {
   id: string
@@ -20,193 +19,168 @@ export interface Modal {
   persistent?: boolean
 }
 
-export const useUIStore = defineStore('ui', () => {
-  // State
-  const isSidebarOpen = ref(false)
-  const isMobileMenuOpen = ref(false)
-  const isLoading = ref(false)
-  const loadingMessage = ref('')
-  const toasts = ref<Toast[]>([])
-  const modals = ref<Modal[]>([])
-  // Simplify theme to always light, dark mode disabled
-  const theme = ref<'light'>('light')
+interface UIState {
+  isSidebarOpen: boolean
+  isMobileMenuOpen: boolean
+  isLoading: boolean
+  loadingMessage: string
+  toasts: Toast[]
+  modals: Modal[]
+  theme: 'light'
+}
 
-  // Getters
-  const hasActiveToasts = computed(() => toasts.value.length > 0)
-  const hasActiveModals = computed(() => modals.value.length > 0)
-  const activeModal = computed(() => modals.value[modals.value.length - 1])
+export const useUIStore = defineStore('ui', {
+  state: (): UIState => ({
+    isSidebarOpen: false,
+    isMobileMenuOpen: false,
+    isLoading: false,
+    loadingMessage: '',
+    toasts: [],
+    modals: [],
+    theme: 'light'
+  }),
 
-  // Actions
-  const toggleSidebar = () => {
-    isSidebarOpen.value = !isSidebarOpen.value
-  }
+  getters: {
+    hasActiveToasts: (state) => state.toasts.length > 0,
+    hasActiveModals: (state) => state.modals.length > 0,
+    activeModal: (state) => state.modals[state.modals.length - 1]
+  },
 
-  const closeSidebar = () => {
-    isSidebarOpen.value = false
-  }
+  actions: {
+    toggleSidebar() {
+      this.isSidebarOpen = !this.isSidebarOpen
+    },
 
-  const openSidebar = () => {
-    isSidebarOpen.value = true
-  }
+    closeSidebar() {
+      this.isSidebarOpen = false
+    },
 
-  const toggleMobileMenu = () => {
-    isMobileMenuOpen.value = !isMobileMenuOpen.value
-  }
+    openSidebar() {
+      this.isSidebarOpen = true
+    },
 
-  const closeMobileMenu = () => {
-    isMobileMenuOpen.value = false
-  }
+    toggleMobileMenu() {
+      this.isMobileMenuOpen = !this.isMobileMenuOpen
+    },
 
-  const setLoading = (loading: boolean, message = '') => {
-    isLoading.value = loading
-    loadingMessage.value = message
-  }
+    closeMobileMenu() {
+      this.isMobileMenuOpen = false
+    },
 
-  const showToast = (toast: Omit<Toast, 'id'>) => {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
-    const newToast: Toast = {
-      id,
-      duration: 5000,
-      ...toast
-    }
-    
-    toasts.value.push(newToast)
-    
-    // Auto remove toast after duration
-    if (newToast.duration && newToast.duration > 0) {
-      setTimeout(() => {
-        removeToast(id)
-      }, newToast.duration)
-    }
-    
-    return id
-  }
+    setLoading(loading: boolean, message = '') {
+      this.isLoading = loading
+      this.loadingMessage = message
+    },
 
-  const removeToast = (id: string) => {
-    const index = toasts.value.findIndex(toast => toast.id === id)
-    if (index > -1) {
-      toasts.value.splice(index, 1)
-    }
-  }
-
-  const clearToasts = () => {
-    toasts.value = []
-  }
-
-  const showSuccessToast = (title: string, message?: string) => {
-    return showToast({
-      type: 'success',
-      title,
-      message
-    })
-  }
-
-  const showErrorToast = (title: string, message?: string) => {
-    return showToast({
-      type: 'error',
-      title,
-      message,
-      duration: 7000 // Error toasts stay longer
-    })
-  }
-
-  const showWarningToast = (title: string, message?: string) => {
-    return showToast({
-      type: 'warning',
-      title,
-      message
-    })
-  }
-
-  const showInfoToast = (title: string, message?: string) => {
-    return showToast({
-      type: 'info',
-      title,
-      message
-    })
-  }
-
-  const openModal = (modal: Omit<Modal, 'id'>) => {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
-    const newModal: Modal = {
-      id,
-      ...modal
-    }
-    
-    modals.value.push(newModal)
-    return id
-  }
-
-  const closeModal = (id?: string) => {
-    if (id) {
-      const index = modals.value.findIndex(modal => modal.id === id)
-      if (index > -1) {
-        modals.value.splice(index, 1)
+    showToast(toast: Omit<Toast, 'id'>) {
+      const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      const newToast: Toast = {
+        id,
+        duration: 5000,
+        ...toast
       }
-    } else {
-      // Close the top modal
-      modals.value.pop()
+      
+      this.toasts.push(newToast)
+      
+      // Auto remove toast after duration
+      if (newToast.duration && newToast.duration > 0) {
+        setTimeout(() => {
+          this.removeToast(id)
+        }, newToast.duration)
+      }
+      
+      return id
+    },
+
+    removeToast(id: string) {
+      const index = this.toasts.findIndex(toast => toast.id === id)
+      if (index > -1) {
+        this.toasts.splice(index, 1)
+      }
+    },
+
+    clearToasts() {
+      this.toasts = []
+    },
+
+    showSuccessToast(title: string, message?: string) {
+      return this.showToast({
+        type: 'success',
+        title,
+        message
+      })
+    },
+
+    showErrorToast(title: string, message?: string) {
+      return this.showToast({
+        type: 'error',
+        title,
+        message,
+        duration: 7000 // Error toasts stay longer
+      })
+    },
+
+    showWarningToast(title: string, message?: string) {
+      return this.showToast({
+        type: 'warning',
+        title,
+        message
+      })
+    },
+
+    showInfoToast(title: string, message?: string) {
+      return this.showToast({
+        type: 'info',
+        title,
+        message
+      })
+    },
+
+    openModal(modal: Omit<Modal, 'id'>) {
+      const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      const newModal: Modal = {
+        id,
+        ...modal
+      }
+      
+      this.modals.push(newModal)
+      return id
+    },
+
+    closeModal(id?: string) {
+      if (id) {
+        const index = this.modals.findIndex(modal => modal.id === id)
+        if (index > -1) {
+          this.modals.splice(index, 1)
+        }
+      } else {
+        // Close the top modal
+        this.modals.pop()
+      }
+    },
+
+    closeAllModals() {
+      this.modals = []
+    },
+
+    // Override theme setter to always light and remove dark class
+    setTheme() {
+      this.theme = 'light'
+      document.documentElement.classList.remove('dark')
+    },
+
+    // Initialize theme to light only, disable dark mode
+    initializeTheme() {
+      this.setTheme()
+    },
+
+    resetUI() {
+      this.isSidebarOpen = false
+      this.isMobileMenuOpen = false
+      this.isLoading = false
+      this.loadingMessage = ''
+      this.clearToasts()
+      this.closeAllModals()
     }
-  }
-
-  const closeAllModals = () => {
-    modals.value = []
-  }
-
-  // Override theme setter to always light and remove dark class
-  const setTheme = () => {
-    theme.value = 'light'
-    document.documentElement.classList.remove('dark')
-  }
-
-  // Initialize theme to light only, disable dark mode
-  const initializeTheme = () => {
-    setTheme()
-  }
-
-  const resetUI = () => {
-    isSidebarOpen.value = false
-    isMobileMenuOpen.value = false
-    isLoading.value = false
-    loadingMessage.value = ''
-    clearToasts()
-    closeAllModals()
-  }
-
-  return {
-    // State
-    isSidebarOpen,
-    isMobileMenuOpen,
-    isLoading,
-    loadingMessage,
-    toasts,
-    modals,
-    theme,
-    
-    // Getters
-    hasActiveToasts,
-    hasActiveModals,
-    activeModal,
-    
-    // Actions
-    toggleSidebar,
-    closeSidebar,
-    openSidebar,
-    toggleMobileMenu,
-    closeMobileMenu,
-    setLoading,
-    showToast,
-    removeToast,
-    clearToasts,
-    showSuccessToast,
-    showErrorToast,
-    showWarningToast,
-    showInfoToast,
-    openModal,
-    closeModal,
-    closeAllModals,
-    setTheme,
-    initializeTheme,
-    resetUI
   }
 })

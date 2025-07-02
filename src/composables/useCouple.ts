@@ -2,14 +2,13 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 import { useCoupleStore } from '@/stores/couple'
-import type { IUser } from '@/types'
 
 export function useCouple() {
   const { t } = useI18n()
   const userStore = useUserStore()
   const coupleStore = useCoupleStore()
 
-  // Computed - Enhanced partner computed that uses user context
+// Computed - Enhanced partner computed that uses user context
   const partner = computed(() => {
     if (!coupleStore.coupleConnection || !coupleStore.isConnected) return null
     
@@ -190,17 +189,17 @@ export function useCouple() {
 
   return {
     // State from store
-    coupleConnection: coupleStore.coupleConnection,
-    pendingInvitations: coupleStore.pendingInvitations,
-    isLoading: coupleStore.isLoading,
-    isSendingInvitation: coupleStore.isSendingInvitation,
-    isAcceptingInvitation: coupleStore.isAcceptingInvitation,
-    error: coupleStore.error,
-    successMessage: coupleStore.successMessage,
-    
+    coupleConnection: computed(() => coupleStore.coupleConnection),
+    pendingInvitations: computed(() => coupleStore.pendingInvitations),
+    isLoading: computed(() => coupleStore.isLoading),
+    isSendingInvitation: computed(() => coupleStore.isSendingInvitation),
+    isAcceptingInvitation: computed(() => coupleStore.isAcceptingInvitation),
+    error: computed(() => coupleStore.error),
+    successMessage: computed(() => coupleStore.successMessage),
+
     // Computed (enhanced with user context)
-    isConnected: coupleStore.isConnected,
-    isPending: coupleStore.isPending,
+    isConnected: computed(() => coupleStore.isConnected),
+    isPending: computed(() => coupleStore.isPending),
     partner,
     relationshipDuration,
     nextAnniversary,

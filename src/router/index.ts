@@ -36,6 +36,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/blog/:id/edit',
+      name: 'blog-edit',
+      component: () => import('@/pages/BlogPage.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/memories',
       name: 'memories',
       component: () => import('@/pages/MemoriesPage.vue'),

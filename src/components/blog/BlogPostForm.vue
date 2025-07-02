@@ -119,7 +119,8 @@
             {{ $t('blog.form.tags') }}
           </label>
           <ComboBox
-            v-model="selectedTags"
+            :model-value="selectedTags"
+            @update:modelValue="handleTagsUpdate"
             :options="tagOptions"
             key-value="id"
             display-value="name"
@@ -139,13 +140,35 @@
               <div class="space-y-2">
                 <label class="flex items-center">
                   <input
-                    v-model="form.isPrivate"
-                    type="checkbox"
-                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                    v-model="form.privacy"
+                    value="private"
+                    type="radio"
+                    name="privacy"
+                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
                   />
-                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.form.private') }}</span>
+                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.privacy.private') }}</span>
                 </label>
-                <p class="text-xs text-gray-500">{{ $t('blog.form.privateHelp') }}</p>
+                <label class="flex items-center">
+                  <input
+                    v-model="form.privacy"
+                    value="couple"
+                    type="radio"
+                    name="privacy"
+                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.privacy.couple') }}</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    v-model="form.privacy"
+                    value="public"
+                    type="radio"
+                    name="privacy"
+                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.privacy.public') }}</span>
+                </label>
+                <p class="text-xs text-gray-500">{{ $t('blog.form.privacyHelp') }}</p>
               </div>
             </div>
 
@@ -155,11 +178,23 @@
               <div class="space-y-2">
                 <label class="flex items-center">
                   <input
-                    v-model="form.isPublished"
-                    type="checkbox"
-                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                    v-model="form.status"
+                    value="draft"
+                    type="radio"
+                    name="status"
+                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
                   />
-                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.form.publish') }}</span>
+                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.status.draft') }}</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    v-model="form.status"
+                    value="published"
+                    type="radio"
+                    name="status"
+                    class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">{{ $t('blog.status.published') }}</span>
                 </label>
                 <p class="text-xs text-gray-500">{{ $t('blog.form.publishHelp') }}</p>
               </div>
@@ -180,7 +215,7 @@
           </Button>
           
           <Button
-            v-if="!form.isPublished"
+            v-if="form.status === 'draft'"
             type="button"
             variant="outline"
             :loading="isSavingDraft"
@@ -192,7 +227,7 @@
 
         <div class="flex space-x-3">
           <Button
-            v-if="isEditMode && post?.isPublished"
+            v-if="isEditMode && post?.status === 'published'"
             type="button"
             variant="outline"
             :loading="isUnpublishing"
@@ -206,7 +241,7 @@
             :loading="isSubmitting"
             :disabled="!isFormValid"
           >
-            {{ form.isPublished 
+            {{ form.status === 'published' 
               ? (isEditMode ? $t('blog.actions.update') : $t('blog.actions.publish'))
               : $t('blog.actions.publish')
             }}
@@ -220,19 +255,22 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useBlogStore, type BlogPost } from '@/stores/blog'
+import { useBlogStore } from '@/stores/blog'
+import { PrivacyEnum, StatusEnum } from '@/utils/enum'
 import type { CreateBlogPostRequest } from '@/types'
 import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
 import RichTextEditor from './RichTextEditor.vue'
 import ComboBox from '@/components/common/ComboBox.vue'
+import type { BlogPostEntity } from '@/types/model/blog/BlogPostEntity'
 // Type for tag options
 interface TagOption { id: string; name: string }
 
 interface Props {
   isOpen: boolean
-  post?: BlogPost | null
+  isEditMode?: boolean
+  post?: BlogPostEntity | null
 }
 
 interface Emits {
@@ -241,50 +279,38 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  isEditMode: false,
   post: null
 })
 const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
-// Form state
+const blogStore = useBlogStore()
 const form = ref<CreateBlogPostRequest>({
   title: '',
   content: '',
   contentHtml: '',
   excerpt: '',
   tags: [],
-  privacy: 'private',
-  status: 'draft',
+  privacy: PrivacyEnum.private,
+  status: StatusEnum.draft,
   isPrivate: false,
   isPublished: false
 })
 // Use object-based options for ComboBox
-const selectedTags = ref<TagOption[]>([])
+const selectedTags = computed<TagOption[]>(() =>
+  (form.value.tags ?? []).map(name => ({ id: name, name }))
+)
 const tagOptions = computed<TagOption[]>(() => {
   // Create available tag options from a predefined list
   const availableTags = ['love', 'relationship', 'memories', 'anniversary', 'date', 'travel', 'food', 'celebration']
   return availableTags.map(tag => ({ id: tag, name: tag }))
 })
 
-// Sync form.tags -> selectedTags
-watch(
-  () => form.value.tags,
-  tags => { 
-    selectedTags.value = (tags ?? []).map(t => ({ id: t, name: t }))
-  },
-  { immediate: true }
-)
-
-// Sync selectedTags -> form.tags
-watch(
-  selectedTags,
-  val => { 
-    form.value.tags = val.map(o => o.name) 
-  },
-  { deep: true }
-)
-
-const blogStore = useBlogStore()
+// Handler for tags update
+const handleTagsUpdate = (newTags: TagOption[]) => {
+  form.value.tags = newTags.map(tag => tag.name)
+}
 
 const errors = ref<Record<string, string>>({})
 const isDragging = ref(false)
@@ -297,10 +323,29 @@ const isUnpublishing = ref(false)
 const imageInput = ref<HTMLInputElement>()
 
 // Computed
-const isEditMode = computed(() => !!props.post)
+const isEditMode = computed(() => props.isEditMode || !!props.post)
 
 const isFormValid = computed(() => {
   return form.value.title.trim() && form.value.content.trim()
+})
+
+// Sync enum values with boolean flags
+const syncFormValues = () => {
+  // Sync privacy
+  form.value.isPrivate = form.value.privacy === PrivacyEnum.private
+  
+  // Sync status
+  form.value.isPublished = form.value.status === StatusEnum.published
+}
+
+// Watch for privacy changes
+watch(() => form.value.privacy, () => {
+  syncFormValues()
+})
+
+// Watch for status changes
+watch(() => form.value.status, () => {
+  syncFormValues()
 })
 
 // Methods
@@ -390,7 +435,7 @@ const saveDraft = async () => {
       ...form.value,
       contentHtml: form.value.content, // For now, use content as contentHtml
       isPublished: false,
-      status: 'draft' as const,
+      status: StatusEnum.draft,
       coverImage: selectedCoverImage.value || undefined
     }
 
@@ -420,7 +465,7 @@ const unpublish = async () => {
   try {
     await blogStore.updatePost({
       id: props.post.id,
-      status: 'draft',
+      status: StatusEnum.draft,
       isPublished: false
     })
     emit('success')
@@ -439,8 +484,8 @@ const resetForm = () => {
     contentHtml: '',
     excerpt: '',
     tags: [],
-    privacy: 'private',
-    status: 'draft',
+    privacy: PrivacyEnum.private,
+    status: StatusEnum.draft,
     isPrivate: false,
     isPublished: false
   }
@@ -465,8 +510,8 @@ watch(() => props.post, (post) => {
       tags: [...post.tags],
       privacy: post.privacy,
       status: post.status,
-      isPrivate: post.isPrivate ?? false,
-      isPublished: post.isPublished ?? false
+      isPrivate: post.privacy === PrivacyEnum.private,
+      isPublished: post.status === StatusEnum.published
     }
     coverImagePreview.value = post.coverImage || null
     // Note: We don't set selectedCoverImage for existing posts
@@ -478,8 +523,38 @@ watch(() => props.isOpen, (isOpen) => {
   if (!isOpen) {
     // Reset form when modal closes, but avoid infinite loop
     resetForm()
+  } else if (isOpen && props.post) {
+    // Populate form with post data when editing
+    populateFormFromPost(props.post)
   }
 })
+
+// Watch for post changes
+watch(() => props.post, (newPost) => {
+  if (newPost && props.isOpen) {
+    populateFormFromPost(newPost)
+  }
+})
+
+// Method to populate form data from post
+const populateFormFromPost = (post: BlogPostEntity) => {
+  form.value = {
+    title: post.title || '',
+    content: post.content || '',
+    contentHtml: post.contentHtml || '',
+    excerpt: post.excerpt || '',
+    tags: post.tags || [],
+    privacy: post.privacy || PrivacyEnum.private,
+    status: post.status || StatusEnum.draft,
+    isPrivate: post.privacy === PrivacyEnum.private,
+    isPublished: post.status === StatusEnum.published
+  }
+  
+  // Set cover image preview if exists
+  if (post.coverImageUrl) {
+    coverImagePreview.value = post.coverImageUrl
+  }
+}
 </script>
 
 <style scoped>

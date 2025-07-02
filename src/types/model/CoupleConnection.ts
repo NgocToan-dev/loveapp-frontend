@@ -1,17 +1,17 @@
-import type { ICoupleConnection, IUser } from "..";
-import { User } from "./User";
+import type { ICoupleConnection } from "..";
+import { UserEntity } from "./user/UserEntity";
 
 export class CoupleConnection implements ICoupleConnection {
   id: string = "";
   _id?: string; // For backend response compatibility
-  user1Id: IUser = new User(); // Can be populated or just ID
-  user2Id: IUser = new User(); // Can be populated or just ID
-  user1?: IUser = new User(); // Separate populated fields
-  user2?: IUser; // Separate populated fields
+  user1Id: string = ""; // Can be populated or just ID
+  user2Id: string = ""; // Can be populated or just ID
+  user1?: UserEntity = new UserEntity(); // Separate populated fields
+  user2?: UserEntity = new UserEntity(); // Separate populated fields
   relationshipTitle?: string;
   relationshipStart?: string;
   status: 'pending' | 'accepted' | 'connected' | 'disconnected' | 'declined' = 'pending';
-  requestedBy?: IUser | string;
+  requestedBy?: UserEntity | string;
   isActive: boolean = false;
   invitationCode?: string;
   requestedAt?: string;

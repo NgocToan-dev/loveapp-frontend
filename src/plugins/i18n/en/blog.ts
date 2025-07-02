@@ -5,6 +5,10 @@ export default {
   noPosts: 'No posts yet',
   firstPost: 'Write your first post!',
   readingTime: 'min read',
+  loadMore: 'Load More',
+  noPostsDescription: 'Start sharing your thoughts and memories.',
+  createFirst: 'Write your first post',
+  confirmDelete: 'Are you sure you want to delete this post?',
   
   loginPrompt: {
     title: 'Login for Full Experience',
@@ -104,5 +108,64 @@ export default {
     food: 'Food',
     memories: 'Memories',
     thoughts: 'Thoughts'
+  },
+
+  stats: {
+    totalPosts: 'Total Posts',
+    publishedPosts: 'Published',
+    published: 'Published',
+    drafts: 'Drafts',
+    totalLikes: 'Total Likes',
+    totalComments: 'Total Comments',
+    avgLikes: 'Avg Likes',
+    avgComments: 'Avg Comments',
+    popularTags: 'Popular Tags',
+    recentActivity: 'Recent Activity',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    daysAgo: '{days} days ago'
+  },
+
+  success: {
+    created: 'Post created successfully',
+    updated: 'Post updated successfully',
+    deleted: 'Post deleted successfully',
+    published: 'Post published successfully',
+    unpublished: 'Post unpublished successfully'
+  },
+
+  errors: {
+    fetch_failed: 'Failed to load posts',
+    fetch_single_failed: 'Failed to load post',
+    create_failed: 'Failed to create post',
+    update_failed: 'Failed to update post',
+    delete_failed: 'Failed to delete post',
+    publish_failed: 'Failed to publish post',
+    unpublish_failed: 'Failed to unpublish post',
+    search_failed: 'Search failed'
+  },
+
+  detail: {
+    title: 'Blog Post',
+    not_found: 'Post Not Found',
+    not_found_message: 'The blog post you are looking for could not be found.',
+    back_to_list: 'Back to Blog',
+    related_posts: 'Related Posts'
+  },
+
+  minute_read: 'min read',
+  updated: 'Updated',
+  no_content: 'This post has no content yet.',
+  tags: 'Tags',
+  comments: 'Comments',
+  comments_coming_soon: 'Comments feature coming soon',
+  
+  share: {
+    title: 'Share Post',
+    description: 'Share this post with others'
+  },
+
+  author: {
+    unknown: 'Unknown Author'
   }
 }

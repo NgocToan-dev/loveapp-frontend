@@ -27,6 +27,10 @@ export default {
     empty: 'Empty',
     offline: 'Offline'
   },
+  loading: 'Loading...',
+  edit: 'Edit',
+  delete: 'Delete',
+  dismiss: 'Dismiss',
   validation: {
     required: 'This field is required',
     email: 'Invalid email address',
@@ -44,7 +48,11 @@ export default {
     cancel: 'Cancel',
     save: 'Save',
     add: 'Add',
-    loadMore: 'Load More'
+    loadMore: 'Load More',
+    back: 'Back',
+    retry: 'Retry',
+    go_back: 'Go Back',
+    favorite: 'Favorite'
   },
   notifications: {
     title: 'Notifications'
@@ -74,7 +82,6 @@ export default {
   },
   or: 'or',
   and: 'and',
-  dismiss: 'Dismiss',
   refresh: 'Refresh',
   search: 'Search',
   filter: {
@@ -89,11 +96,29 @@ export default {
   select_all: 'Select all',
   copy: 'Copy',
   copied: 'Copied!',
-  share: 'Share',
   settings: 'Settings',
   remove: 'Remove',
   addCustom: 'Add "{value}"',
   noResults: 'No results found',
+  
+  error: {
+    title: 'Error'
+  },
+  
+  social: {
+    facebook: 'Facebook',
+    twitter: 'Twitter'
+  },
+  
+  share: {
+    copy_link: 'Copy Link',
+    share_text: 'Share Text',
+    link_copied: 'Link copied to clipboard',
+    text_copied: 'Text copied to clipboard',
+    copy_failed: 'Failed to copy',
+    share_failed: 'Failed to share',
+    share_text_label: 'Share Text'
+  },
   
   dashboard: {
     welcome_message: 'Welcome to your love space',

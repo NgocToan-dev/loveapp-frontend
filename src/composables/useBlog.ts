@@ -1,4 +1,5 @@
 import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 import { useNotifications } from './useNotifications'
 import { useBlogStore } from '@/stores/blog'
 import type { CreateBlogPostRequest, UpdateBlogPostRequest } from '@/types'
@@ -8,20 +9,20 @@ export function useBlog() {
   const { showSuccess, showError } = useNotifications()
   const blogStore = useBlogStore()
 
-  // Return store properties directly instead of destructuring
-  const posts = blogStore.posts
-  const isLoading = blogStore.isLoading
-  const error = blogStore.error
-  const selectedPost = blogStore.selectedPost
-  const filteredPosts = blogStore.filteredPosts
-  const publishedPosts = blogStore.publishedPosts
-  const draftPosts = blogStore.draftPosts
-  const postsCount = blogStore.postsCount
+  // Return store properties using computed for reactivity
+  const posts = computed(() => blogStore.posts)
+  const isLoading = computed(() => blogStore.isLoading)
+  const error = computed(() => blogStore.error)
+  const selectedPost = computed(() => blogStore.selectedPost)
+  const filteredPosts = computed(() => blogStore.filteredPosts)
+  const publishedPosts = computed(() => blogStore.publishedPosts)
+  const draftPosts = computed(() => blogStore.draftPosts)
+  const postsCount = computed(() => blogStore.postsCount)
 
   // Wrapped actions with notifications
-  const fetchPosts = async () => {
+  const fetchPosts = async (page = 1, limit = 12) => {
     try {
-      await blogStore.fetchPosts()
+      await blogStore.fetchPosts(page, limit)
     } catch (err: any) {
       showError(t('blog.errors.fetch_failed'), err.message)
       throw err
@@ -96,10 +97,10 @@ export function useBlog() {
   const searchPosts = async (query: string) => {
     try {
       // Basic client-side search for now - will enhance later
-      return posts.filter(post => 
+      return posts.value.filter(post => 
         post.title.toLowerCase().includes(query.toLowerCase()) ||
         post.content.toLowerCase().includes(query.toLowerCase()) ||
-        post.tags?.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+        post.tags?.some((tag: string) => tag.toLowerCase().includes(query.toLowerCase()))
       )
     } catch (err: any) {
       showError(t('blog.errors.search_failed'), err.message)
@@ -109,7 +110,7 @@ export function useBlog() {
 
   // Helper functions
   const hasPosts = () => {
-    return Array.isArray(posts) && posts.length > 0
+    return Array.isArray(posts.value) && posts.value.length > 0
   }
 
   const clearError = () => {

@@ -251,12 +251,6 @@ const handleSubmit = () => {
       data.repeat = 'none'
     }
 
-    // Clean up frontend-only fields
-    delete data.reminderDate
-    delete data.reminderTime
-    delete data.isRecurring
-    delete data.recurringType
-
     emit('submit', data as CreateReminderRequest | UpdateReminderRequest)
   }
 }

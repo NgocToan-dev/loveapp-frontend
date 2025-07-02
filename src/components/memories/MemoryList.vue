@@ -161,16 +161,6 @@
         @close="closeForm"
         @success="handleFormSuccess"
       />
-
-      <!-- Confirm Delete Dialog -->
-      <ConfirmDialog
-        :is-open="!!memoryToDelete"
-        :title="$t('memories.delete.title')"
-        :message="$t('memories.delete.message')"
-        :confirm-text="$t('common.buttons.delete')"
-        @confirm="handleDelete"
-        @cancel="memoryToDelete = null"
-      />
     </div>
   </div>
 </template>
@@ -181,7 +171,6 @@ import { useI18n } from 'vue-i18n'
 import { useMemoriesStore, type Memory } from '@/stores/memories'
 import MemoryCard from './MemoryCard.vue'
 import MemoryForm from './MemoryForm.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { t } = useI18n()
 const memoriesStore = useMemoriesStore()
@@ -193,9 +182,6 @@ const showFavoritesOnly = ref<boolean>(false)
 const showPrivateOnly = ref<boolean>(false)
 const sortBy = ref<{ field: string; direction: 'asc' | 'desc' }>({ field: 'date', direction: 'desc' })
 
-// Available moods for filtering
-const availableMoods = computed(() => ['happy', 'love', 'excited', 'romantic', 'nostalgic', 'grateful'])
-
 // Check if any filters are active
 const hasActiveFilters = computed(() => 
   searchQuery.value || 
@@ -203,13 +189,6 @@ const hasActiveFilters = computed(() =>
   showFavoritesOnly.value || 
   showPrivateOnly.value
 )
-
-const sortOptions = [
-  { label: t('memories.filters.newestFirst'), value: 'date_desc' },
-  { label: t('memories.filters.oldestFirst'), value: 'date_asc' },
-  { label: t('memories.filters.titleAZ'), value: 'title_asc' }
-]
-const currentSort = computed(() => `${sortBy.value.field}_${sortBy.value.direction}`)
 
 const filtersObj = computed(() => ({
   search: searchQuery.value,
@@ -219,31 +198,6 @@ const filtersObj = computed(() => ({
 }))
 
 const displayedMemories = computed(() => memoriesStore.filteredMemories)
-
-const handleSort = (newSort: string) => {
-  const [field, direction] = newSort.split('_') as [string, 'asc' | 'desc']
-  sortBy.value = { field, direction }
-  memoriesStore.setSortBy(field, direction)
-}
-
-const handleFilters = (newFilters: Record<string, any>) => {
-  searchQuery.value = newFilters.search || ''
-  selectedMood.value = newFilters.mood || null
-  showFavoritesOnly.value = !!newFilters.showFavoritesOnly
-  showPrivateOnly.value = !!newFilters.showPrivateOnly
-  memoriesStore.setFilters(newFilters)
-}
-
-const hasMoreMemories = computed(() => false)
-const isLoadingMore = ref(false)
-const loadMore = async () => {
-  isLoadingMore.value = true
-  try {
-    await memoriesStore.loadMoreMemories()
-  } finally {
-    isLoadingMore.value = false
-  }
-}
 
 const showCreateForm = ref(false)
 const editingMemory = ref<Memory | null>(null)
@@ -257,19 +211,6 @@ const confirmDelete = (memory: Memory) => {
   memoryToDelete.value = memory
 }
 
-const handleDelete = async () => {
-  if (!memoryToDelete.value) return
-  
-  try {
-    await memoriesStore.deleteMemory(memoryToDelete.value.id)
-    memoryToDelete.value = null
-    // Show success toast if available
-  } catch (error) {
-    console.error('Failed to delete memory:', error)
-    // Show error toast if available
-  }
-}
-
 const closeForm = () => {
   showCreateForm.value = false
   editingMemory.value = null
@@ -279,38 +220,11 @@ const handleFormSuccess = () => {
   closeForm()
 }
 
-// Filter and sort methods
-const getMoodEmoji = (mood: string) => {
-  const moodEmojis: Record<string, string> = {
-    happy: '😊',
-    love: '❤️',
-    excited: '🎉',
-    romantic: '💕',
-    nostalgic: '💭',
-    grateful: '🙏'
-  }
-  return moodEmojis[mood] || '😊'
-}
-
-const setSortBy = (field: string, direction: 'asc' | 'desc') => {
-  sortBy.value = { field, direction }
-  memoriesStore.setSortBy(field, direction)
-}
-
-const setMoodFilter = (mood: Memory['mood'] | null) => {
-  selectedMood.value = mood
-  memoriesStore.setFilters(filtersObj.value)
-}
-
 const toggleFavoritesFilter = () => {
   showFavoritesOnly.value = !showFavoritesOnly.value
   memoriesStore.setFilters(filtersObj.value)
 }
 
-const togglePrivateFilter = () => {
-  showPrivateOnly.value = !showPrivateOnly.value
-  memoriesStore.setFilters(filtersObj.value)
-}
 
 const clearAllFilters = () => {
   searchQuery.value = ''
@@ -318,12 +232,6 @@ const clearAllFilters = () => {
   showFavoritesOnly.value = false
   showPrivateOnly.value = false
   memoriesStore.setFilters({})
-}
-
-const handleViewModeChange = (mode: 'grid' | 'list' | 'gallery') => {
-  if (mode === 'grid' || mode === 'list') {
-    viewMode.value = mode
-  }
 }
 
 onMounted(() => {

@@ -27,6 +27,9 @@ export default {
     empty: 'Trống',
     offline: 'Ngoại tuyến'
   },
+  loading: 'Đang tải...',
+  edit: 'Chỉnh sửa',
+  delete: 'Xóa',
   validation: {
     required: 'Trường này là bắt buộc',
     email: 'Email không hợp lệ',
@@ -44,7 +47,13 @@ export default {
     cancel: 'Hủy',
     save: 'Lưu',
     add: 'Thêm',
-    loadMore: 'Tải thêm'
+    loadMore: 'Tải thêm',
+    back: 'Quay lại',
+    retry: 'Thử lại',
+    go_back: 'Quay lại',
+    favorite: 'Yêu thích',
+    duplicate: 'Nhân bản',
+    export: 'Xuất khẩu',
   },
   notifications: {
     title: 'Thông báo'

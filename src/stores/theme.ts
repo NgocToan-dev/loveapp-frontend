@@ -1,69 +1,66 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 
-export const useThemeStore = defineStore('theme', () => {
-  // State
-  function getInitialTheme(): 'light' | 'dark' | 'romantic' | 'spring' {
-    try {
-      const saved = localStorage.getItem('love-app-theme')
-      if (saved) {
-        const { theme } = JSON.parse(saved)
-        if (['light','dark','romantic','spring'].includes(theme)) {
-          return theme as 'light' | 'dark' | 'romantic' | 'spring'
-        }
-      }
-    } catch {
-      // ignore parse errors
+type ThemeType = 'light' | 'dark' | 'romantic' | 'spring'
+
+interface ThemeState {
+  currentTheme: ThemeType
+}
+
+export const useThemeStore = defineStore('theme', {
+  state: (): ThemeState => ({
+    currentTheme: getInitialTheme()
+  }),
+
+  getters: {
+    isDark: (state) => state.currentTheme === 'dark',
+    isLight: (state) => state.currentTheme === 'light',
+    isRomantic: (state) => state.currentTheme === 'romantic',
+    isSpring: (state) => state.currentTheme === 'spring'
+  },
+
+  actions: {
+    applyTheme() {
+      const html = document.documentElement
+      html.classList.remove('light', 'dark', 'romantic', 'spring')
+      html.classList.add(this.currentTheme)
+      localStorage.setItem(
+        'love-app-theme',
+        JSON.stringify({ theme: this.currentTheme })
+      )
+    },
+
+    toggleDarkLight() {
+      this.currentTheme = this.isDark ? 'light' : 'dark'
+      this.applyTheme()
+    },
+
+    setRomanticMode(enabled: boolean) {
+      this.currentTheme = enabled ? 'romantic' : 'light'
+      this.applyTheme()
+    },
+
+    setSpringMode(enabled: boolean) {
+      this.currentTheme = enabled ? 'spring' : 'light'
+      this.applyTheme()
+    },
+
+    initialize() {
+      this.applyTheme()
     }
-    return 'light'
-  }
-  const currentTheme = ref<'light' | 'dark' | 'romantic' | 'spring'>(getInitialTheme())
-
-  // Getters
-  const isDark = computed(() => currentTheme.value === 'dark')
-  const isLight = computed(() => currentTheme.value === 'light')
-  const isRomantic = computed(() => currentTheme.value === 'romantic')
-  const isSpring = computed(() => currentTheme.value === 'spring')
-
-  // Actions
-  function applyTheme() {
-    const html = document.documentElement
-    html.classList.remove('light', 'dark', 'romantic', 'spring')
-    html.classList.add(currentTheme.value)
-    localStorage.setItem(
-      'love-app-theme',
-      JSON.stringify({ theme: currentTheme.value })
-    )
-  }
-
-  function toggleDarkLight() {
-    currentTheme.value = isDark.value ? 'light' : 'dark'
-    applyTheme()
-  }
-
-  function setRomanticMode(enabled: boolean) {
-    currentTheme.value = enabled ? 'romantic' : 'light'
-    applyTheme()
-  }
-
-  function setSpringMode(enabled: boolean) {
-    currentTheme.value = enabled ? 'spring' : 'light'
-    applyTheme()
-  }
-
-  function initialize() {
-    applyTheme()
-  }
-
-  return {
-    currentTheme,
-    isDark,
-    isLight,
-    isRomantic,
-    isSpring,
-    toggleDarkLight,
-    setRomanticMode,
-    setSpringMode,
-    initialize
   }
 })
+
+function getInitialTheme(): ThemeType {
+  try {
+    const saved = localStorage.getItem('love-app-theme')
+    if (saved) {
+      const { theme } = JSON.parse(saved)
+      if (['light','dark','romantic','spring'].includes(theme)) {
+        return theme as ThemeType
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return 'light'
+}

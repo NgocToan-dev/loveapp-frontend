@@ -6,11 +6,17 @@
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div class="mb-4 lg:mb-0">
             <h1 class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-spring-green bg-clip-text mb-2">
-              {{ $t('blog.title') }}
+              {{ isEditMode ? $t('blog.form.editTitle') : $t('blog.title') }}
             </h1>
             <p class="text-gray-600">{{ $t('blog.subtitle') }}</p>
           </div>
-          <Button variant="primary" size="md" class="flex items-center space-x-2" @click="showCreateForm = true">
+          <Button 
+            v-if="!isEditMode"
+            variant="primary" 
+            size="md" 
+            class="flex items-center space-x-2" 
+            @click="showCreateForm = true"
+          >
             <template #icon>
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -80,7 +86,7 @@
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
             <span>{{ error }}</span>
-            <Button variant="ghost-link" size="xs" class="ml-4 text-red-700 hover:text-red-900" @click="clearError">
+            <Button variant="ghost-link" size="xs" class="ml-4 text-red-700 hover:text-red-900" @click="clearErrorAction">
               <template #icon>
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -94,8 +100,9 @@
         <BlogPostForm
           v-if="showCreateForm"
           :is-open="showCreateForm"
-          :is-edit-mode="false"
-          @close="showCreateForm = false"
+          :is-edit-mode="!!editingPost"
+          :post="editingPost"
+          @close="closeCreateForm"
           @success="handleCreateSuccess"
         />
       </div>
@@ -104,26 +111,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useBlogStore } from '@/stores/blog'
 import { useUserStore } from '@/stores/user'
-import type { BlogPost, CreateBlogPostRequest, UpdateBlogPostRequest } from '@/types'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BlogStats from '@/components/blog/BlogStats.vue'
 import BlogFilters from '@/components/blog/BlogFilters.vue'
 import BlogPostList from '@/components/blog/BlogPostList.vue'
 import BlogPostForm from '@/components/blog/BlogPostForm.vue'
-// BlogDetail handled by dedicated page
-// import BlogPostDetail from '@/components/blog/BlogPostDetail.vue'
-// Common dropdown components
-import Dropdown from '@/components/common/Dropdown.vue'
-import DropdownItem from '@/components/common/DropdownItem.vue'
 // Common form components
-import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
+import type { BlogPostEntity } from '@/types/model/blog/BlogPostEntity'
 
 const { t } = useI18n()
 const userStore = useUserStore()
@@ -131,35 +132,43 @@ const { isAuthenticated } = userStore
 
 const blogStore = useBlogStore()
 const router = useRouter()
+const route = useRoute()
 
-// Reactive references from store
-const {
-  posts,
-  selectedPost: storeSelectedPost,
-  stats,
-  isLoading,
-  isCreating,
-  isUpdating,
-  error,
-  currentPage,
-  totalPages,
-  filters,
-  filteredPosts,
-  allTags,
-  fetchPosts,
-  fetchStats,
-  createPost,
-  updatePost,
-  deletePost,
-  toggleLike,
-  updateFilters: storeUpdateFilters,
-  clearFilters: storeClearFilters,
-  clearError
-} = blogStore
+// Reactive references from store - options API pattern
+const posts = computed(() => blogStore.posts)
+const stats = computed(() => blogStore.stats)
+const isLoading = computed(() => blogStore.isLoading)
+const error = computed(() => blogStore.error)
+const currentPage = computed(() => blogStore.currentPage)
+const totalPages = computed(() => blogStore.totalPages)
+const filters = computed(() => blogStore.filters)
+const filteredPosts = computed(() => blogStore.filteredPosts)
+const allTags = computed(() => blogStore.allTags)
+
+// Store actions
+const fetchPostsAction = blogStore.fetchPosts
+const fetchStatsAction = blogStore.fetchStats
+const createPostAction = blogStore.createPost
+const updatePostAction = blogStore.updatePost
+const deletePostAction = blogStore.deletePost
+const toggleLikeAction = blogStore.toggleLike
+const updateFiltersAction = blogStore.updateFilters
+const clearFiltersAction = blogStore.clearFilters
+const clearErrorAction = blogStore.clearError
+const fetchPostByIdAction = blogStore.fetchPostById
 
 // Local state
 const showCreateForm = ref(false)
-const editingPost = ref<BlogPost | null>(null)
+const editingPost = ref<BlogPostEntity | null>(null)
+
+// Computed
+const isEditMode = computed(() => {
+  return route.name === 'blog-edit' && !!route.params.id
+})
+
+const postId = computed(() => {
+  return route.params.id as string
+})
 
 // Form data
 const formData = ref({
@@ -173,7 +182,7 @@ const tagsInput = ref('')
 
 // Computed
 const recentPosts = computed(() => {
-  return posts.slice(0, 5)
+  return posts.value.slice(0, 5)
 })
 // Validation rules for Vuetify form fields
 const titleRules = computed(() => [
@@ -185,44 +194,28 @@ const contentRules = computed(() => [
 ])
 
 // Methods
-const handleSelectPost = (post: BlogPost) => {
+const handleSelectPost = (post: BlogPostEntity) => {
   router.push({ name: 'blog-detail', params: { id: post.id } })
 }
 
-const handleEditPost = (post: BlogPost) => {
+const handleEditPost = (post: BlogPostEntity) => {
   editingPost.value = post
   router.push({ name: 'blog-edit', params: { id: post.id } })
 }
 
 const handleDeletePost = async (postId: string) => {
   if (confirm(t('blog.confirmDelete'))) {
-    await deletePost(postId)
+    await deletePostAction(postId)
   }
 }
 
 const handleToggleLike = async (postId: string) => {
-  await toggleLike(postId)
-}
-
-const handleFormSubmit = async (data: CreateBlogPostRequest | UpdateBlogPostRequest) => {
-  try {
-    if (editingPost.value) {
-      await updatePost(data as UpdateBlogPostRequest)
-    } else {
-      await createPost(data as CreateBlogPostRequest)
-    }
-    closeCreateForm()
-    // Only fetch stats if user is authenticated
-    if (isAuthenticated) {
-      await fetchStats()
-    }
-  } catch (err) {
-    // Error handled in store
-  }
+  await toggleLikeAction(postId)
 }
 
 const closeCreateForm = () => {
   showCreateForm.value = false
+  const wasEditing = editingPost.value
   editingPost.value = null
   // Reset form
   formData.value = {
@@ -232,68 +225,96 @@ const closeCreateForm = () => {
     status: 'draft'
   }
   tagsInput.value = ''
-}
-
-const handleQuickSubmit = async () => {
-  const tags = tagsInput.value
-    .split(',')
-    .map(tag => tag.trim())
-    .filter(tag => tag.length > 0)
-
-  const postData: CreateBlogPostRequest | UpdateBlogPostRequest = {
-    title: formData.value.title,
-    content: formData.value.content,
-    contentHtml: `<p>${formData.value.content.replace(/\n/g, '</p><p>')}</p>`,
-    tags,
-    privacy: formData.value.privacy,
-    status: formData.value.status,
-    excerpt: formData.value.content.substring(0, 150) + (formData.value.content.length > 150 ? '...' : '')
-  }
-
-  if (editingPost.value) {
-    await updatePost({ ...postData, id: editingPost.value.id } as UpdateBlogPostRequest)
-  } else {
-    await createPost(postData as CreateBlogPostRequest)
-  }
   
-  closeCreateForm()
-  // Only fetch stats if user is authenticated
-  if (isAuthenticated) {
-    await fetchStats()
+  // If we were editing, redirect back to blog list
+  if (wasEditing && isEditMode.value) {
+    router.push('/blog')
   }
 }
 
 const loadMorePosts = async () => {
-  await fetchPosts(currentPage + 1)
+  await fetchPostsAction(currentPage.value + 1)
 }
 
 const updateFilters = (newFilters: any) => {
-  storeUpdateFilters(newFilters)
+  updateFiltersAction(newFilters)
 }
 
 const clearFilters = () => {
-  storeClearFilters()
+  clearFiltersAction()
 }
 
 // Lifecycle
 onMounted(async () => {
   // Always fetch posts (public content)
-  await fetchPosts()
+  await fetchPostsAction()
   
   // Only fetch stats if user is authenticated (personal stats)
   if (isAuthenticated) {
     try {
-      await fetchStats()
+      await fetchStatsAction()
     } catch (error) {
       console.error('Error fetching blog stats:', error)
       // Don't throw error here as stats are optional
     }
   }
+
+  // If in edit mode, load the post and show edit form
+  if (isEditMode.value && postId.value) {
+    try {
+      await fetchPostByIdAction(postId.value)
+      const selectedPost = blogStore.selectedPost
+      if (selectedPost) {
+        editingPost.value = selectedPost
+        // Populate form with post data
+        formData.value = {
+          title: selectedPost.title || '',
+          content: selectedPost.content || '',
+          privacy: (selectedPost.privacy as any) || 'couple',
+          status: (selectedPost.status as any) || 'draft'
+        }
+        tagsInput.value = selectedPost.tags?.join(', ') || ''
+        showCreateForm.value = true
+      }
+    } catch (error) {
+      console.error('Error loading post for edit:', error)
+      // Redirect back to blog list if post not found
+      router.push('/blog')
+    }
+  }
 })
+
+// Watch for route changes to handle edit mode
+watch(
+  () => route.params.id,
+  async (newId, oldId) => {
+    if (isEditMode.value && newId && newId !== oldId) {
+      try {
+        await fetchPostByIdAction(newId as string)
+        const selectedPost = blogStore.selectedPost
+        if (selectedPost) {
+          editingPost.value = selectedPost
+          // Populate form with post data
+          formData.value = {
+            title: selectedPost.title || '',
+            content: selectedPost.content || '',
+            privacy: (selectedPost.privacy as any) || 'couple',
+            status: (selectedPost.status as any) || 'draft'
+          }
+          tagsInput.value = selectedPost.tags?.join(', ') || ''
+          showCreateForm.value = true
+        }
+      } catch (error) {
+        console.error('Error loading post for edit:', error)
+        router.push('/blog')
+      }
+    }
+  }
+)
 
 // Đóng form tạo bài viết và làm mới danh sách posts
 const handleCreateSuccess = async () => {
   showCreateForm.value = false
-  await fetchPosts(1)
+  await fetchPostsAction(1)
 }
 </script>

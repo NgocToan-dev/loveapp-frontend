@@ -1,21 +1,7 @@
 // User types
-export interface IUser {
-  _id: string
-  id?: string // Support backend response
-  email: string
-  username?: string
-  firstName?: string
-  lastName?: string
-  displayName: string
-  avatarUrl?: string
-  dateOfBirth?: string
-  phone?: string
-  bio?: string
-  coupleId?: string
-  isEmailVerified?: boolean
-  createdAt: string
-  updatedAt?: string
-}
+
+import type { IUserEntity } from "./model/user/IUserEntity"
+
 
 export interface LoginCredentials {
   email: string
@@ -38,14 +24,14 @@ export interface RegisterCredentials {
 export interface ICoupleConnection {
   id: string
   _id?: string // For backend response compatibility
-  user1Id: IUser | string // Can be populated or just ID
-  user2Id: IUser | string // Can be populated or just ID
-  user1?: IUser // Separate populated fields
-  user2?: IUser // Separate populated fields
+  user1Id: string // Can be populated or just ID
+  user2Id: string // Can be populated or just ID
+  user1?: IUserEntity // Separate populated fields
+  user2?: IUserEntity // Separate populated fields
   relationshipTitle?: string
   relationshipStart?: string
   status: 'pending' | 'accepted' | 'connected' | 'disconnected' | 'declined'
-  requestedBy?: IUser | string
+  requestedBy?: IUserEntity | string
   isActive: boolean
   invitationCode?: string
   requestedAt?: string
@@ -59,10 +45,10 @@ export interface ICoupleConnection {
 export interface CoupleInvitation {
   _id: string
   id?: string // For frontend compatibility
-  user1Id: IUser | string
-  user2Id: IUser | string  
+  user1Id: string
+  user2Id: string  
   status: 'pending' | 'accepted' | 'declined'
-  requestedBy: IUser | string
+  requestedBy: string
   relationshipTitle: string
   isActive: boolean
   requestedAt: string
@@ -91,8 +77,8 @@ export interface Memory {
   createdBy: string
   createdAt: string
   updatedAt: string
-  author: IUser
-  userId?: IUser // For API response compatibility
+  author: IUserEntity
+  userId?: string // For API response compatibility
 }
 
 export interface CreateMemoryRequest {
@@ -145,34 +131,6 @@ export interface UpdateReminderRequest extends Partial<CreateReminderRequest> {
   isCompleted?: boolean
 }
 
-// Blog types
-export interface BlogPost {
-  id: string
-  title: string
-  content: string
-  contentHtml: string
-  excerpt?: string
-  coverImage?: string
-  coverImageUrl?: string
-  author: {
-    id: string
-    displayName: string
-    avatarUrl?: string
-  }
-  tags: string[]
-  privacy: 'private' | 'couple' | 'public'
-  status: 'draft' | 'published'
-  isLiked?: boolean
-  likesCount: number
-  views: number
-  readingTime?: number
-  createdAt: string
-  updatedAt: string
-  publishedAt?: string
-  isPrivate?: boolean
-  isPublished?: boolean
-}
-
 export interface CreateBlogPostRequest {
   title: string
   content: string
@@ -208,10 +166,11 @@ export interface BlogPostStats {
   totalPosts: number
   publishedPosts: number
   draftPosts: number
-  totalViews: number
   totalLikes: number
-  postsThisMonth: number
-  popularTags: { tag: string; count: number }[]
+  totalComments: number
+  avgLikesPerPost: number
+  avgCommentsPerPost: number
+  popularTags?: { tag: string; count: number }[]
 }
 
 export interface BlogComment {

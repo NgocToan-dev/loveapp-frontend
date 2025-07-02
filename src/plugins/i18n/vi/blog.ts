@@ -84,12 +84,13 @@ export default {
 
   stats: {
     totalPosts: 'Tổng bài viết',
+    publishedPosts: 'Đã xuất bản',
     published: 'Đã xuất bản',
     drafts: 'Bản nháp',
-    totalViews: 'Tổng lượt xem',
+    totalComments: 'Tổng bình luận',
     totalLikes: 'Tổng lượt thích',
-    thisMonth: 'Tháng này',
     avgLikes: 'TB thích',
+    avgComments: 'TB bình luận',
     popularTags: 'Thẻ phổ biến',
     recentActivity: 'Hoạt động gần đây',
     today: 'Hôm nay',
@@ -157,6 +158,42 @@ export default {
     not_found: "Bài viết không tìm thấy",
     back_to_list: "Quay lại blog",
     not_found_message: "Bài viết bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.",
-  }
+    related_posts: 'Bài viết liên quan'
+  },
+
+  success: {
+    created: 'Tạo bài viết thành công',
+    updated: 'Cập nhật bài viết thành công',
+    deleted: 'Xóa bài viết thành công',
+    published: 'Xuất bản bài viết thành công',
+    unpublished: 'Hủy xuất bản bài viết thành công'
+  },
+
+  errors: {
+    fetch_failed: 'Không thể tải bài viết',
+    fetch_single_failed: 'Không thể tải bài viết này',
+    create_failed: 'Không thể tạo bài viết',
+    update_failed: 'Không thể cập nhật bài viết',
+    delete_failed: 'Không thể xóa bài viết',
+    publish_failed: 'Không thể xuất bản bài viết',
+    unpublish_failed: 'Không thể hủy xuất bản bài viết',
+    search_failed: 'Tìm kiếm thất bại'
+  },
   
+  minute_read: 'phút đọc',
+  updated: 'Cập nhật',
+  no_content: 'Bài viết này chưa có nội dung.',
+  tags: 'Thẻ',
+  comments: 'Bình luận',
+  comments_coming_soon: 'Tính năng bình luận sẽ sớm có',
+  
+  share: {
+    title: 'Chia sẻ bài viết',
+    description: 'Chia sẻ bài viết này với người khác'
+  },
+
+  author: {
+    unknown: 'Tác giả không xác định'
+  }
+
 }

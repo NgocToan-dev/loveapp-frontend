@@ -101,10 +101,11 @@ import CrudActions from '@/components/common/CrudActions.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import BaseConfirmModal from '@/components/common/BaseConfirmModal.vue'
 import ArrowLeftIcon from '@/components/icons/ArrowLeftIcon.vue'
-import type { Memory, Reminder, BlogPost, User } from '@/types'
+import type { Memory, Reminder, IUser } from '@/types'
+import type { BlogPostEntity } from '@/types/model/blog/BlogPostEntity'
 
 interface Props {
-  data?: Memory | Reminder | BlogPost | null
+  data?: Memory | Reminder | BlogPostEntity | null
   title: string
   subtitle?: string
   entity: 'memory' | 'reminder' | 'blog'

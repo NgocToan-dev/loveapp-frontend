@@ -326,14 +326,14 @@ const copyInvitationCode = async (code: string) => {
 // Lifecycle
 onMounted(async () => {
   // Fetch pending invitations if not loaded
-  if (!pendingInvitations.length) {
+  if (!pendingInvitations.value.length) {
     await fetchPendingInvitations(true) // Force refresh
   }
    
    // Set initial date value if connection exists
-   if (coupleConnection?.anniversaryDate) {
+   if (coupleConnection?.value?.anniversaryDate) {
     // Extract date part from ISO datetime string
-    const dateStr = new Date(coupleConnection.anniversaryDate).toISOString().split('T')[0]
+    const dateStr = new Date(coupleConnection.value.anniversaryDate).toISOString().split('T')[0]
     newRelationshipDate.value = dateStr
   }
 })

@@ -12,7 +12,7 @@ export const useStatistics = () => {
   const { coupleConnection } = useCouple()
 
   // Computed statistics
-  const memoriesCount = computed(() => memoriesStore.memories.length)
+  const memoriesCount = computed(() => memoriesStore.memories.value.length)
   
   const remindersCount = computed(() => remindersStore.reminders.length)
   
@@ -45,7 +45,7 @@ export const useStatistics = () => {
     const thisMonth = today.getMonth()
     const thisYear = today.getFullYear()
     
-    return memoriesStore.memories.filter((m: any) => {
+    return memoriesStore.memories.value.filter((m: any) => {
       const memoryDate = new Date(m.createdAt)
       return memoryDate.getMonth() === thisMonth && memoryDate.getFullYear() === thisYear
     }).length
@@ -59,9 +59,8 @@ export const useStatistics = () => {
       date: string
       description?: string
     }> = []
-    
     // Add recent memories
-    memoriesStore.memories
+    memoriesStore.memories.value
       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 3)
       .forEach((memory: any) => {

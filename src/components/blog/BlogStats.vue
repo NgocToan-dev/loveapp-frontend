@@ -44,18 +44,18 @@
     <div class="stat-card bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-6">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-purple-100 text-sm font-medium">{{ $t('blog.stats.totalViews') }}</p>
-          <p class="text-2xl font-bold">{{ formatNumber(stats?.totalViews || 0) }}</p>
+          <p class="text-purple-100 text-sm font-medium">{{ $t('blog.stats.totalComments') }}</p>
+          <p class="text-2xl font-bold">{{ formatNumber(stats?.totalComments || 0) }}</p>
         </div>
         <div class="p-3 bg-purple-400/30 rounded-full">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+            <path d="M20,2H4A2,2 0 0,0 2,4V16A2,2 0 0,0 4,18H18L22,22V4A2,2 0 0,0 20,2Z" />
           </svg>
         </div>
       </div>
       <div class="mt-2">
         <span class="text-purple-100 text-xs">
-          {{ $t('blog.stats.thisMonth') }}: {{ stats?.postsThisMonth || 0 }}
+          {{ $t('blog.stats.avgComments') }}: {{ formatNumber(stats?.avgCommentsPerPost || 0) }}
         </span>
       </div>
     </div>
@@ -138,11 +138,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { BlogPostStats, BlogPost } from '@/types'
+import type { BlogPostStats } from '@/types'
+import type { BlogPostEntity } from '@/types/model/blog/BlogPostEntity'
 
 interface Props {
   stats?: BlogPostStats | null
-  recentPosts?: BlogPost[]
+  recentPosts?: BlogPostEntity[]
 }
 
 const props = defineProps<Props>()
@@ -151,7 +152,7 @@ const { t } = useI18n()
 
 const averageLikes = computed(() => {
   if (!props.stats || !props.stats.totalPosts || !props.stats.totalLikes) return '0'
-  return (props.stats.totalLikes / props.stats.totalPosts).toFixed(1)
+  return props.stats.avgLikesPerPost?.toFixed(1) || '0'
 })
 
 const formatNumber = (num: number) => {

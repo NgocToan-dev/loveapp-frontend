@@ -28,16 +28,6 @@
 
         <!-- User section -->
         <div class="hidden md:flex items-center space-x-4">
-          <!-- Development Panel (only in dev mode) -->
-          <div
-            v-if="isDev && !userStore.isAuthenticated"
-            class="flex items-center space-x-2"
-          >
-            <Button variant="outline" size="xs" @click="userStore.loginMockUser">
-              🔧 {{ $t("common.buttons.devLogin") }}
-            </Button>
-          </div>
-
           <!-- Language Switcher -->
           <LanguageSwitcher />
 

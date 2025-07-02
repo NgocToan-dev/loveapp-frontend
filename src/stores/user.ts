@@ -1,326 +1,269 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { authService, type AuthResponse } from '@/services/auth'
-import { storage } from '@/utils/helpers'
-import type { User, LoginCredentials, RegisterCredentials } from '@/types'
+import { defineStore } from "pinia";
+import { authService, type AuthResponse } from "@/services/auth";
+import { storage } from "@/utils/helpers";
+import type { LoginCredentials, RegisterCredentials } from "@/types";
+import { UserEntity } from "@/types/model/user/UserEntity";
 
-export const useUserStore = defineStore('user', () => {
-  // State
-  const user = ref<User | null>(storage.get<User>('user'))
-  const token = ref<string | null>(storage.get<string>('auth_token'))
-  const refreshToken = ref<string | null>(storage.get<string>('refresh_token'))
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
+export const useUserStore = defineStore("user", {
+  state: () => ({
+    user: storage.get<UserEntity>("user") as UserEntity | null,
+    token: storage.get<string>("auth_token") as string | null,
+    refreshToken: storage.get<string>("refresh_token") as string | null,
+    isLoading: false,
+    error: null as string | null,
+  }),
 
-  // Getters
-  const isAuthenticated = computed(() => !!token.value && !!user.value)
-  
-  const hasPartner = computed(() => !!user.value?.coupleId)
-  
-  const userDisplayName = computed(() => {
-    if (!user.value) return ''
-    if (user.value.displayName) return user.value.displayName
-    if (user.value.firstName && user.value.lastName) {
-      return `${user.value.firstName} ${user.value.lastName}`.trim()
-    }
-    return user.value.email // Fallback to email
-  })
+  getters: {
+    isAuthenticated: (state) => !!state.token && !!state.user,
 
-  const userInitials = computed(() => {
-    if (!user.value) return ''
-    if (user.value.firstName && user.value.lastName) {
-      return `${user.value.firstName.charAt(0)}${user.value.lastName.charAt(0)}`.toUpperCase()
-    }
-    if (user.value.displayName) {
-      const names = user.value.displayName.split(' ')
-      if (names.length >= 2) {
-        return `${names[0].charAt(0)}${names[names.length - 1].charAt(0)}`.toUpperCase()
+    hasPartner: (state) => !!state.user?.coupleId,
+
+    userDisplayName: (state) => {
+      if (!state.user) return "";
+      if (state.user.displayName) return state.user.displayName;
+      if (state.user.firstName && state.user.lastName) {
+        return `${state.user.firstName} ${state.user.lastName}`.trim();
       }
-      return user.value.displayName.substring(0, 2).toUpperCase()
-    }
-    return user.value.email.substring(0, 2).toUpperCase()
-  })
+      return state.user.email; // Fallback to email
+    },
 
-  const relationshipDuration = computed(() => {
-    // TODO: Calculate relationship duration from coupleId data
-    return 0
-  })
-
-  // Actions
-  const login = async (credentials: LoginCredentials) => {
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      const response: AuthResponse = await authService.login(credentials)
-      
-      // Transform backend user to frontend User format
-      const transformedUser: User = {
-        _id: response.user.id,
-        id: response.user.id,
-        email: response.user.email,
-        displayName: response.user.displayName,
-        avatarUrl: response.user.avatarUrl,
-        createdAt: response.user.createdAt,
-        username: '', // Default values for optional fields
-        firstName: '',
-        lastName: '',
-        isEmailVerified: false
+    userInitials: (state) => {
+      if (!state.user) return "";
+      if (state.user.firstName && state.user.lastName) {
+        return `${state.user.firstName.charAt(0)}${state.user.lastName.charAt(0)}`.toUpperCase();
       }
-      
-      
-      user.value = transformedUser
-      token.value = response.token
-      
-      // Store in localStorage
-      storage.set('user', transformedUser)
-      storage.set('auth_token', response.token)
-      
-      if (response.refreshToken) {
-        refreshToken.value = response.refreshToken
-        storage.set('refresh_token', response.refreshToken)
+      if (state.user.displayName) {
+        const names = state.user.displayName.split(" ");
+        if (names.length >= 2) {
+          return `${names[0].charAt(0)}${names[names.length - 1].charAt(0)}`.toUpperCase();
+        }
+        return state.user.displayName.substring(0, 2).toUpperCase();
       }
-      
-      if (credentials.rememberMe) {
-        storage.set('remember_user', true)
+      return state.user.email.substring(0, 2).toUpperCase();
+    },
+
+    relationshipDuration: () => {
+      // TODO: Calculate relationship duration from coupleId data
+      return 0;
+    },
+  },
+
+  actions: {
+    async login(credentials: LoginCredentials) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        const response: AuthResponse = await authService.login(credentials);
+
+        // Transform backend user to frontend User format
+        const transformedUser: UserEntity = {
+          _id: response.user.id,
+          id: response.user.id,
+          email: response.user.email,
+          displayName: response.user.displayName,
+          avatarUrl: response.user.avatarUrl,
+          createdAt: response.user.createdAt,
+          username: "", // Default values for optional fields
+          firstName: "",
+          lastName: "",
+          isEmailVerified: false,
+        };
+
+        this.user = transformedUser;
+        this.token = response.token;
+
+        // Store in localStorage
+        storage.set("user", transformedUser);
+        storage.set("auth_token", response.token);
+
+        if (response.refreshToken) {
+          this.refreshToken = response.refreshToken;
+          storage.set("refresh_token", response.refreshToken);
+        }
+
+        if (credentials.rememberMe) {
+          storage.set("remember_user", true);
+        }
+
+        return response;
+      } catch (err: any) {
+        console.error("UserStore: Login error:", err);
+        this.error = err.message || "Login failed";
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
-      
-      return response
-    } catch (err: any) {
-      console.error('UserStore: Login error:', err)
-      error.value = err.message || 'Login failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
+    },
 
-  const register = async (credentials: RegisterCredentials) => {
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      // Ensure displayName is set if not provided
-      const registerData = {
-        ...credentials,
-        displayName: credentials.displayName || `${credentials.firstName} ${credentials.lastName}`.trim()
+    async register(credentials: RegisterCredentials) {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        // Ensure displayName is set if not provided
+        const registerData = {
+          ...credentials,
+          displayName:
+            credentials.displayName ||
+            `${credentials.firstName} ${credentials.lastName}`.trim(),
+        };
+
+        const response: AuthResponse = await authService.register(registerData);
+
+        // Transform backend user to frontend User format
+        const transformedUser: UserEntity = {
+          _id: response.user.id,
+          id: response.user.id,
+          email: response.user.email,
+          displayName: response.user.displayName,
+          avatarUrl: response.user.avatarUrl,
+          createdAt: response.user.createdAt,
+          username: credentials.username || "",
+          firstName: credentials.firstName || "",
+          lastName: credentials.lastName || "",
+          isEmailVerified: false,
+        };
+
+        this.user = transformedUser;
+        this.token = response.token;
+
+        // Store in localStorage
+        storage.set("user", transformedUser);
+        storage.set("auth_token", response.token);
+
+        if (response.refreshToken) {
+          this.refreshToken = response.refreshToken;
+          storage.set("refresh_token", response.refreshToken);
+        }
+
+        return response;
+      } catch (err: any) {
+        this.error = err.message || "Registration failed";
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
-      
-      const response: AuthResponse = await authService.register(registerData)
-      
-      // Transform backend user to frontend User format
-      const transformedUser: User = {
-        _id: response.user.id,
-        id: response.user.id,
-        email: response.user.email,
-        displayName: response.user.displayName,
-        avatarUrl: response.user.avatarUrl,
-        createdAt: response.user.createdAt,
-        username: credentials.username || '',
-        firstName: credentials.firstName || '',
-        lastName: credentials.lastName || '',
-        isEmailVerified: false
+    },
+
+    async logout() {
+      this.isLoading = true;
+
+      try {
+        if (this.token) {
+          await authService.logout();
+        }
+
+        this.user = null;
+        this.token = null;
+        this.refreshToken = null;
+        this.error = null;
+
+        // Clear localStorage
+        storage.remove("user");
+        storage.remove("auth_token");
+        storage.remove("refresh_token");
+        storage.remove("remember_user");
+      } catch (err: any) {
+        this.error = err.message || "Logout failed";
+      } finally {
+        this.isLoading = false;
       }
-      
-      user.value = transformedUser
-      token.value = response.token
-      
-      // Store in localStorage
-      storage.set('user', transformedUser)
-      storage.set('auth_token', response.token)
-      
-      if (response.refreshToken) {
-        refreshToken.value = response.refreshToken
-        storage.set('refresh_token', response.refreshToken)
+    },
+
+    async updateProfile(updates: Partial<UserEntity>) {
+      if (!this.user) throw new Error("User not authenticated");
+
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const updatedUser = await authService.updateProfile(updates);
+        this.user = updatedUser;
+        storage.set("user", updatedUser);
+        return updatedUser;
+      } catch (err: any) {
+        this.error = err.message || "Update failed";
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
-      
-      return response
-    } catch (err: any) {
-      error.value = err.message || 'Registration failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
+    },
 
-  const logout = async () => {
-    isLoading.value = true
-    
-    try {
-      if (token.value) {
-        await authService.logout()
+    async connectPartner(partnerEmail: string) {
+      if (!this.user) throw new Error("User not authenticated");
+
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        // TODO: Implement partner connection API
+        // For now, update coupleId locally
+        const updatedUser = {
+          ...this.user,
+          coupleId: "temp-couple-id", // This should come from API
+          updatedAt: new Date().toISOString(),
+        };
+
+        this.user = updatedUser;
+        storage.set("user", updatedUser);
+        return updatedUser;
+      } catch (err: any) {
+        this.error = err.message || "Connection failed";
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
-      
-      user.value = null
-      token.value = null
-      refreshToken.value = null
-      error.value = null
-      
-      // Clear localStorage
-      storage.remove('user')
-      storage.remove('auth_token')
-      storage.remove('refresh_token')
-      storage.remove('remember_user')
-    } catch (err: any) {
-      error.value = err.message || 'Logout failed'
-    } finally {
-      isLoading.value = false
-    }
-  }
+    },
 
-  const updateProfile = async (updates: Partial<User>) => {
-    if (!user.value) throw new Error('User not authenticated')
-    
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      const updatedUser = await authService.updateProfile(updates)
-      user.value = updatedUser
-      storage.set('user', updatedUser)
-      return updatedUser
-    } catch (err: any) {
-      error.value = err.message || 'Update failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
+    initializeAuth() {
+      const storedUser = storage.get<UserEntity>("user");
+      const storedToken = storage.get<string>("auth_token");
 
-  const connectPartner = async (partnerEmail: string) => {
-    if (!user.value) throw new Error('User not authenticated')
-    
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      // TODO: Implement partner connection API
-      // For now, update coupleId locally
-      const updatedUser = {
-        ...user.value,
-        coupleId: 'temp-couple-id', // This should come from API
-        updatedAt: new Date().toISOString()
+      if (storedUser && storedToken) {
+        this.user = storedUser;
+        this.token = storedToken;
+
+        const storedRefreshToken = storage.get<string>("refresh_token");
+        if (storedRefreshToken) {
+          this.refreshToken = storedRefreshToken;
+        }
+      } else {
+        console.log("UserStore: No stored auth data found");
       }
-      
-      user.value = updatedUser
-      storage.set('user', updatedUser)
-      return updatedUser
-    } catch (err: any) {
-      error.value = err.message || 'Connection failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
+    },
 
-  const initializeAuth = () => {
-    const storedUser = storage.get<User>('user')
-    const storedToken = storage.get<string>('auth_token')
-    
-    
-    if (storedUser && storedToken) {
-      user.value = storedUser
-      token.value = storedToken
-      
-      const storedRefreshToken = storage.get<string>('refresh_token')
-      if (storedRefreshToken) {
-        refreshToken.value = storedRefreshToken
+    clearError() {
+      this.error = null;
+    },
+
+    async forgotPassword(email: string) {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        await authService.forgotPassword(email);
+        return { success: true, message: "Password reset email sent" };
+      } catch (err: any) {
+        this.error = err.message || "Password reset failed";
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
+    },
 
-    } else {
-      console.log('UserStore: No stored auth data found')
-    }
-  }
+    async resetPassword(token: string, newPassword: string) {
+      this.isLoading = true;
+      this.error = null;
 
-  const clearError = () => {
-    error.value = null
-  }
-
-  const forgotPassword = async (email: string) => {
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      await authService.forgotPassword(email)
-      return { success: true, message: 'Password reset email sent' }
-    } catch (err: any) {
-      error.value = err.message || 'Password reset failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const resetPassword = async (token: string, newPassword: string) => {
-    isLoading.value = true
-    error.value = null
-    
-    try {
-      await authService.resetPassword(token, newPassword)
-      return { success: true, message: 'Password reset successfully' }
-    } catch (err: any) {
-      error.value = err.message || 'Password reset failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const loginMockUser = () => {
-    // Only for development environment
-    if (import.meta.env.DEV) {
-      const mockUser: User = {
-        _id: 'mock-user-1',
-        id: 'mock-user-1', 
-        email: 'demo@loveapp.com',
-        displayName: 'Demo User',
-        firstName: 'Demo',
-        lastName: 'User',
-        username: 'demouser',
-        avatarUrl: 'https://via.placeholder.com/150/ff6b6b/ffffff?text=DU',
-        isEmailVerified: true,
-        createdAt: new Date().toISOString(),
-        coupleId: undefined
+      try {
+        await authService.resetPassword(token, newPassword);
+        return { success: true, message: "Password reset successfully" };
+      } catch (err: any) {
+        this.error = err.message || "Password reset failed";
+        throw err;
+      } finally {
+        this.isLoading = false;
       }
-      
-      const mockToken = 'mock-jwt-token-for-development'
-      
-      user.value = mockUser
-      token.value = mockToken
-      
-      // Store in localStorage
-      storage.set('user', mockUser)
-      storage.set('auth_token', mockToken)
-      
-      console.log('🔧 Mock user logged in for development')
-    }
-  }
-
-  return {
-    // State
-    user,
-    token,
-    refreshToken,
-    isLoading,
-    error,
-    
-    // Getters
-    isAuthenticated,
-    hasPartner,
-    userDisplayName,
-    userInitials,
-    relationshipDuration,
-    
-    // Actions
-    login,
-    register,
-    logout,
-    updateProfile,
-    connectPartner,
-    initializeAuth,
-    clearError,
-    forgotPassword,
-    resetPassword,
-    loginMockUser
-  }
-})
+    },
+  },
+});
