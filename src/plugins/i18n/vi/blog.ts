@@ -61,6 +61,10 @@ export default {
     excerptPlaceholder: 'Nhập đoạn trích ngắn...',
     excerpt: 'Đoạn trích',
     dragCoverImage: 'Kéo và thả ảnh bìa vào đây hoặc nhấp để chọn',
+    coverImagePreview: 'Xem trước ảnh bìa',
+    removeCoverImage: 'Xóa ảnh bìa',
+    uploadingImage: 'Đang tải ảnh lên...',
+    imageUploadFailed: 'Tải ảnh lên thất bại. Vui lòng thử lại.',
   },
 
   filters: {

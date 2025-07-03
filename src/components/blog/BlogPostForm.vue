@@ -34,7 +34,11 @@
             @dragover.prevent
             @dragenter.prevent
             class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-400 transition-colors"
-            :class="{ 'border-pink-400 bg-pink-50': isDragging }"
+            :class="{ 
+              'border-pink-400 bg-pink-50': isDragging,
+              'border-blue-400 bg-blue-50': isUploadingImage,
+              'opacity-50 pointer-events-none': isUploadingImage
+            }"
           >
             <input
               ref="imageInput"
@@ -42,6 +46,7 @@
               accept="image/*"
               @change="handleImageSelect"
               class="hidden"
+              :disabled="isUploadingImage"
             />
             
             <!-- Current Cover Image -->
@@ -61,7 +66,7 @@
             </div>
 
             <!-- Upload Prompt -->
-            <div v-else>
+            <div v-else-if="!isUploadingImage">
               <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
@@ -79,7 +84,20 @@
                 {{ $t('blog.form.selectCoverImage') }}
               </Button>
             </div>
+
+            <!-- Upload Loading State -->
+            <div v-else class="flex flex-col items-center">
+              <div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+              <p class="mt-2 text-sm text-blue-600">
+                {{ $t('blog.form.uploadingImage') }}
+              </p>
+            </div>
           </div>
+          
+          <!-- Upload Error -->
+          <p v-if="errors.coverImage" class="mt-1 text-sm text-red-600">
+            {{ errors.coverImage }}
+          </p>
         </div>
 
         <!-- Content Editor -->
@@ -257,6 +275,8 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useBlogStore } from '@/stores/blog'
 import { PrivacyEnum, StatusEnum } from '@/utils/enum'
+import { uploadService } from '@/services/upload'
+import { validateImageFile } from '@/utils/helpers'
 import type { CreateBlogPostRequest } from '@/types'
 import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
@@ -320,6 +340,7 @@ const selectedCoverImage = ref<File | null>(null)
 const isSubmitting = ref(false)
 const isSavingDraft = ref(false)
 const isUnpublishing = ref(false)
+const isUploadingImage = ref(false)
 const imageInput = ref<HTMLInputElement>()
 
 // Computed
@@ -364,18 +385,62 @@ const handleDrop = (event: DragEvent) => {
   }
 }
 
-const processImage = (file: File) => {
-  selectedCoverImage.value = file
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    coverImagePreview.value = e.target?.result as string
+const processImage = async (file: File) => {
+  // Validate image file
+  const validation = validateImageFile(file)
+  if (!validation.isValid) {
+    errors.value.coverImage = validation.error || 'Invalid image file'
+    return
   }
-  reader.readAsDataURL(file)
+
+  // Clear any previous errors
+  errors.value.coverImage = ''
+  
+  // Show loading state
+  isUploadingImage.value = true
+  
+  try {
+    // Upload image to MinIO via backend
+    const result = await uploadService.uploadCoverImage(file)
+    
+    // Set the uploaded image URL
+    form.value.coverImageUrl = result.imageUrl
+    
+    // Set preview for user interface
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      coverImagePreview.value = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+    
+    // Clear the selected file since we now have the URL
+    selectedCoverImage.value = null
+    
+  } catch (error) {
+    console.error('Image upload failed:', error)
+    errors.value.coverImage = t('blog.form.imageUploadFailed')
+  } finally {
+    isUploadingImage.value = false
+  }
 }
 
-const removeCoverImage = () => {
+const removeCoverImage = async () => {
+  // If we have an uploaded image URL, try to delete it from MinIO
+  if (form.value.coverImageUrl) {
+    try {
+      await uploadService.deleteFile(form.value.coverImageUrl)
+    } catch (error) {
+      console.error('Failed to delete cover image:', error)
+      // Continue anyway - the form removal is more important
+    }
+  }
+  
+  // Clear form data
+  form.value.coverImageUrl = undefined
   selectedCoverImage.value = null
   coverImagePreview.value = null
+  
+  // Clear file input
   if (imageInput.value) {
     imageInput.value.value = ''
   }
@@ -404,7 +469,7 @@ const handleSubmit = async () => {
     const submitData = {
       ...form.value,
       contentHtml: form.value.content, // For now, use content as contentHtml
-      coverImage: selectedCoverImage.value || undefined
+      // coverImage is no longer needed since we upload directly
     }
 
     if (isEditMode.value && props.post) {
@@ -436,7 +501,7 @@ const saveDraft = async () => {
       contentHtml: form.value.content, // For now, use content as contentHtml
       isPublished: false,
       status: StatusEnum.draft,
-      coverImage: selectedCoverImage.value || undefined
+      // coverImage is no longer needed since we upload directly
     }
 
     if (isEditMode.value && props.post) {
@@ -487,7 +552,8 @@ const resetForm = () => {
     privacy: PrivacyEnum.private,
     status: StatusEnum.draft,
     isPrivate: false,
-    isPublished: false
+    isPublished: false,
+    coverImageUrl: undefined
   }
   selectedCoverImage.value = null
   coverImagePreview.value = null
@@ -547,7 +613,8 @@ const populateFormFromPost = (post: BlogPostEntity) => {
     privacy: post.privacy || PrivacyEnum.private,
     status: post.status || StatusEnum.draft,
     isPrivate: post.privacy === PrivacyEnum.private,
-    isPublished: post.status === StatusEnum.published
+    isPublished: post.status === StatusEnum.published,
+    coverImageUrl: post.coverImageUrl || undefined
   }
   
   // Set cover image preview if exists

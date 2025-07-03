@@ -74,6 +74,8 @@ export default {
     removeCoverImage: 'Remove Cover Image',
     dragCoverImage: 'Drag and drop a cover image here or click to select',
     selectCoverImage: 'Select Cover Image',
+    uploadingImage: 'Uploading image...',
+    imageUploadFailed: 'Image upload failed. Please try again.',
     tags: 'Tags',
     tagsPlaceholder: 'Add tags and press Enter...',
     category: 'Category',

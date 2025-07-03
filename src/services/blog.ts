@@ -1,5 +1,6 @@
 import { BlogPostEntity } from '@/types/model/blog/BlogPostEntity';
 import api from './api'
+import { uploadService } from './upload'
 import type { 
   CreateBlogPostRequest, 
   UpdateBlogPostRequest, 
@@ -90,8 +91,8 @@ export const blogService = {
     // Handle cover image upload separately if present
     let coverImageUrl = ''
     if (data.coverImage && data.coverImage instanceof File) {
-      const imageResult = await this.uploadCoverImage(data.coverImage)
-      coverImageUrl = imageResult.url
+      const imageResult = await uploadService.uploadCoverImage(data.coverImage)
+      coverImageUrl = imageResult.imageUrl
     }
     
     // Prepare JSON payload
@@ -136,8 +137,8 @@ export const blogService = {
     // If there's a cover image, handle it separately
     if (coverImage && coverImage instanceof File) {
       // First upload the image
-      const imageResult = await this.uploadCoverImage(coverImage)
-      updateData.coverImageUrl = imageResult.url
+      const imageResult = await uploadService.uploadCoverImage(coverImage)
+      updateData.coverImageUrl = imageResult.imageUrl
     }
     
     // Send JSON payload for other fields
@@ -226,19 +227,6 @@ export const blogService = {
   // Get all tags
   async getTags(): Promise<string[]> {
     const response = await api.get('/blog/tags')
-    return response.data
-  },
-
-  // Upload cover image
-  async uploadCoverImage(file: File): Promise<{ url: string }> {
-    const formData = new FormData()
-    formData.append('image', file)
-
-    const response = await api.post('/blog/upload-cover', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
     return response.data
   },
 

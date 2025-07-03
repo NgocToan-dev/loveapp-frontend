@@ -170,15 +170,15 @@
             v-if="currentPost.tags && currentPost.tags.length > 0"
             class="tags-section mt-8 pt-6 border-t border-gray-200"
           >
-            <h3 class="text-sm font-medium text-gray-700 mb-3">{{ $t("blog.tags") }}</h3>
             <div class="flex flex-wrap gap-2">
               <Badge
                 v-for="tag in currentPost.tags"
                 :key="tag"
-                :label="`#${tag}`"
                 variant="secondary"
                 size="sm"
-              />
+              >
+                {{ `#${tag}` }}
+              </Badge>
             </div>
           </div>
 
