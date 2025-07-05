@@ -6,25 +6,28 @@
         <button
           v-for="filter in filterOptions"
           :key="filter.value"
-          :class="['filter-tab', { active: activeFilter === filter.value }]"
-          @click="activeFilter = filter.value"
+          :class="['filter-tab', { active: queryParams.type === filter.value }]"
+          @click="setFilter(filter.value)"
         >
           <span class="filter-icon">{{ filter.icon }}</span>
           <span>{{ $t(filter.label) }}</span>
+          <span v-if="filter.count !== undefined" class="filter-count">{{
+            filter.count
+          }}</span>
         </button>
       </div>
-      
+
       <div class="sort-controls">
         <button
-          :class="['sort-btn', { active: sortOrder === 'desc' }]"
-          @click="sortOrder = 'desc'"
+          :class="['sort-btn', { active: queryParams.sortOrder === 'desc' }]"
+          @click="setSortOrder('desc')"
           :title="$t('timeline.sortDesc')"
         >
           <SortDescIcon />
         </button>
         <button
-          :class="['sort-btn', { active: sortOrder === 'asc' }]"
-          @click="sortOrder = 'asc'"  
+          :class="['sort-btn', { active: queryParams.sortOrder === 'asc' }]"
+          @click="setSortOrder('asc')"
           :title="$t('timeline.sortAsc')"
         >
           <SortAscIcon />
@@ -35,26 +38,29 @@
     <!-- Timeline Items -->
     <div v-if="isLoading" class="timeline-loading">
       <LoadingSpinner />
-      <p>{{ $t('common.loading') }}</p>
+      <p>{{ $t("common.loading") }}</p>
     </div>
 
-    <div v-else-if="filteredItems.length === 0" class="timeline-empty">
+    <div v-else-if="!hasItems" class="timeline-empty">
       <div class="empty-icon">📅</div>
-      <h3>{{ $t('timeline.empty.title') }}</h3>
-      <p>{{ $t('timeline.empty.description') }}</p>
+      <h3>{{ $t("timeline.empty.title") }}</h3>
+      <p>{{ $t("timeline.empty.description") }}</p>
       <div class="empty-actions">
         <Button @click="$router.push('/memories')" variant="primary">
-          {{ $t('timeline.empty.createMemory') }}
+          {{ $t("timeline.empty.createMemory") }}
         </Button>
         <Button @click="$router.push('/reminders')" variant="outline">
-          {{ $t('timeline.empty.createReminder') }}
+          {{ $t("timeline.empty.createReminder") }}
+        </Button>
+        <Button @click="$router.push('/blog')" variant="outline">
+          {{ $t("timeline.empty.createBlog") }}
         </Button>
       </div>
     </div>
 
     <div v-else class="timeline-list">
       <div
-        v-for="item in filteredItems"
+        v-for="item in items"
         :key="`${item.type}-${item.id}`"
         class="timeline-item"
         :data-type="item.type"
@@ -70,10 +76,12 @@
             <div class="timeline-header">
               <div class="timeline-title">
                 <h4>{{ item.title }}</h4>
-                <span class="timeline-type">{{ $t(`timeline.types.${item.type}`) }}</span>
+                <span :class="['timeline-type', getTypeColor(item.type)]">
+                  {{ $t(`timeline.types.${item.type}`) }}
+                </span>
               </div>
               <div class="timeline-date">
-                {{ formatDate(item.date, 'relative') }}
+                {{ formatDate(item.date, "relative") }}
               </div>
             </div>
 
@@ -82,56 +90,97 @@
             </div>
 
             <div v-if="item.imageUrl" class="timeline-image">
-              <img 
-                :src="item.imageUrl" 
+              <img
+                :src="item.imageUrl"
                 :alt="item.title"
                 @click="showImagePreview(item.imageUrl)"
                 loading="lazy"
               />
             </div>
 
+            <!-- Author info for blog posts -->
+            <div v-if="item.author && item.type === 'blog'" class="timeline-author">
+              <img
+                v-if="item.author.avatarUrl"
+                :src="item.author.avatarUrl"
+                :alt="item.author.displayName"
+                class="author-avatar"
+              />
+              <span class="author-name">{{ item.author.displayName }}</span>
+            </div>
+
+            <!-- Blog specific info -->
+            <div v-if="item.type === 'blog'" class="blog-meta">
+              <div class="blog-engagement">
+                <span v-if="item.likes" class="engagement-item">
+                  ❤️ {{ item.likes }}
+                </span>
+                <span v-if="item.comments" class="engagement-item">
+                  💬 {{ item.comments }}
+                </span>
+              </div>
+              <div v-if="item.tags && item.tags.length > 0" class="blog-tags">
+                <span v-for="tag in item.tags.slice(0, 3)" :key="tag" class="tag">
+                  #{{ tag }}
+                </span>
+              </div>
+            </div>
+
             <div class="timeline-meta">
               <div class="timeline-status">
                 <!-- Memory Status -->
-                <div v-if="item.type === 'memory'" class="status-memory">
+                <div
+                  v-if="item.type === 'memory'"
+                  class="status-memory flex items-center gap-1"
+                >
                   <div class="status-dot status-memory-dot"></div>
-                  <span>{{ $t('timeline.types.memory') }}</span>
+                  <div>{{ $t("timeline.types.memory") }}</div>
                 </div>
 
                 <!-- Reminder Status -->
-                <div v-else-if="item.type === 'reminder'" class="status-reminder">
-                  <div 
+                <div
+                  v-else-if="item.type === 'reminder'"
+                  class="status-reminder flex items-center gap-1"
+                >
+                  <div
                     :class="[
                       'status-dot',
-                      item.isCompleted ? 'status-completed' : 'status-pending'
+                      item.isCompleted ? 'status-completed' : 'status-pending',
                     ]"
                   ></div>
-                  <span>
-                    {{ item.isCompleted ? $t('reminders.status.completed') : $t('reminders.status.pending') }}
-                  </span>
+                  <div>
+                    {{
+                      item.isCompleted
+                        ? $t("reminders.status.completed")
+                        : $t("reminders.status.pending")
+                    }}
+                  </div>
+                </div>
+
+                <!-- Blog Status -->
+                <div
+                  v-else-if="item.type === 'blog'"
+                  class="status-blog flex items-center gap-1"
+                >
+                  <div class="status-dot status-blog-dot"></div>
+                  <div>{{ $t("timeline.types.blog") }}</div>
                 </div>
 
                 <!-- Anniversary Status -->
-                <div v-else-if="item.type === 'anniversary'" class="status-anniversary">
+                <div
+                  v-else-if="item.type === 'anniversary'"
+                  class="status-anniversary flex items-center gap-1"
+                >
                   <div class="status-dot status-anniversary-dot"></div>
-                  <span>{{ $t('timeline.types.anniversary') }}</span>
+                  <div>{{ $t("timeline.types.anniversary") }}</div>
                 </div>
               </div>
 
               <div class="timeline-actions">
                 <button
-                  v-if="item.type === 'memory'"
-                  @click="viewMemory(item.id)"
+                  @click="viewItem(item)"
                   class="action-btn"
-                  :title="$t('common.actions.view')"
-                >
-                  <ViewIcon />
-                </button>
-                <button
-                  v-if="item.type === 'reminder'"
-                  @click="viewReminder(item.id)"
-                  class="action-btn"
-                  :title="$t('common.actions.view')"
+                  :title="$t('timeline.actions.view')"
                 >
                   <ViewIcon />
                 </button>
@@ -140,202 +189,145 @@
           </div>
         </div>
       </div>
+
+      <!-- Load More Button -->
+      <div v-if="canLoadMore" class="load-more-container">
+        <Button
+          @click="loadMore"
+          :loading="isLoadingMore"
+          variant="outline"
+          class="load-more-btn"
+        >
+          {{ $t("timeline.loadMore") }}
+        </Button>
+      </div>
     </div>
 
     <!-- Image Preview Modal -->
-    <ImagePreview 
+    <ImagePreview
       v-if="previewImage"
       :imageUrl="previewImage"
       @close="previewImage = null"
+    />
+
+    <!-- Timeline Detail Modal -->
+    <TimelineDetailModal
+      v-if="selectedItem"
+      :item="selectedItem"
+      @close="selectedItem = null"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { useMemories } from '@/composables/useMemories'
-import { useReminders } from '@/composables/useReminders'
-import { useCouple } from '@/composables/useCouple'
-import { formatDate, truncateText, getDaysUntil } from '@/utils/helpers'
-import Button from '@/components/common/Button.vue'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import ImagePreview from '@/components/common/ImagePreview.vue'
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { useTimeline } from "@/composables/useTimeline";
+import { formatDate, truncateText } from "@/utils/helpers";
+import type { TimelineItem } from "@/types";
 
-// Timeline items interface
-interface TimelineItem {
-  id: string
-  type: 'memory' | 'reminder' | 'anniversary'
-  title: string
-  description?: string
-  date: string
-  imageUrl?: string
-  isCompleted?: boolean
-}
+// Components
+import Button from "@/components/common/Button.vue";
+import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
+import ImagePreview from "@/components/common/ImagePreview.vue";
+import TimelineDetailModal from "@/components/timeline/TimelineDetailModal.vue";
 
-const { t } = useI18n()
-const router = useRouter()
+// Icons
+import SortDescIcon from "@/components/icons/SortDescIcon.vue";
+import SortAscIcon from "@/components/icons/SortAscIcon.vue";
+import ViewIcon from "@/components/icons/ViewIcon.vue";
 
-const memoriesStore = useMemories()
-const remindersStore = useReminders()
-const { coupleConnection } = useCouple()
+const { t } = useI18n();
+const router = useRouter();
+
+// Timeline composable
+const {
+  items,
+  stats,
+  isLoading,
+  isLoadingMore,
+  queryParams,
+  filterOptions,
+  hasItems,
+  canLoadMore,
+  fetchTimeline,
+  fetchTimelineStats,
+  setFilter,
+  setSortOrder,
+  loadMore,
+  getTypeIcon,
+  getTypeColor,
+} = useTimeline();
 
 // State
-const activeFilter = ref<string>('all')
-const sortOrder = ref<'asc' | 'desc'>('desc')
-const previewImage = ref<string | null>(null)
-
-// Filter options
-const filterOptions = [
-  { value: 'all', label: 'timeline.filters.all', icon: '📅' },
-  { value: 'memories', label: 'timeline.filters.memories', icon: '📸' },
-  { value: 'reminders', label: 'timeline.filters.reminders', icon: '⏰' },
-  { value: 'anniversaries', label: 'timeline.filters.anniversaries', icon: '💕' }
-]
-
-// Computed
-const isLoading = computed(() => memoriesStore.isLoading || remindersStore.isLoading)
-
-const timelineItems = computed(() => {
-  const items: TimelineItem[] = []
-
-  // Add memories (with enhanced safe guard)
-  if (memoriesStore.memories && Array.isArray(memoriesStore.memories) && memoriesStore.memories.length > 0) {
-    try {
-      memoriesStore.memories.forEach((memory: any) => {
-        if (memory && memory.id && memory.title && memory.createdAt) {
-          items.push({
-            id: memory.id,
-            type: 'memory',
-            title: memory.title,
-            description: memory.content || '',
-            date: memory.createdAt,
-            imageUrl: memory.imageUrl
-          })
-        }
-      })
-    } catch (error) {
-      console.error('Error processing memories:', error)
-    }
-  }
-
-  // Add reminders (with enhanced safe guard)
-  if (remindersStore.reminders && Array.isArray(remindersStore.reminders) && remindersStore.reminders.length > 0) {
-    try {
-      remindersStore.reminders.forEach((reminder: any) => {
-        if (reminder && reminder.id && reminder.title && reminder.reminderDate) {
-          items.push({
-            id: reminder.id,
-            type: 'reminder',
-            title: reminder.title,
-            description: reminder.description || '',
-            date: reminder.reminderDate,
-            isCompleted: reminder.isCompleted
-          })
-        }
-      })
-    } catch (error) {
-      console.error('Error processing reminders:', error)
-    }
-  }
-
-  // Add anniversary if couple exists
-  if (coupleConnection.value?.relationshipStart) {
-    const relationshipStart = new Date(coupleConnection.value.relationshipStart)
-    const today = new Date()
-    
-    // Calculate years together
-    let years = today.getFullYear() - relationshipStart.getFullYear()
-    const monthDiff = today.getMonth() - relationshipStart.getMonth()
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < relationshipStart.getDate())) {
-      years--
-    }
-    
-    if (years > 0) {
-      // Create anniversary for each year
-      for (let year = 1; year <= years; year++) {
-        const anniversaryDate = new Date(relationshipStart)
-        anniversaryDate.setFullYear(relationshipStart.getFullYear() + year)
-        
-        items.push({
-          id: `anniversary-${year}`,
-          type: 'anniversary',
-          title: t('timeline.anniversary.title'),
-          description: t('timeline.anniversary.description'),
-          date: anniversaryDate.toISOString()
-        })
-      }
-    }
-  }
-
-  return items
-})
-
-const filteredItems = computed(() => {
-  let filtered = timelineItems.value
-
-  // Apply filter
-  if (activeFilter.value !== 'all') {
-    if (activeFilter.value === 'anniversaries') {
-      filtered = filtered.filter(item => item.type === 'anniversary')
-    } else {
-      filtered = filtered.filter(item => item.type === activeFilter.value.slice(0, -1)) // Remove 's' from plural
-    }
-  }
-
-  // Apply sort
-  return filtered.sort((a, b) => {
-    const dateA = new Date(a.date).getTime()
-    const dateB = new Date(b.date).getTime()
-    return sortOrder.value === 'desc' ? dateB - dateA : dateA - dateB
-  })
-})
+const previewImage = ref<string | null>(null);
+const selectedItem = ref<TimelineItem | null>(null);
 
 // Methods
-const getTypeIcon = (type: string) => {
-  const icons = {
-    memory: '📸',
-    reminder: '⏰',
-    anniversary: '💕'
-  }
-  return icons[type as keyof typeof icons] || '✨'
-}
-
 const showImagePreview = (imageUrl: string) => {
-  previewImage.value = imageUrl
-}
+  previewImage.value = imageUrl;
+};
 
-const viewMemory = (id: string) => {
-  router.push('/memories')
-}
-
-const viewReminder = (id: string) => {
-  router.push('/reminders')
-}
-
-// Icon components
-import SortDescIcon from '@/components/icons/SortDescIcon.vue'
-import SortAscIcon from '@/components/icons/SortAscIcon.vue'
-import ViewIcon from '@/components/icons/ViewIcon.vue'
+const viewItem = (item: TimelineItem) => {
+  selectedItem.value = item;
+};
 
 // Lifecycle
 onMounted(async () => {
-  await Promise.all([
-    memoriesStore.fetchMemories(),
-    remindersStore.fetchReminders()
-  ])
-})
+  await Promise.all([fetchTimeline(), fetchTimelineStats()]);
+});
 </script>
 
 <style scoped>
 .timeline-container {
-  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
 
+/* Timeline Stats */
+.timeline-stats {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+.stat-content h3 {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.stat-content p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  margin: 4px 0 0 0;
+}
+
+/* Timeline Filters */
 .timeline-filters {
   display: flex;
   justify-content: space-between;
@@ -363,6 +355,7 @@ onMounted(async () => {
   transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
+  position: relative;
 }
 
 .filter-tab:hover {
@@ -378,6 +371,21 @@ onMounted(async () => {
 
 .filter-icon {
   font-size: 16px;
+}
+
+.filter-count {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 18px;
+  text-align: center;
+}
+
+.filter-tab.active .filter-count {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
 }
 
 .sort-controls {
@@ -414,6 +422,7 @@ onMounted(async () => {
   height: 16px;
 }
 
+/* Timeline Loading and Empty States */
 .timeline-loading {
   text-align: center;
   padding: 40px;
@@ -438,12 +447,13 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
+/* Timeline List */
 .timeline-list {
   position: relative;
 }
 
 .timeline-list::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 20px;
   top: 0;
@@ -489,6 +499,12 @@ onMounted(async () => {
   color: white;
 }
 
+.timeline-blog {
+  border-color: #2196f3;
+  background: #2196f3;
+  color: white;
+}
+
 .timeline-anniversary {
   border-color: #e91e63;
   background: #e91e63;
@@ -499,6 +515,7 @@ onMounted(async () => {
   font-size: 18px;
 }
 
+/* Timeline Card */
 .timeline-card {
   background: white;
   border-radius: 12px;
@@ -532,7 +549,7 @@ onMounted(async () => {
   background: #f5f5f5;
   border-radius: 4px;
   font-size: 12px;
-  color: #666;
+  font-weight: 500;
 }
 
 .timeline-date {
@@ -564,6 +581,61 @@ onMounted(async () => {
   transform: scale(1.02);
 }
 
+/* Author Info */
+.timeline-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Blog Meta */
+.blog-meta {
+  margin-bottom: 12px;
+}
+
+.blog-engagement {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.engagement-item {
+  font-size: 14px;
+  color: #666;
+}
+
+.blog-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Timeline Meta */
 .timeline-meta {
   display: flex;
   justify-content: space-between;
@@ -593,6 +665,10 @@ onMounted(async () => {
 
 .status-pending {
   background: #ff9800;
+}
+
+.status-blog-dot {
+  background: #2196f3;
 }
 
 .status-anniversary-dot {
@@ -628,56 +704,71 @@ onMounted(async () => {
   height: 16px;
 }
 
+/* Load More */
+.load-more-container {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.load-more-btn {
+  padding: 12px 24px;
+}
+
 /* Mobile responsive */
 @media (max-width: 640px) {
   .timeline-container {
     padding: 16px;
   }
-  
+
   .timeline-filters {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filter-tabs {
     justify-content: stretch;
   }
-  
+
   .filter-tab {
     flex: 1;
     justify-content: center;
     font-size: 12px;
     padding: 6px 12px;
   }
-  
+
   .timeline-list::before {
     left: 16px;
   }
-  
+
   .timeline-item {
     padding-left: 52px;
   }
-  
+
   .timeline-dot {
     width: 32px;
     height: 32px;
   }
-  
+
   .timeline-icon {
     font-size: 14px;
   }
-  
+
   .timeline-header {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .timeline-title h4 {
     font-size: 16px;
   }
-  
+
   .empty-actions {
     flex-direction: column;
+  }
+
+  .blog-engagement {
+    flex-direction: column;
+    gap: 4px;
   }
 }
 </style>

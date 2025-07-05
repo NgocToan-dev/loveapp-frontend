@@ -387,3 +387,15 @@ export type ReminderType = Reminder['type']
 export type MemoryType = 'text' | 'photo' | 'video'
 export type ConnectionStatus = ICoupleConnection['status']
 export type ThemeMode = ThemeConfig['mode']
+
+// Export timeline types
+export type {
+  TimelineAuthor,
+  TimelineItem,
+  TimelineQueryParams,
+  TimelinePagination,
+  TimelineResponse,
+  TimelineStats,
+  TimelineStatsFlat,
+  TimelineFilter
+} from './timeline'

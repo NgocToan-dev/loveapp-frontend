@@ -93,7 +93,8 @@ export default {
     total: 'Total',
     completed: 'Completed',
     upcoming: 'Upcoming',
-    overdue: 'Overdue'
+    overdue: 'Overdue',
+    completion_rate: 'Completion Rate'
   },
 
   filter: {

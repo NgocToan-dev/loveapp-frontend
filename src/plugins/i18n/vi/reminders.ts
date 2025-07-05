@@ -85,14 +85,16 @@ export default {
     upcoming: 'Sắp tới',
     today: 'Hôm nay',
     overdue: 'Quá hạn',
-    completed: 'Hoàn thành'
+    completed: 'Hoàn thành',
+    pending: 'Đang chờ'
   },
 
   stats: {
     total: 'Tổng số',
     completed: 'Đã hoàn thành',
     upcoming: 'Sắp tới',
-    overdue: 'Quá hạn'
+    overdue: 'Quá hạn',
+    completion_rate: 'Tỷ lệ hoàn thành'
   },
 
   filter: {
