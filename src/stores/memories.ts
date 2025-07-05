@@ -246,10 +246,13 @@ export const useMemoriesStore = defineStore('memories', {
         console.log('Store updating memory with data:', updateData)
 
         const updatedMemory = await memoriesService.updateMemory(updateData)
+        console.log('Store received updated memory:', updatedMemory)
         
         if (Array.isArray(this.memories)) {
           const index = this.memories.findIndex(m => m.id === data.id)
+          console.log('Found memory at index:', index)
           if (index !== -1) {
+            console.log('Updating memory in store array:', { old: this.memories[index], new: updatedMemory })
             this.memories[index] = updatedMemory
           }
         }

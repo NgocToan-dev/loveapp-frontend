@@ -84,7 +84,11 @@ export const memoriesService = {
         'Content-Type': 'application/json'
       }
     })
-    return normalizeMemory(response.data)
+    
+    console.log('Create memory API response:', response.data)
+    // Backend returns { message, memory }, so we need response.data.memory
+    const memoryData = response.data.memory || response.data
+    return normalizeMemory(memoryData)
   },
 
   // Update memory
@@ -105,7 +109,14 @@ export const memoriesService = {
         'Content-Type': 'application/json'
       }
     })
-    return normalizeMemory(response.data)
+    
+    console.log('Update memory API response:', response.data)
+    // Backend returns { message, memory }, so we need response.data.memory
+    const memoryData = response.data.memory || response.data
+    const normalizedMemory = normalizeMemory(memoryData)
+    console.log('Normalized memory:', normalizedMemory)
+    
+    return normalizedMemory
   },
 
   // Delete memory
