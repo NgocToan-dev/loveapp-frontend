@@ -3,6 +3,18 @@ export default {
   subtitle: 'Never forget special dates',
   description: 'Manage and track important events in your relationship',
   
+  no_connection_title: 'Not connected with partner',
+  no_connection_message: 'You need to connect with your partner to use shared reminders.',
+  no_reminders_title: 'No reminders yet',
+  no_reminders_message: 'Create your first reminder to never forget special dates.',
+  create_first: 'Create your first reminder',
+  overdue: 'Overdue',
+  overdue_by: 'Overdue by',
+  upcoming: 'Upcoming',
+  upcoming_section: 'Upcoming',
+  completed: 'Completed',
+  completed_section: 'Completed',
+  
   create: {
     title: 'Create New Reminder',
     button: 'Add Reminder'
@@ -99,27 +111,41 @@ export default {
     all: 'All reminders'
   },
 
-  no_connection_title: 'Connect with your partner',
-  no_connection_message: 'You need to connect with your partner to create shared reminders.',
-  no_reminders_title: 'No reminders yet',
-  no_reminders_message: 'Create your first reminder to never miss special moments!',
-  create_first: 'Create first reminder',
-  
   search_placeholder: 'Search reminders...',
-  
-  overdue_section: 'Overdue reminders',
-  upcoming_section: 'Upcoming reminders',
-  completed_section: 'Completed reminders',
-  all_section: 'All reminders',
 
   mark_complete: 'Mark as complete',
   mark_incomplete: 'Mark as incomplete',
+  time_remaining: 'Time remaining',
   snooze: 'Snooze',
   snooze_reminder: 'Snooze reminder',
-  snooze_description: 'Choose when to be reminded again:',
+  snooze_description: 'Snooze from the original reminder time:',
   custom_snooze: 'Custom time',
   snooze_until_date: 'Snooze until date',
   snooze_until_time: 'Snooze until time',
+
+  filters: {
+    all: 'All',
+    overdue: 'Overdue',
+    upcoming: 'Upcoming',
+    future: 'Future',
+    completed: 'Completed',
+    pending: 'Pending'
+  },
+
+  future: 'Future Reminders',
+  pending: 'Pending',
+  all: 'All Reminders',
+
+  no_overdue_title: 'No overdue reminders',
+  no_overdue_message: 'You\'ve completed all reminders on time!',
+  no_upcoming_title: 'No upcoming reminders',
+  no_upcoming_message: 'No reminders in the next 7 days.',
+  no_future_title: 'No future reminders',
+  no_future_message: 'No reminders beyond 7 days.',
+  no_completed_title: 'No completed reminders',
+  no_completed_message: 'Complete some reminders to see them here.',
+  no_pending_title: 'No pending reminders',
+  no_pending_message: 'All reminders have been completed!',
 
   snooze_options: {
     '15_minutes': '15 minutes',

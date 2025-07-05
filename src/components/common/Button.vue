@@ -3,7 +3,7 @@
     :class="buttonClasses"
     class="cursor-pointer"
     :disabled="disabled || loading"
-    @click="handleClick"
+    @click="handleClick($event)"
   >
     <svg 
       v-if="loading" 
@@ -59,12 +59,12 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  click: []
+  click: [event: Event]
 }>()
 
-const handleClick = () => {
+const handleClick = (event: Event) => {
   if (!props.disabled && !props.loading) {
-    emit('click')
+    emit('click', event)
   }
 }
 

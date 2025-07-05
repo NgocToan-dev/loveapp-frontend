@@ -44,6 +44,7 @@ export default {
     tagsHelp: 'Ví dụ: tình yêu, kỷ niệm, du lịch',
     category: 'Danh mục',
     privacy: 'Quyền riêng tư',
+    privacyHelp: 'Chọn quyền riêng tư cho bài viết của bạn. "Riêng tư" chỉ bạn và người yêu có thể xem, "Công khai" mọi người đều có thể xem.',
     status: 'Trạng thái',
     coverImage: 'Ảnh bìa',
     draft: 'Bản nháp',

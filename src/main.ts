@@ -1,4 +1,5 @@
 import './assets/main.css'
+import './assets/tooltip.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -6,6 +7,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import i18n from './plugins/i18n'
+import tooltipPlugin from './plugins/tooltip'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -33,6 +35,7 @@ initializeAppDataWatcher()
 
 app.use(router)
 app.use(i18n)
+app.use(tooltipPlugin)
 
 // Mount app
 app.mount('#app')

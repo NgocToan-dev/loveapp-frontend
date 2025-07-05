@@ -12,6 +12,7 @@
           <span :class="labelClasses">{{ label || placeholder }}</span>
         </slot>
         <ChevronDownIcon
+          v-if="showIconDropdown"
           :class="chevronClasses"
           :style="{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }"
         />
@@ -67,6 +68,7 @@ interface Props {
   disabled?: boolean
   rounded?: boolean
   shadow?: boolean
+  showIconDropdown?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -80,7 +82,8 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'default',
   disabled: false,
   rounded: true,
-  shadow: true
+  shadow: true,
+  showIconDropdown: true
 })
 
 const emit = defineEmits<{

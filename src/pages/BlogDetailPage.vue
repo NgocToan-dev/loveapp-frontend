@@ -2,15 +2,20 @@
   <AppLayout>
     <div class="blog-detail-page">
       <!-- Breadcrumb Navigation -->
-      <nav class="breadcrumb mb-6">
-        <RouterLink to="/blog" class="breadcrumb-link text-blue-600 hover:text-blue-800">
-          {{ $t("blog.title") }}
-        </RouterLink>
-        <ChevronRightIcon class="w-4 h-4 text-gray-400 mx-2" />
-        <span class="breadcrumb-current text-gray-900">
-          {{ currentPost?.title || $t("blog.detail.title") }}
-        </span>
-      </nav>
+      <div class="flex flex-col items-center">
+        <nav class="breadcrumb my-6">
+          <RouterLink
+            to="/blog"
+            class="breadcrumb-link text-blue-600 hover:text-blue-800"
+          >
+            {{ $t("blog.title") }}
+          </RouterLink>
+          <ChevronRightIcon class="w-4 h-4 text-gray-400 mx-2" />
+          <span class="breadcrumb-current text-gray-900">
+            {{ currentPost?.title || $t("blog.detail.title") }}
+          </span>
+        </nav>
+      </div>
 
       <!-- Loading State -->
       <div

@@ -380,7 +380,7 @@ This comprehensive plan ensures a consistent, scalable, and user-friendly CRUD e
 
 - [x] **Reminder CRUD Implementation**
   - [x] `src/components/reminders/ReminderDetail.vue` - Reminder detail component
-  - [x] `src/pages/ReminderDetailPageNew.vue` - Reminder detail page (with some type issues)
+  - [x] `src/pages/ReminderDetailPage.vue` - Reminder detail page (with some type issues)
   - [x] Router configuration for `/reminders/:id`
 
 ### 🔄 PHASE 2: In Progress - Memory CRUD

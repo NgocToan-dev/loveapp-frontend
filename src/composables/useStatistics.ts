@@ -14,24 +14,24 @@ export const useStatistics = () => {
   // Computed statistics
   const memoriesCount = computed(() => memoriesStore.memories.value.length)
   
-  const remindersCount = computed(() => remindersStore.reminders.length)
-  
-  const pendingRemindersCount = computed(() => 
-    remindersStore.reminders.filter((r: any) => r.isCompleted === false).length
+  const remindersCount = computed(() => remindersStore.reminders.value.length)
+
+  const pendingRemindersCount = computed(() =>
+    remindersStore.reminders.value.filter((r: any) => r.isCompleted === false).length
   )
-  
-  const completedRemindersCount = computed(() => 
-    remindersStore.reminders.filter((r: any) => r.isCompleted === true).length
+
+  const completedRemindersCount = computed(() =>
+    remindersStore.reminders.value.filter((r: any) => r.isCompleted === true).length
   )
-  
-  const daysTogethger = computed(() => {
+
+  const daysTogether = computed(() => {
     if (!coupleConnection.value?.relationshipStart) return 0
     return getDaysBetween(new Date(coupleConnection.value.relationshipStart), new Date())
   })
   
   const upcomingReminders = computed(() => {
     const today = new Date()
-    const upcoming = remindersStore.reminders.filter((r: any) => {
+    const upcoming = remindersStore.reminders.value.filter((r: any) => {
       const reminderDate = new Date(r.reminderDate)
       const diffTime = reminderDate.getTime() - today.getTime()
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -74,7 +74,7 @@ export const useStatistics = () => {
       })
     
     // Add recent reminders
-    remindersStore.reminders
+    remindersStore.reminders.value
       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 3)
       .forEach((reminder: any) => {
@@ -107,7 +107,7 @@ export const useStatistics = () => {
     remindersCount,
     pendingRemindersCount,
     completedRemindersCount,
-    daysTogethger,
+    daysTogether,
     upcomingReminders,
     thisMonthMemories,
     recentActivity,

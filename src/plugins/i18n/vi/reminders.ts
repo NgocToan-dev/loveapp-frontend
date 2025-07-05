@@ -3,6 +3,17 @@ export default {
   subtitle: 'Không bao giờ quên những ngày đặc biệt',
   description: 'Quản lý và theo dõi những sự kiện quan trọng trong mối quan hệ của bạn',
   
+  no_connection_title: 'Chưa kết nối với người yêu',
+  no_connection_message: 'Bạn cần kết nối với người yêu để sử dụng tính năng lời nhắc chung.',
+  no_reminders_title: 'Chưa có lời nhắc nào',
+  no_reminders_message: 'Tạo lời nhắc đầu tiên để không bao giờ quên những ngày đặc biệt.',
+  create_first: 'Tạo lời nhắc đầu tiên',
+  overdue: 'Quá hạn',
+  overdue_by: 'Quá hạn',
+  upcoming: 'Sắp tới',
+  completed: 'Đã hoàn thành',
+  active: 'Đang hoạt động',
+
   create: {
     title: 'Tạo lời nhắc mới',
     button: 'Thêm nhắc nhở'
@@ -99,27 +110,42 @@ export default {
     all: 'Tất cả lời nhắc'
   },
 
-  no_connection_title: 'Kết nối với người yêu',
-  no_connection_message: 'Bạn cần kết nối với người yêu để tạo lời nhắc chung.',
-  no_reminders_title: 'Chưa có lời nhắc nào',
-  no_reminders_message: 'Hãy tạo lời nhắc đầu tiên để không bỏ lỡ những ngày đặc biệt!',
-  create_first: 'Tạo lời nhắc đầu tiên',
-  
   search_placeholder: 'Tìm kiếm lời nhắc...',
-  
-  overdue_section: 'Lời nhắc quá hạn',
-  upcoming_section: 'Lời nhắc sắp tới',
-  completed_section: 'Lời nhắc đã hoàn thành',
-  all_section: 'Tất cả lời nhắc',
 
   mark_complete: 'Đánh dấu hoàn thành',
   mark_incomplete: 'Đánh dấu chưa hoàn thành',
+  cannot_edit_completed: 'Không thể chỉnh sửa lời nhắc đã hoàn thành',
+  time_remaining: 'Thời gian còn lại',
   snooze: 'Hoãn lại',
   snooze_reminder: 'Hoãn lời nhắc',
-  snooze_description: 'Chọn thời gian để được nhắc lại:',
+  snooze_description: 'Hoãn thêm từ thời gian nhắc nhở gốc:',
   custom_snooze: 'Thời gian tùy chỉnh',
   snooze_until_date: 'Hoãn đến ngày',
   snooze_until_time: 'Hoãn đến giờ',
+
+  filters: {
+    all: 'Tất cả',
+    overdue: 'Quá hạn',
+    upcoming: 'Sắp tới',
+    future: 'Lịch hẹn xa',
+    completed: 'Đã hoàn thành',
+    pending: 'Chưa hoàn thành'
+  },
+
+  future: 'Lịch hẹn xa',
+  pending: 'Chưa hoàn thành',
+  all: 'Tất cả lời nhắc',
+
+  no_overdue_title: 'Không có lời nhắc quá hạn',
+  no_overdue_message: 'Bạn đã hoàn thành tất cả lời nhắc đúng hạn!',
+  no_upcoming_title: 'Không có lời nhắc sắp tới',
+  no_upcoming_message: 'Không có lời nhắc nào trong 7 ngày tới.',
+  no_future_title: 'Không có lịch hẹn xa',
+  no_future_message: 'Không có lời nhắc nào sau 7 ngày tới.',
+  no_completed_title: 'Chưa có lời nhắc nào được hoàn thành',
+  no_completed_message: 'Hãy hoàn thành một số lời nhắc để xem chúng ở đây.',
+  no_pending_title: 'Không có lời nhắc đang chờ',
+  no_pending_message: 'Tất cả lời nhắc đã được hoàn thành!',
 
   snooze_options: {
     '15_minutes': '15 phút',
@@ -158,7 +184,8 @@ export default {
     updated: 'Cập nhật lời nhắc thành công!',
     deleted: 'Xóa lời nhắc thành công!',
     marked_completed: 'Đánh dấu hoàn thành thành công!',
-    marked_incomplete: 'Đánh dấu chưa hoàn thành thành công!'
+    marked_incomplete: 'Đánh dấu chưa hoàn thành thành công!',
+    snoozed: 'Hoãn lời nhắc thành công!'
   },
 
   actions: {

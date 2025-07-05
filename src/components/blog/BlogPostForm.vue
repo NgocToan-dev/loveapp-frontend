@@ -259,8 +259,8 @@
             :loading="isSubmitting"
             :disabled="!isFormValid"
           >
-            {{ form.status === 'published' 
-              ? (isEditMode ? $t('blog.actions.update') : $t('blog.actions.publish'))
+            {{ isEditMode && post?.status === 'published'
+              ? $t('blog.actions.update')
               : $t('blog.actions.publish')
             }}
           </Button>
@@ -466,8 +466,11 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
+    // Khi nhấn nút submit (publish), tự động chuyển trạng thái sang published
     const submitData = {
       ...form.value,
+      status: StatusEnum.published,
+      isPublished: true,
       contentHtml: form.value.content, // For now, use content as contentHtml
       // coverImage is no longer needed since we upload directly
     }

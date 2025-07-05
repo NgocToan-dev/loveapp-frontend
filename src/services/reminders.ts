@@ -6,30 +6,68 @@ import type {
   PaginatedResponse 
 } from '@/types'
 
+// Normalize reminder data from backend to frontend format
+const normalizeReminder = (reminder: any): Reminder => {
+  return {
+    ...reminder,
+    id: reminder.id || reminder._id?.toString() || reminder._id,
+    userId: reminder.userId ? {
+      _id: reminder.userId._id || reminder.userId,
+      displayName: reminder.userId.displayName || '',
+      avatarUrl: reminder.userId.avatarUrl || ''
+    } : undefined,
+    description: reminder.description || '',
+    repeat: reminder.repeat || 'none',
+    recurringType: reminder.recurringType || 'none',
+    notified: reminder.notified || false
+  }
+}
+
+// Normalize array of reminders
+const normalizeReminders = (reminders: any[]): Reminder[] => {
+  return reminders.map(normalizeReminder)
+}
+
 export const remindersService = {
   // Get all reminders for the couple
   async getReminders(page = 1, limit = 10): Promise<PaginatedResponse<Reminder>> {
     const response = await api.get(`/reminders?page=${page}&limit=${limit}`)
-    return response.data
+    // Transform the backend response to match our PaginatedResponse interface
+    return {
+      success: true,
+      data: normalizeReminders(response.data.reminders || []),
+      pagination: {
+        page: response.data.pagination?.currentPage || page,
+        limit: limit,
+        total: response.data.pagination?.totalReminders || 0,
+        totalPages: response.data.pagination?.totalPages || 1
+      }
+    }
+  },
+
+  // Get all reminders without pagination (for full view)
+  async getAllReminders(): Promise<Reminder[]> {
+    const response = await api.get('/reminders?limit=1000') // Get a large number to get all
+    return normalizeReminders(response.data.reminders || [])
   },
 
   // Get single reminder by ID
   async getReminder(id: string): Promise<Reminder> {
     const response = await api.get(`/reminders/${id}`)
-    return response.data
+    return normalizeReminder(response.data.reminder || response.data)
   },
 
   // Create new reminder
   async createReminder(data: CreateReminderRequest): Promise<Reminder> {
     const response = await api.post('/reminders', data)
-    return response.data
+    return normalizeReminder(response.data.reminder || response.data)
   },
 
   // Update reminder
   async updateReminder(data: UpdateReminderRequest): Promise<Reminder> {
     const { id, ...updateData } = data
     const response = await api.put(`/reminders/${id}`, updateData)
-    return response.data
+    return normalizeReminder(response.data.reminder || response.data)
   },
 
   // Delete reminder
@@ -40,43 +78,43 @@ export const remindersService = {
   // Mark reminder as completed
   async markCompleted(id: string): Promise<Reminder> {
     const response = await api.patch(`/reminders/${id}/complete`)
-    return response.data
+    return normalizeReminder(response.data.reminder || response.data)
   },
 
   // Mark reminder as incomplete
   async markIncomplete(id: string): Promise<Reminder> {
     const response = await api.patch(`/reminders/${id}/incomplete`)
-    return response.data
+    return normalizeReminder(response.data.reminder || response.data)
   },
 
   // Get upcoming reminders
   async getUpcomingReminders(days = 7): Promise<Reminder[]> {
     const response = await api.get(`/reminders/upcoming?days=${days}`)
-    return response.data
+    return normalizeReminders(response.data.reminders || response.data)
   },
 
   // Get overdue reminders
   async getOverdueReminders(): Promise<Reminder[]> {
     const response = await api.get('/reminders/overdue')
-    return response.data
+    return normalizeReminders(response.data.reminders || response.data)
   },
 
   // Get reminders by type
   async getRemindersByType(type: Reminder['type']): Promise<Reminder[]> {
     const response = await api.get(`/reminders/type/${type}`)
-    return response.data
+    return normalizeReminders(response.data.reminders || response.data)
   },
 
   // Get reminders for specific date
   async getRemindersForDate(date: string): Promise<Reminder[]> {
     const response = await api.get(`/reminders/date/${date}`)
-    return response.data
+    return normalizeReminders(response.data.reminders || response.data)
   },
 
   // Search reminders
   async searchReminders(query: string): Promise<Reminder[]> {
     const response = await api.get(`/reminders/search?q=${encodeURIComponent(query)}`)
-    return response.data
+    return normalizeReminders(response.data.reminders || response.data)
   },
 
   // Get reminder statistics
@@ -95,13 +133,13 @@ export const remindersService = {
   // Snooze reminder
   async snoozeReminder(id: string, snoozeUntil: string): Promise<Reminder> {
     const response = await api.patch(`/reminders/${id}/snooze`, { snoozeUntil })
-    return response.data
+    return normalizeReminder(response.data.reminder || response.data)
   },
 
   // Get recurring reminders
   async getRecurringReminders(): Promise<Reminder[]> {
     const response = await api.get('/reminders/recurring')
-    return response.data
+    return normalizeReminders(response.data.reminders || response.data)
   },
 
   // Update recurring pattern
@@ -113,6 +151,6 @@ export const remindersService = {
     }
   ): Promise<Reminder> {
     const response = await api.patch(`/reminders/${id}/recurring`, pattern)
-    return response.data
+    return normalizeReminder(response.data.reminder || response.data)
   }
 }

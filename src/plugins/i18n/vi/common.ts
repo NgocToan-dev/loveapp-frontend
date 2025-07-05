@@ -36,7 +36,20 @@ export default {
     invalidEmail: 'Email không hợp lệ',
     minLength: 'Tối thiểu {min} ký tự',
     maxLength: 'Tối đa {max} ký tự',
-    passwordMatch: 'Mật khẩu không khớp'
+    passwordMatch: 'Mật khẩu không khớp',
+    password: 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số',
+    confirmPassword: 'Xác nhận mật khẩu không khớp',
+    futureDate: 'Ngày phải trong tương lai',
+    pastDate: 'Ngày phải trong quá khứ',
+    validDate: 'Ngày không hợp lệ',
+    validTime: 'Thời gian không hợp lệ (định dạng HH:MM)',
+    phone: 'Số điện thoại không hợp lệ',
+    url: 'URL không hợp lệ',
+    numeric: 'Phải là số',
+    min: 'Giá trị tối thiểu là {min}',
+    max: 'Giá trị tối đa là {max}',
+    fileSize: 'Kích thước file không được vượt quá {size}MB',
+    fileType: 'Định dạng file không được hỗ trợ'
   },
   actions: {
     signOut: 'Đăng xuất',
@@ -79,13 +92,32 @@ export default {
     days_ago: '{count} ngày trước',
     weeks_ago: '{count} tuần trước',
     months_ago: '{count} tháng trước',
-    years_ago: '{count} năm trước'
+    years_ago: '{count} năm trước',
+    days: 'ngày',
+    hours: 'giờ',
+    minutes: 'phút',
+    seconds: 'giây'
   },
   or: 'hoặc',
   and: 'và',
   dismiss: 'Bỏ qua',
   refresh: 'Làm mới',
   search: 'Tìm kiếm',
+  error: {
+    title: 'Có lỗi xảy ra',
+    unexpected: 'Có lỗi bất ngờ xảy ra',
+    details: 'Chi tiết lỗi'
+  },
+  share: {
+    default: 'Chia sẻ',
+    copy_link: 'Sao chép liên kết',
+    share_text: 'Chia sẻ văn bản',
+    share_text_label: 'Nội dung chia sẻ',
+    link_copied: 'Đã sao chép liên kết!',
+    text_copied: 'Đã sao chép văn bản!',
+    copy_failed: 'Không thể sao chép',
+    share_failed: 'Không thể chia sẻ'
+  },
   filter: {
     title: 'Bộ lọc',
     clear_all: 'Xóa tất cả',
@@ -98,7 +130,6 @@ export default {
   select_all: 'Chọn tất cả',
   copy: 'Sao chép',
   copied: 'Đã sao chép!',
-  share: 'Chia sẻ',
   settings: 'Cài đặt',
   remove: 'Xóa',
   addCustom: 'Thêm "{value}"',

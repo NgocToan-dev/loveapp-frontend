@@ -1,151 +1,216 @@
 <template>
   <div 
-    class="reminder-card"
+    class="reminder-card group"
     :class="{ 
-      completed: reminder.isCompleted, 
-      overdue: isOverdue,
-      upcoming: isUpcoming 
+      'completed': reminder.isCompleted, 
+      'overdue': !reminder.isCompleted && isOverdue,
+      'upcoming': !reminder.isCompleted && isUpcoming 
     }"
     @click="handleCardClick"
   >
-    <!-- Reminder Header -->
-    <div class="reminder-header">
-      <div class="reminder-type-icon">
-        {{ getReminderIcon(reminder.type) }}
-      </div>
-      
-      <div class="reminder-info">
-        <h3 class="reminder-title">{{ reminder.title }}</h3>
-        <p v-if="reminder.description" class="reminder-description">
+    <!-- Main Content -->
+    <div class="reminder-content">
+      <!-- Title and Description -->
+      <div class="mb-4">
+        <h3 class="text-lg font-semibold mb-2 leading-tight"
+            :class="reminder.isCompleted ? 'text-gray-500 line-through' : 'text-gray-900'">
+          {{ reminder.title }}
+        </h3>
+        <p v-if="reminder.description" 
+           class="text-sm leading-relaxed line-clamp-2"
+           :class="reminder.isCompleted ? 'text-gray-400' : 'text-gray-600'">
           {{ reminder.description }}
         </p>
       </div>
 
-      <div class="reminder-actions">
-        <Button
-          @click="toggleComplete"
-          :variant="reminder.isCompleted ? 'outline' : 'primary'"
-          size="sm"
-          :loading="isUpdating"
-        >
-          {{ reminder.isCompleted ? $t('reminders.mark_incomplete') : $t('reminders.mark_complete') }}
-        </Button>
-        
-        <Dropdown>
-          <template #trigger>
-            <Button variant="ghost" size="sm" class="more-actions">
-              ⋯
-            </Button>
-          </template>
-          
-          <DropdownItem @click="$emit('edit', reminder)">
-            {{ $t('common.actions.edit') }}
-          </DropdownItem>
-          
-          <DropdownItem 
-            v-if="!reminder.isCompleted && !isOverdue"
-            @click="showSnoozeDialog = true"
-          >
-            {{ $t('reminders.snooze') }}
-          </DropdownItem>
-          
-          <DropdownItem @click="showDeleteConfirm = true" class="danger">
-            {{ $t('common.actions.delete') }}
-          </DropdownItem>
-        </Dropdown>
-      </div>
-    </div>
-
-    <!-- Reminder Details -->
-    <div class="reminder-details">
-      <div class="detail-item">
-        <span class="detail-icon">📅</span>
-        <span class="detail-text">
-          {{ formatDateTime(reminder.reminderDate, reminder.reminderTime) }}
+      <!-- Status and Type Information -->
+      <div class="flex items-center gap-2 mb-3 flex-wrap">
+        <!-- Status Badge -->
+        <span v-if="reminder.isCompleted" 
+              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <CheckCircleIcon class="h-3 w-3 mr-1" />
+          {{ $t('reminders.completed') }}
         </span>
-      </div>
-
-      <div v-if="reminder.isRecurring" class="detail-item">
-        <span class="detail-icon">🔄</span>
-        <span class="detail-text">
-          {{ $t(`reminders.recurring.${reminder.recurringType}`) }}
-        </span>
-      </div>
-
-      <div v-if="isUpcoming && !reminder.isCompleted" class="detail-item countdown">
-        <span class="detail-icon">⏰</span>
-        <span class="detail-text countdown-text">
-          {{ formatCountdown(reminderDateTime) }}
-        </span>
-      </div>
-
-      <div v-if="isOverdue && !reminder.isCompleted" class="detail-item overdue">
-        <span class="detail-icon">⚠️</span>
-        <span class="detail-text">
+        <span v-else-if="isOverdue" 
+              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <ExclamationTriangleIcon class="h-3 w-3 mr-1" />
           {{ $t('reminders.overdue') }}
         </span>
+        <span v-else-if="isUpcoming"
+              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          <ClockIcon class="h-3 w-3 mr-1" />
+          {{ $t('reminders.upcoming') }}
+        </span>
+        <span v-else 
+              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <ClockIcon class="h-3 w-3 mr-1" />
+          {{ $t('reminders.active') }}
+        </span>
+        
+        <!-- Type Badge -->
+        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
+          <span class="mr-1">{{ getReminderIcon(reminder.type) }}</span>
+          {{ $t(`reminders.types.${reminder.type}`) }}
+        </span>
+        
+        <!-- Recurring Badge -->
+        <span v-if="reminder.isRecurring" 
+              class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700">
+          🔄 {{ $t(`reminders.recurring.${reminder.recurringType}`) }}
+        </span>
+      </div>
+
+      <!-- Time Information -->
+      <div class="space-y-2">
+        <!-- Scheduled Time -->
+        <div class="flex items-center text-sm text-gray-600">
+          <CalendarIcon class="h-4 w-4 mr-2 text-gray-400" />
+          <span>{{ formatDateTimeDisplay(reminderDateTime) }}</span>
+        </div>
+        
+        <!-- Time Remaining / Status -->
+        <div v-if="reminder.isCompleted" class="flex items-center text-sm text-green-600">
+          <CheckCircleIcon class="h-4 w-4 mr-2" />
+          <span class="font-medium">{{ $t('reminders.completed') }}</span>
+        </div>
+        <div v-else-if="isOverdue" class="flex items-center text-sm text-red-600">
+          <ExclamationTriangleIcon class="h-4 w-4 mr-2" />
+          <span class="font-medium">
+            {{ $t('reminders.overdue_by') }} {{ formatTimeRemaining(reminderDateTime, true) }}
+          </span>
+        </div>
+        <div v-else class="flex items-center text-sm text-blue-600">
+          <ClockIcon class="h-4 w-4 mr-2" />
+          <span class="font-medium">
+            {{ $t('reminders.time_remaining') }}: {{ formatTimeRemaining(reminderDateTime) }}
+          </span>
+        </div>
       </div>
     </div>
 
-    <!-- Reminder Footer -->
-    <div class="reminder-footer">
-      <div class="reminder-meta">
-        <span class="created-by">
-          {{ $t('reminders.created_by') }}: {{ reminder.createdBy || 'Unknown' }}
-        </span>
-        <span class="created-date">
-          {{ formatDate(reminder.createdAt, 'relative') }}
-        </span>
-      </div>
-
-      <div v-if="reminder.type !== 'custom'" class="reminder-type-badge">
-        {{ $t(`reminders.types.${reminder.type}`) }}
+    <!-- Actions Footer -->
+    <div class="reminder-actions border-t border-gray-100 pt-3 mt-4">
+      <div class="flex items-center justify-between gap-2">
+        <!-- Primary Actions -->
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="!reminder.isCompleted"
+            @click.stop="toggleComplete"
+            variant="success"
+            size="sm"
+            class="bg-green-600 hover:bg-green-700 text-white"
+            :disabled="isUpdating"
+            v-tooltip="$t('reminders.mark_complete')"
+          >
+            <CheckCircleIcon class="h-4 w-4" />
+          </Button>
+          
+          <Button
+            v-if="reminder.isCompleted"
+            @click.stop="toggleComplete"
+            variant="outline"
+            size="sm"
+            class="border-gray-300 text-gray-700 hover:bg-gray-50"
+            :disabled="isUpdating"
+            v-tooltip="$t('reminders.mark_incomplete')"
+          >
+            <ArrowUturnLeftIcon class="h-4 w-4" />
+          </Button>
+          
+          <Button
+            v-if="!reminder.isCompleted && !isOverdue"
+            @click.stop="showSnoozeDialog = true"
+            variant="outline"
+            size="sm"
+            class="border-blue-300 text-blue-700 hover:bg-blue-50"
+            v-tooltip="$t('reminders.snooze')"
+          >
+            <ClockIcon class="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <!-- Secondary Actions -->
+        <div class="flex items-center gap-1">
+          <Button
+            @click.stop="$emit('edit', reminder)"
+            variant="ghost"
+            size="sm"
+            class="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            :disabled="reminder.isCompleted"
+            :class="{ 'opacity-50 cursor-not-allowed': reminder.isCompleted }"
+            v-tooltip="reminder.isCompleted ? $t('reminders.cannot_edit_completed') : $t('common.actions.edit')"
+          >
+            <PencilIcon class="h-4 w-4" />
+          </Button>
+          
+          <Button
+            @click.stop="showDeleteConfirm = true"
+            variant="ghost"
+            size="sm"
+            class="text-red-600 hover:text-red-700 hover:bg-red-50"
+            v-tooltip="$t('common.actions.delete')"
+          >
+            <TrashIcon class="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
 
     <!-- Snooze Dialog -->
     <Modal v-model="showSnoozeDialog" :title="$t('reminders.snooze_reminder')">
-      <div class="snooze-options">
-        <p>{{ $t('reminders.snooze_description') }}</p>
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600">{{ $t('reminders.snooze_description') }}</p>
         
-        <div class="snooze-buttons">
+        <!-- Quick Snooze Options -->
+        <div class="grid grid-cols-2 gap-2">
           <Button
             v-for="option in snoozeOptions"
             :key="option.value"
             @click="handleSnooze(option.value)"
             variant="outline"
-            class="snooze-button"
+            class="text-sm"
           >
             {{ option.label }}
           </Button>
         </div>
 
-        <div class="custom-snooze">
-          <h4>{{ $t('reminders.custom_snooze') }}</h4>
-          <div class="snooze-form">
-            <div class="input-group">
-              <label>{{ $t('reminders.snooze_until_date') }}</label>
+        <!-- Custom Snooze -->
+        <div class="border-t pt-4">
+          <h4 class="text-sm font-medium text-gray-900 mb-3">{{ $t('reminders.custom_snooze') }}</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                {{ $t('reminders.snooze_until_date') }}
+              </label>
               <input
                 v-model="customSnoozeDate"
                 type="date"
-                class="form-input"
+                :min="new Date().toISOString().split('T')[0]"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <div class="input-group">
-              <label>{{ $t('reminders.snooze_until_time') }}</label>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                {{ $t('reminders.snooze_until_time') }}
+              </label>
               <input
                 v-model="customSnoozeTime"
                 type="time"
-                class="form-input"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <Button
-              @click="handleCustomSnooze"
-              :disabled="!customSnoozeDate || !customSnoozeTime"
-            >
-              {{ $t('reminders.snooze') }}
-            </Button>
           </div>
+          <div v-if="customSnoozeDate && customSnoozeTime && !isCustomSnoozeValid" class="mt-2">
+            <p class="text-xs text-red-600">{{ $t('reminders.validation.date_future') }}</p>
+          </div>
+          <Button
+            @click="handleCustomSnooze"
+            :disabled="!isCustomSnoozeValid"
+            class="w-full mt-3"
+            :class="{ 'opacity-50 cursor-not-allowed': !isCustomSnoozeValid }"
+          >
+            {{ $t('reminders.snooze') }}
+          </Button>
         </div>
       </div>
     </Modal>
@@ -168,11 +233,17 @@ import { useI18n } from 'vue-i18n'
 import type { Reminder } from '@/types'
 import { formatDateTime, formatDate, formatCountdown } from '@/utils/helpers'
 import Button from '@/components/common/Button.vue'
-import Dropdown from '@/components/common/Dropdown.vue'
-import DropdownItem from '@/components/common/DropdownItem.vue'
 import Modal from '@/components/common/Modal.vue'
-import Input from '@/components/common/Input.vue'
 import BaseConfirmModal from '@/components/common/BaseConfirmModal.vue'
+import { 
+  CheckCircleIcon, 
+  ExclamationTriangleIcon, 
+  ClockIcon,
+  CalendarIcon,
+  PencilIcon,
+  TrashIcon,
+  ArrowUturnLeftIcon
+} from '@heroicons/vue/24/outline'
 
 interface Props {
   reminder: Reminder
@@ -202,7 +273,8 @@ const customSnoozeTime = ref('')
 
 // Computed
 const reminderDateTime = computed(() => {
-  return new Date(props.reminder.reminderDate + 'T' + props.reminder.reminderTime)
+  // Use datetime directly from backend (primary source)
+  return new Date(props.reminder.datetime)
 })
 
 const isOverdue = computed(() => {
@@ -237,6 +309,15 @@ const snoozeOptions = computed(() => [
   }
 ])
 
+const isCustomSnoozeValid = computed(() => {
+  if (!customSnoozeDate.value || !customSnoozeTime.value) return false
+  
+  const snoozeDateTime = new Date(`${customSnoozeDate.value}T${customSnoozeTime.value}:00`)
+  const now = new Date()
+  
+  return snoozeDateTime > now
+})
+
 // Methods
 const getReminderIcon = (type: string) => {
   const icons = {
@@ -249,13 +330,14 @@ const getReminderIcon = (type: string) => {
 }
 
 const handleCardClick = (event: Event) => {
-  // Prevent card click when clicking on buttons or dropdowns
+  // Prevent card click when clicking on buttons
   const target = event.target as HTMLElement
   if (target.closest('button') || target.closest('.dropdown')) {
     return
   }
   
-  emit('click', props.reminder)
+  // Click functionality disabled - no action on card click
+  // emit('click', props.reminder)
 }
 
 const toggleComplete = () => {
@@ -263,22 +345,65 @@ const toggleComplete = () => {
 }
 
 const handleSnooze = (minutes: number) => {
-  const snoozeUntil = new Date()
-  snoozeUntil.setMinutes(snoozeUntil.getMinutes() + minutes)
+  // Snooze from the original reminder time, not from current time
+  const originalDateTime = new Date(props.reminder.datetime)
+  const snoozeUntil = new Date(originalDateTime.getTime() + minutes * 60 * 1000)
+  const now = new Date()
   
-  const snoozeDate = snoozeUntil.toISOString().split('T')[0]
-  const snoozeTime = snoozeUntil.toTimeString().split(' ')[0].substring(0, 5)
+  // If the snoozed time is still in the past, snooze from current time instead
+  const finalSnoozeTime = snoozeUntil <= now 
+    ? new Date(now.getTime() + minutes * 60 * 1000)
+    : snoozeUntil
   
-  emit('snooze', props.reminder.id, `${snoozeDate}T${snoozeTime}`)
+  // Send full ISO string format
+  emit('snooze', props.reminder.id, finalSnoozeTime.toISOString())
   showSnoozeDialog.value = false
 }
 
 const handleCustomSnooze = () => {
   if (customSnoozeDate.value && customSnoozeTime.value) {
-    emit('snooze', props.reminder.id, `${customSnoozeDate.value}T${customSnoozeTime.value}`)
+    // Validate that snooze time is in the future
+    const snoozeDateTime = new Date(`${customSnoozeDate.value}T${customSnoozeTime.value}:00`)
+    const now = new Date()
+    
+    if (snoozeDateTime <= now) {
+      // Could show an error message here, but for now just ignore invalid times
+      return
+    }
+    
+    // Send full ISO string format
+    emit('snooze', props.reminder.id, snoozeDateTime.toISOString())
     showSnoozeDialog.value = false
     customSnoozeDate.value = ''
     customSnoozeTime.value = ''
+  }
+}
+
+const formatDateTimeDisplay = (dateTime: Date) => {
+  return dateTime.toLocaleString('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}
+
+const formatTimeRemaining = (dateTime: Date, isOverdue = false) => {
+  const now = new Date()
+  const diff = isOverdue ? now.getTime() - dateTime.getTime() : dateTime.getTime() - now.getTime()
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  
+  if (days > 0) {
+    return `${days} ${t('common.time.days')} ${hours > 0 ? `${hours} ${t('common.time.hours')}` : ''}`
+  } else if (hours > 0) {
+    return `${hours} ${t('common.time.hours')} ${minutes > 0 ? `${minutes} ${t('common.time.minutes')}` : ''}`
+  } else {
+    return `${minutes} ${t('common.time.minutes')}`
   }
 }
 </script>
@@ -286,234 +411,66 @@ const handleCustomSnooze = () => {
 <style scoped>
 .reminder-card {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(229 231 235);
+  padding: 1.5rem;
+  transition: all 0.2s;
   cursor: pointer;
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-  }
-
-  &.completed {
-    opacity: 0.7;
-    background: #f8f9fa;
-    
-    .reminder-title {
-      text-decoration: line-through;
-      color: #666;
-    }
-  }
-
-  &.overdue {
-    border-left: 4px solid #f44336;
-    background: #fff5f5;
-  }
-
-  &.upcoming {
-    border-left: 4px solid #4caf50;
-    background: #f8fff8;
-  }
 }
 
-.reminder-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
+.reminder-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: rgb(156 163 175);
 }
 
-.reminder-type-icon {
-  font-size: 1.5rem;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f5f5;
-  border-radius: 50%;
-  flex-shrink: 0;
+.reminder-card.completed {
+  background: rgb(249 250 251);
+  border-color: rgb(229 231 235);
 }
 
-.reminder-info {
-  flex: 1;
+.reminder-card.completed .reminder-content h3 {
+  text-decoration: line-through;
+  color: rgb(107 114 128);
 }
 
-.reminder-title {
-  margin: 0 0 4px 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #2c3e50;
+.reminder-card.overdue {
+  border-color: rgb(254 202 202);
+  background: rgb(254 242 242);
 }
 
-.reminder-description {
-  margin: 0;
-  color: #666;
-  font-size: 0.875rem;
-  line-height: 1.4;
+.reminder-card.upcoming {
+  border-color: rgb(252 211 77);
+  background: rgb(255 251 235);
 }
 
 .reminder-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.more-actions {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-
-.reminder-details {
-  margin-bottom: 16px;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &.countdown {
-    color: #4caf50;
-    font-weight: 500;
-  }
-
-  &.overdue {
-    color: #f44336;
-    font-weight: 500;
-  }
-}
-
-.detail-icon {
-  font-size: 0.875rem;
-  width: 16px;
-  text-align: center;
-}
-
-.detail-text {
-  font-size: 0.875rem;
-}
-
-.countdown-text {
-  font-weight: 600;
-}
-
-.reminder-footer {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
 }
 
-.reminder-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 0.75rem;
-  color: #888;
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.reminder-type-badge {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.snooze-options {
-  p {
-    margin: 0 0 16px 0;
-    color: #666;
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .reminder-card {
+    padding: 1rem;
   }
-}
-
-.snooze-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.snooze-button {
-  padding: 12px;
-}
-
-.custom-snooze {
-  border-top: 1px solid #e0e0e0;
-  padding-top: 16px;
-
-  h4 {
-    margin: 0 0 12px 0;
-    font-size: 1rem;
-  }
-}
-
-.snooze-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-  }
-}
-
-.form-input {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  transition: border-color 0.2s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-  }
-}
-
-@media (max-width: 768px) {
-  .reminder-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
+  
   .reminder-actions {
-    justify-content: flex-end;
-    margin-top: 12px;
-  }
-
-  .reminder-footer {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    gap: 0.75rem;
   }
-
-  .snooze-buttons {
-    grid-template-columns: 1fr;
+  
+  .reminder-actions > div {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

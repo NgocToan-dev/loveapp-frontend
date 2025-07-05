@@ -1,3 +1,4 @@
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotifications } from './useNotifications'
 import { useRemindersStore } from '@/stores/reminders'
@@ -8,19 +9,19 @@ export function useReminders() {
   const { showSuccess, showError } = useNotifications()
   const remindersStore = useRemindersStore()
 
-  // Return store properties directly instead of destructuring
-  const reminders = remindersStore.reminders
-  const isLoading = remindersStore.isLoading
-  const error = remindersStore.error
-  const selectedReminder = remindersStore.selectedReminder
-  const upcomingReminders = remindersStore.upcomingReminders
-  const todayReminders = remindersStore.todayReminders
-  const overDueReminders = remindersStore.overDueReminders
-  const completedReminders = remindersStore.completedReminders
-  const remindersByType = remindersStore.remindersByType
-  const remindersCount = remindersStore.remindersCount
-  const pendingCount = remindersStore.pendingCount
-  const completedCount = remindersStore.completedCount
+  // Use computed properties for reactive store state
+  const reminders = computed(() => remindersStore.reminders)
+  const isLoading = computed(() => remindersStore.isLoading)
+  const error = computed(() => remindersStore.error)
+  const selectedReminder = computed(() => remindersStore.selectedReminder)
+  const upcomingReminders = computed(() => remindersStore.upcomingReminders)
+  const todayReminders = computed(() => remindersStore.todayReminders)
+  const overDueReminders = computed(() => remindersStore.overDueReminders)
+  const completedReminders = computed(() => remindersStore.completedReminders)
+  const remindersByType = computed(() => remindersStore.remindersByType)
+  const remindersCount = computed(() => remindersStore.remindersCount)
+  const pendingCount = computed(() => remindersStore.pendingCount)
+  const completedCount = computed(() => remindersStore.completedCount)
 
   // Wrapped actions with notifications
   const fetchReminders = async () => {
@@ -95,11 +96,22 @@ export function useReminders() {
     }
   }
 
+  const snoozeReminder = async (id: string, snoozeUntil: string) => {
+    try {
+      const updatedReminder = await remindersStore.snoozeReminder(id, snoozeUntil)
+      showSuccess(t('reminders.success.snoozed'))
+      return updatedReminder
+    } catch (err: any) {
+      showError(t('reminders.errors.snooze_failed'), err.message)
+      throw err
+    }
+  }
+
   // Helper functions
-  const hasReminders = () => remindersCount > 0
-  const hasUpcomingReminders = () => upcomingReminders.length > 0
-  const hasTodayReminders = () => todayReminders.length > 0
-  const hasOverdueReminders = () => overDueReminders.length > 0
+  const hasReminders = () => remindersCount.value > 0
+  const hasUpcomingReminders = () => upcomingReminders.value.length > 0
+  const hasTodayReminders = () => todayReminders.value.length > 0
+  const hasOverdueReminders = () => overDueReminders.value.length > 0
 
   const getReminderStatusColor = (reminder: any) => {
     if (reminder.isCompleted) return 'text-green-600'
@@ -155,6 +167,7 @@ export function useReminders() {
     deleteReminder,
     markCompleted,
     markIncomplete,
+    snoozeReminder,
     
     // Helpers
     hasReminders,

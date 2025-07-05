@@ -37,7 +37,20 @@ export default {
     invalidEmail: 'Invalid email address',
     minLength: 'Minimum {min} characters',
     maxLength: 'Maximum {max} characters',
-    passwordMatch: 'Passwords do not match'
+    passwordMatch: 'Passwords do not match',
+    password: 'Password must be at least 8 characters with uppercase, lowercase and number',
+    confirmPassword: 'Password confirmation does not match',
+    futureDate: 'Date must be in the future',
+    pastDate: 'Date must be in the past',
+    validDate: 'Invalid date',
+    validTime: 'Invalid time format (HH:MM)',
+    phone: 'Invalid phone number',
+    url: 'Invalid URL',
+    numeric: 'Must be a number',
+    min: 'Minimum value is {min}',
+    max: 'Maximum value is {max}',
+    fileSize: 'File size must not exceed {size}MB',
+    fileType: 'File type not supported'
   },
   actions: {
     signOut: 'Sign Out',
@@ -78,7 +91,11 @@ export default {
     days_ago: '{count} days ago',
     weeks_ago: '{count} weeks ago',
     months_ago: '{count} months ago',
-    years_ago: '{count} years ago'
+    years_ago: '{count} years ago',
+    days: 'days',
+    hours: 'hours',
+    minutes: 'minutes',
+    seconds: 'seconds'
   },
   or: 'or',
   and: 'and',

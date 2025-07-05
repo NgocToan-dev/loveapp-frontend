@@ -11,7 +11,7 @@
         :disabled="isLoading"
       >
         <PencilIcon class="w-4 h-4 mr-2" />
-        {{ $t('common.actions.edit') }}
+        {{ $t("common.actions.edit") }}
       </Button>
 
       <!-- Favorite Action -->
@@ -26,7 +26,7 @@
         :class="{ 'is-favorite': isFavorite }"
       >
         <HeartIcon class="w-4 h-4 mr-2" :class="{ 'fill-current': isFavorite }" />
-        {{ isFavorite ? $t('common.actions.unfavorite') : $t('common.actions.favorite') }}
+        {{ isFavorite ? $t("common.actions.unfavorite") : $t("common.actions.favorite") }}
       </Button>
     </div>
 
@@ -41,15 +41,13 @@
         :disabled="isLoading"
       >
         <ShareIcon class="w-4 h-4 mr-2" />
-        {{ $t('common.actions.share') }}
+        {{ $t("common.actions.share") }}
       </Button>
 
       <!-- More Actions Dropdown -->
-      <Dropdown>
+      <Dropdown :showIconDropdown="false">
         <template #trigger>
-          <Button variant="ghost" size="sm" class="more-actions">
-            <EllipsisVerticalIcon class="w-4 h-4" />
-          </Button>
+          <EllipsisVerticalIcon class="w-6 h-6" />
         </template>
 
         <!-- Duplicate Action -->
@@ -58,28 +56,28 @@
           @click="$emit('duplicate')"
           :disabled="isLoading"
         >
-          <DocumentDuplicateIcon class="w-4 h-4 mr-2" />
-          {{ $t('common.actions.duplicate') }}
+          <div class="flex items-center">
+            <DocumentDuplicateIcon class="w-4 h-4 mr-2" />
+            {{ $t("common.actions.duplicate") }}
+          </div>
         </DropdownItem>
 
         <!-- Export Action -->
-        <DropdownItem
-          v-if="canExport"
-          @click="$emit('export')"
-          :disabled="isLoading"
-        >
-          <ArrowDownTrayIcon class="w-4 h-4 mr-2" />
-          {{ $t('common.actions.export') }}
+        <DropdownItem v-if="canExport" @click="$emit('export')" :disabled="isLoading">
+          <div class="flex items-center">
+            <ArrowDownTrayIcon class="w-4 h-4 mr-2" />
+            <span class="mr-2">{{ $t("common.actions.export") }}</span>
+          </div>
         </DropdownItem>
 
         <!-- Archive Action -->
-        <DropdownItem
-          v-if="canArchive"
-          @click="$emit('archive')"
-          :disabled="isLoading"
-        >
-          <ArchiveBoxIcon class="w-4 h-4 mr-2" />
-          {{ isArchived ? $t('common.actions.unarchive') : $t('common.actions.archive') }}
+        <DropdownItem v-if="canArchive" @click="$emit('archive')" :disabled="isLoading">
+          <div class="flex items-center">
+            <ArchiveBoxIcon class="w-4 h-4 mr-2" />
+            {{
+              isArchived ? $t("common.actions.unarchive") : $t("common.actions.archive")
+            }}
+          </div>
         </DropdownItem>
 
         <div v-if="canDelete" class="border-t border-gray-200 my-1"></div>
@@ -91,8 +89,10 @@
           :disabled="isLoading"
           class="danger"
         >
-          <TrashIcon class="w-4 h-4 mr-2" />
-          {{ $t('common.actions.delete') }}
+          <div class="flex items-center">
+            <TrashIcon class="w-4 h-4 mr-2" />
+            {{ $t("common.actions.delete") }}
+          </div>
         </DropdownItem>
       </Dropdown>
     </div>
@@ -100,33 +100,42 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import Button from '@/components/common/Button.vue'
-import Dropdown from '@/components/common/Dropdown.vue'
-import DropdownItem from '@/components/common/DropdownItem.vue'
-import { PencilIcon, HeartIcon, ShareIcon, DocumentDuplicateIcon, ArrowDownTrayIcon, ArchiveBoxIcon, TrashIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
+import { useI18n } from "vue-i18n";
+import Button from "@/components/common/Button.vue";
+import Dropdown from "@/components/common/Dropdown.vue";
+import DropdownItem from "@/components/common/DropdownItem.vue";
+import {
+  PencilIcon,
+  HeartIcon,
+  ShareIcon,
+  DocumentDuplicateIcon,
+  ArrowDownTrayIcon,
+  ArchiveBoxIcon,
+  TrashIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/vue/24/outline";
 
 interface Props {
-  canEdit?: boolean
-  canDelete?: boolean
-  canShare?: boolean
-  canFavorite?: boolean
-  canDuplicate?: boolean
-  canExport?: boolean
-  canArchive?: boolean
-  isFavorite?: boolean
-  isArchived?: boolean
-  isLoading?: boolean
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canShare?: boolean;
+  canFavorite?: boolean;
+  canDuplicate?: boolean;
+  canExport?: boolean;
+  canArchive?: boolean;
+  isFavorite?: boolean;
+  isArchived?: boolean;
+  isLoading?: boolean;
 }
 
 interface Emits {
-  edit: []
-  delete: []
-  share: []
-  favorite: []
-  duplicate: []
-  export: []
-  archive: []
+  edit: [];
+  delete: [];
+  share: [];
+  favorite: [];
+  duplicate: [];
+  export: [];
+  archive: [];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -139,11 +148,11 @@ const props = withDefaults(defineProps<Props>(), {
   canArchive: false,
   isFavorite: false,
   isArchived: false,
-  isLoading: false
-})
+  isLoading: false,
+});
 
-const emit = defineEmits<Emits>()
-const { t } = useI18n()
+const emit = defineEmits<Emits>();
+const { t } = useI18n();
 </script>
 
 <style scoped>
@@ -176,15 +185,6 @@ const { t } = useI18n()
 
 .favorite-button.is-favorite:hover {
   background-color: #fce4ec;
-}
-
-.more-actions {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
 }
 
 .danger {

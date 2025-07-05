@@ -14,7 +14,7 @@
           :label="$t('reminders.form.title')"
           :placeholder="$t('reminders.form.title_placeholder')"
           required
-          :error="errors.title"
+          :errorMessage="errors.title"
           @blur="validateField('title')"
         />
       </div>
@@ -56,7 +56,7 @@
             type="date"
             :label="$t('reminders.form.date')"
             required
-            :error="errors.reminderDate"
+            :errorMessage="errors.reminderDate"
             @blur="validateField('reminderDate')"
           />
         </div>
@@ -67,7 +67,7 @@
             type="time"
             :label="$t('reminders.form.time')"
             required
-            :error="errors.reminderTime"
+            :errorMessage="errors.reminderTime"
             @blur="validateField('reminderTime')"
           />
         </div>
@@ -134,6 +134,18 @@ import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
 import { useCouple } from '@/composables/useCouple'
 
+// Local form interface for UI fields
+interface LocalFormData {
+  id?: string
+  title: string
+  description?: string
+  reminderDate: string  // UI field
+  reminderTime: string  // UI field
+  type: Reminder['type']
+  isRecurring: boolean  // UI field
+  recurringType?: 'daily' | 'weekly' | 'monthly' | 'yearly' // UI field
+}
+
 interface Props {
   reminder?: Reminder
   isSubmitting?: boolean
@@ -152,8 +164,8 @@ const emit = defineEmits<Emits>()
 const { t } = useI18n()
 const { isConnected } = useCouple()
 
-// Form state
-const form = ref<CreateReminderRequest & { id?: string }>({
+// Form state - using local interface for UI
+const form = ref<LocalFormData>({
   title: '',
   description: '',
   reminderDate: '',
@@ -204,12 +216,16 @@ const validateField = (field: string) => {
       if (!form.value.reminderDate) {
         errors.value.reminderDate = t('common.validation.required')
       } else {
-        const selectedDate = new Date(form.value.reminderDate)
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        
-        if (selectedDate < today) {
-          errors.value.reminderDate = t('reminders.validation.date_future')
+        // Khi sửa reminder, cho phép giữ nguyên ngày hiện tại hoặc quá khứ
+        // Chỉ validate cho reminder mới
+        if (!isEditing.value) {
+          const selectedDate = new Date(form.value.reminderDate)
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          if (selectedDate < today) {
+            errors.value.reminderDate = t('reminders.validation.date_future')
+          }
         }
       }
       break
@@ -271,15 +287,22 @@ const resetForm = () => {
 // Watchers
 watch(() => props.reminder, (newReminder) => {
   if (newReminder) {
+    // Extract date and time from datetime field for UI
+    const datetime = new Date(newReminder.datetime)
+    const dateStr = datetime.toISOString().split('T')[0]
+    const timeStr = datetime.toTimeString().substring(0, 5)
+    
     form.value = {
       id: newReminder.id,
       title: newReminder.title,
       description: newReminder.description || '',
-      reminderDate: newReminder.reminderDate.split('T')[0],
-      reminderTime: newReminder.reminderTime,
+      reminderDate: dateStr,
+      reminderTime: timeStr,
       type: newReminder.type,
       isRecurring: newReminder.isRecurring,
-      recurringType: newReminder.recurringType
+      recurringType: newReminder.recurringType && newReminder.recurringType !== 'none' 
+        ? newReminder.recurringType as 'daily' | 'weekly' | 'monthly' | 'yearly' 
+        : undefined
     }
   } else {
     resetForm()

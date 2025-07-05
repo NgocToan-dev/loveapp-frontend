@@ -51,7 +51,7 @@ We have successfully implemented comprehensive CRUD detail pages for all three m
 #### Router Configuration
 ```typescript
 // Added routes for all detail pages
-/reminders/:id -> ReminderDetailPageNew.vue
+/reminders/:id -> ReminderDetailPage.vue
 /memories/:id -> MemoryDetailPage.vue  
 /blog/:id -> BlogDetailPage.vue
 ```
@@ -65,7 +65,7 @@ We have successfully implemented comprehensive CRUD detail pages for all three m
 #### Component Architecture
 ```
 src/pages/
-├── ReminderDetailPageNew.vue
+├── ReminderDetailPage.vue
 ├── MemoryDetailPage.vue
 └── BlogDetailPage.vue
 
@@ -105,7 +105,7 @@ src/components/common/
 2. `src/components/common/CrudActions.vue`
 3. `src/components/common/ListView.vue`
 4. `src/components/common/FilterSortPanel.vue`
-5. `src/pages/ReminderDetailPageNew.vue`
+5. `src/pages/ReminderDetailPage.vue`
 6. `src/pages/MemoryDetailPage.vue`
 7. `src/pages/BlogDetailPage.vue`
 

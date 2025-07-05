@@ -14,7 +14,7 @@ export interface CreateMemoryData {
   description: string
   content?: string
   date: string
-  images?: File[]
+  images?: string[] // Changed from File[] to string[] (URLs)
   tags?: string[]
   location?: string
   mood?: Memory['mood']
@@ -202,9 +202,12 @@ export const useMemoriesStore = defineStore('memories', {
           date: data.date,
           tags: data.tags || [],
           location: data.location,
+          mood: data.mood,
           isPrivate: data.isPrivate ?? false,
-          image: data.images?.[0] // Take first image if any
+          images: data.images || [] // Send image URLs
         }
+        
+        console.log('Store creating memory with data:', createData)
         
         const newMemory = await memoriesService.createMemory(createData)
         if (Array.isArray(this.memories)) {
@@ -230,13 +233,17 @@ export const useMemoriesStore = defineStore('memories', {
         const updateData: UpdateMemoryRequest = {
           id: data.id,
           title: data.title,
+          description: data.description,
           content: data.content,
           date: data.date,
           tags: data.tags,
           location: data.location,
+          mood: data.mood,
           isPrivate: data.isPrivate,
-          image: data.images?.[0]
+          images: data.images // Image URLs
         }
+
+        console.log('Store updating memory with data:', updateData)
 
         const updatedMemory = await memoriesService.updateMemory(updateData)
         
@@ -304,10 +311,8 @@ export const useMemoriesStore = defineStore('memories', {
         const memory = this.memories.find(m => m.id === id)
         if (!memory) throw new Error('Memory not found')
         
-        const updatedMemory = await memoriesService.updateMemory({
-          id,
-          isFavorite: !memory.isFavorite
-        })
+        // Use the dedicated toggleFavorite API endpoint
+        const updatedMemory = await memoriesService.toggleFavorite(id)
         
         // Update in local state
         const index = this.memories.findIndex(m => m.id === id)
@@ -322,7 +327,8 @@ export const useMemoriesStore = defineStore('memories', {
         
         return updatedMemory
       } catch (err: any) {
-        this.error = err.message
+        this.error = err.response?.data?.message || err.message || 'Có lỗi khi thay đổi trạng thái yêu thích'
+        console.error('Error toggling favorite:', err)
         throw err
       }
     },

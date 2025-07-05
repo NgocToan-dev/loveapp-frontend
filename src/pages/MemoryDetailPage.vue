@@ -273,7 +273,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, type ComputedRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMemories } from '@/composables/useMemories'
@@ -281,7 +281,6 @@ import { useCouple } from '@/composables/useCouple'
 import { useNotifications } from '@/composables/useNotifications'
 import { formatDate, formatDateTime } from '@/utils/helpers'
 import type { Memory } from '@/types'
-
 import AppLayout from '@/components/layout/AppLayout.vue'
 import MemoryCard from '@/components/memories/MemoryCard.vue'
 import CrudActions from '@/components/common/CrudActions.vue'
@@ -298,10 +297,10 @@ import {
   CalendarIcon,
   MapPinIcon,
   UserIcon,
-  ClockIcon
+  ClockIcon,
+  LinkIcon,
+  ShareIcon
 } from '@heroicons/vue/24/outline'
-import LinkIcon from '@/components/icons/LinkIcon.vue'
-import ShareIcon from '@/components/icons/ShareIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -329,7 +328,7 @@ const shareText = ref('')
 
 // Computed
 const memoryId = computed(() => route.params.id as string)
-const currentMemory = computed(() => selectedMemory)
+const currentMemory = selectedMemory as ComputedRef<Memory | null> // Explicit type for TypeScript
 
 const canEdit = computed(() => {
   return !!(isConnected.value && currentMemory.value)
@@ -344,13 +343,13 @@ const canShare = computed(() => {
 })
 
 const relatedMemories = computed(() => {
-  if (!currentMemory.value || !memories) return []
+  if (!currentMemory.value || !memories.value) return []
   
-  return memories
+  return memories.value
     .filter((m: Memory) => 
       m.id !== currentMemory.value?.id && 
       (m.location === currentMemory.value?.location ||
-       m.tags?.some(tag => currentMemory.value?.tags?.includes(tag)) ||
+       m.tags?.some((tag: string) => currentMemory.value?.tags?.includes(tag)) ||
        Math.abs(new Date(m.date).getTime() - new Date(currentMemory.value?.date || '').getTime()) < 30 * 24 * 60 * 60 * 1000) // Within 30 days
     )
     .slice(0, 6)
@@ -421,7 +420,7 @@ const handleDeleteRelated = async (memory: Memory) => {
 }
 
 const handleToggleFavoriteRelated = async (id: string) => {
-  const relatedMemory = memories?.find((m: Memory) => m.id === id)
+  const relatedMemory = memories.value?.find((m: Memory) => m.id === id)
   if (!relatedMemory) return
   
   try {

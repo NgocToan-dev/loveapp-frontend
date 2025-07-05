@@ -60,12 +60,6 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/reminders/:id',
-      name: 'reminder-detail',
-      component: () => import('@/pages/ReminderDetailPageNew.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
       path: '/timeline',
       name: 'timeline',
       component: () => import('@/pages/TimelinePage.vue'),

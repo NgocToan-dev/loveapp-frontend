@@ -2,6 +2,12 @@
 
 import type { IUserEntity } from "./model/user/IUserEntity"
 
+// Export aliases for backwards compatibility
+export type IUser = IUserEntity
+export type User = IUserEntity
+export type CoupleConnection = ICoupleConnection
+export type { IUserEntity }
+
 
 export interface LoginCredentials {
   email: string
@@ -85,30 +91,42 @@ export interface CreateMemoryRequest {
   title: string
   description: string
   content?: string
-  image?: File
+  images?: string[] // Array of image URLs instead of File objects
   location?: string
   date: string
   tags?: string[] // Made optional
+  mood?: 'happy' | 'love' | 'excited' | 'romantic' | 'nostalgic' | 'grateful'
   isPrivate?: boolean
 }
 
 export interface UpdateMemoryRequest extends Partial<CreateMemoryRequest> {
   id: string
   isFavorite?: boolean
+  images?: string[] // Array of image URLs instead of File objects
 }
 
 // Reminder types
 export interface Reminder {
   id: string
+  _id?: string // Backend MongoDB ID
+  userId?: {
+    _id: string
+    displayName: string
+    avatarUrl: string
+  }
   coupleId: string
   title: string
   description?: string
+  datetime: string // Only datetime field needed
+  // Computed frontend fields (derived from datetime)
   reminderDate: string
   reminderTime: string
+  repeat: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
   type: 'anniversary' | 'birthday' | 'date' | 'custom'
   isRecurring: boolean
-  recurringType?: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  recurringType?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
   isCompleted: boolean
+  notified: boolean
   createdBy: string
   createdAt: string
   updatedAt: string
@@ -117,13 +135,9 @@ export interface Reminder {
 export interface CreateReminderRequest {
   title: string
   description?: string
-  reminderDate?: string // Frontend field
-  reminderTime?: string // Frontend field
-  datetime?: string // Backend field - required
-  repeat?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' // Backend field
+  datetime: string // Only send datetime to backend
+  repeat?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly'
   type: 'anniversary' | 'birthday' | 'date' | 'custom'
-  isRecurring?: boolean // Frontend field
-  recurringType?: 'daily' | 'weekly' | 'monthly' | 'yearly' // Frontend field
 }
 
 export interface UpdateReminderRequest extends Partial<CreateReminderRequest> {

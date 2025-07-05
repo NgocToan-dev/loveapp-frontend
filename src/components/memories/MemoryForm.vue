@@ -77,10 +77,12 @@
         <!-- Image Upload Area -->
         <div
           @drop.prevent="handleDrop"
-          @dragover.prevent
-          @dragenter.prevent
-          class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-400 transition-colors"
+          @dragover.prevent="handleDragOver"
+          @dragenter.prevent="handleDragEnter"
+          @dragleave.prevent="handleDragLeave"
+          class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-400 transition-colors cursor-pointer"
           :class="{ 'border-pink-400 bg-pink-50': isDragging }"
+          @click="handleUploadAreaClick"
         >
           <input
             ref="fileInput"
@@ -120,13 +122,45 @@
               :src="image.preview"
               :alt="`Image ${index + 1}`"
               class="w-full h-24 object-cover rounded-lg"
+              :class="{ 'opacity-50': image.isUploading }"
             />
+            
+            <!-- Upload loading indicator -->
+            <div
+              v-if="image.isUploading"
+              class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg"
+            >
+              <div class="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+            </div>
+            
+            <!-- Upload success indicator -->
+            <div
+              v-else-if="image.url && !image.isExisting"
+              class="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1"
+            >
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            
+            <!-- Upload error indicator -->
+            <div
+              v-else-if="image.uploadError"
+              class="absolute top-1 left-1 bg-red-500 text-white rounded-full p-1"
+              :title="image.uploadError"
+            >
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            
             <Button
               type="button"
               @click="removeImage(index)"
               variant="outline"
               size="sm"
               class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+              :disabled="image.isUploading"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -251,6 +285,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMemoriesStore, type Memory, type CreateMemoryData } from '@/stores/memories'
+import { memoriesService } from '@/services/memories'
 import Modal from '@/components/common/Modal.vue'
 import Input from '@/components/common/Input.vue'
 import Button from '@/components/common/Button.vue'
@@ -275,13 +310,13 @@ const emit = defineEmits<Emits>()
 const { t } = useI18n()
 const memoriesStore = useMemoriesStore()
 
-// Form state
+// Form state - Updated to use string URLs for images
 const form = ref<CreateMemoryData>({
   title: '',
   description: '',
   content: '',
   date: new Date().toISOString().split('T')[0],
-  images: [],
+  images: [], // This will now be array of URLs
   tags: [],
   location: '',
   mood: undefined,
@@ -289,7 +324,14 @@ const form = ref<CreateMemoryData>({
 })
 
 const errors = ref<Record<string, string>>({})
-const selectedImages = ref<Array<{ file: File; preview: string }>>([])
+const selectedImages = ref<Array<{ 
+  file: File | null; 
+  preview: string; 
+  isExisting?: boolean; 
+  url?: string;
+  isUploading?: boolean;
+  uploadError?: string;
+}>>([])
 const newTag = ref('')
 const selectedTag = ref('')
 const isDragging = ref(false)
@@ -344,36 +386,102 @@ const getMoodEmoji = (mood: Memory['mood']) => {
 
 const handleFileSelect = (event: Event) => {
   const files = (event.target as HTMLInputElement).files
+  console.log('Files selected:', files?.length || 0)
   if (files) {
     processFiles(Array.from(files))
+  }
+}
+
+const handleUploadAreaClick = (event: Event) => {
+  // Only trigger file input if click is not from the button
+  const target = event.target as HTMLElement
+  if (!target.closest('button')) {
+    fileInput.value?.click()
   }
 }
 
 const handleDrop = (event: DragEvent) => {
   isDragging.value = false
   const files = event.dataTransfer?.files
+  console.log('Files dropped:', files?.length || 0)
   if (files) {
     processFiles(Array.from(files))
   }
 }
 
+const handleDragOver = (event: DragEvent) => {
+  event.preventDefault()
+}
+
+const handleDragEnter = (event: DragEvent) => {
+  event.preventDefault()
+  isDragging.value = true
+}
+
+const handleDragLeave = (event: DragEvent) => {
+  event.preventDefault()
+  // Only set to false if we're leaving the drop zone entirely
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  const x = event.clientX
+  const y = event.clientY
+  
+  if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+    isDragging.value = false
+  }
+}
+
 const processFiles = (files: File[]) => {
-  files.forEach(file => {
+  console.log('Processing files:', files.length)
+  files.forEach((file, index) => {
+    console.log(`File ${index}:`, { name: file.name, type: file.type, size: file.size })
     if (file.type.startsWith('image/')) {
       const reader = new FileReader()
       reader.onload = (e) => {
+        console.log(`File ${index} processed successfully`)
         selectedImages.value.push({
           file,
-          preview: e.target?.result as string
+          preview: e.target?.result as string,
+          isExisting: false,
+          isUploading: false
         })
+        
+        console.log('Total selected images:', selectedImages.value.length)
       }
       reader.readAsDataURL(file)
+    } else {
+      console.log(`File ${index} skipped - not an image`)
     }
   })
 }
 
+const uploadImage = async (imageItem: typeof selectedImages.value[0]) => {
+  if (!imageItem.file || imageItem.isExisting || imageItem.url) return imageItem.url
+
+  imageItem.isUploading = true
+  imageItem.uploadError = undefined
+  
+  try {
+    console.log('Uploading image:', imageItem.file.name)
+    const response = await memoriesService.uploadImage(imageItem.file)
+    imageItem.url = response.url
+    console.log('Image uploaded successfully:', response.url)
+    return response.url
+  } catch (error) {
+    console.error('Failed to upload image:', error)
+    imageItem.uploadError = 'Upload failed'
+    throw error
+  } finally {
+    imageItem.isUploading = false
+  }
+}
+
 const removeImage = (index: number) => {
+  const imageToRemove = selectedImages.value[index]
+  
+  // Remove from selectedImages UI array
   selectedImages.value.splice(index, 1)
+  
+  console.log('Image removed:', { index, remaining: selectedImages.value.length })
 }
 
 const addTag = () => {
@@ -444,9 +552,39 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
-    const submitData = {
+    // Upload all new images first and get their URLs
+    const imageUploadPromises = selectedImages.value
+      .filter(img => !img.isExisting && img.file && !img.url)
+      .map(img => uploadImage(img))
+
+    console.log('Uploading images:', imageUploadPromises.length)
+    
+    // Wait for all images to upload
+    await Promise.all(imageUploadPromises)
+    
+    // Collect all image URLs (existing + newly uploaded)
+    const allImageUrls = selectedImages.value
+      .filter(img => img.url || img.isExisting)
+      .map(img => img.url!)
+      .filter(Boolean)
+
+    console.log('Form data being submitted:', {
       ...form.value,
-      images: selectedImages.value.map(img => img.file)
+      imageUrls: allImageUrls.length,
+      mood: form.value.mood,
+      isPrivate: form.value.isPrivate
+    })
+
+    const submitData = {
+      title: form.value.title,
+      description: form.value.description,
+      content: form.value.content,
+      date: form.value.date,
+      tags: form.value.tags || [],
+      location: form.value.location,
+      mood: form.value.mood,
+      isPrivate: Boolean(form.value.isPrivate),
+      images: allImageUrls // Array of URLs instead of File objects
     }
 
     if (isEditMode.value && props.memory) {
@@ -462,6 +600,7 @@ const handleSubmit = async () => {
     handleClose()
   } catch (error) {
     console.error('Failed to save memory:', error)
+    // Show error to user (you can add toast notification here)
   } finally {
     isSubmitting.value = false
   }
@@ -484,6 +623,11 @@ const resetForm = () => {
   selectedTag.value = ''
   selectedTagOption.value = []
   errors.value = {}
+  
+  // Reset file input
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 }
 
 const handleClose = () => {
@@ -494,18 +638,41 @@ const handleClose = () => {
 // Watch for memory prop changes
 watch(() => props.memory, (memory) => {
   if (memory) {
+    // Format date for HTML input (YYYY-MM-DD)
+    const formattedDate = memory.date ? new Date(memory.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+    
     form.value = {
       title: memory.title,
       description: memory.description || '',
       content: memory.content || '',
-      date: memory.date,
+      date: formattedDate,
       tags: [...memory.tags || []],
       location: memory.location || '',
-      mood: memory.mood,
-      isPrivate: memory.isPrivate
+      mood: memory.mood || undefined,
+      isPrivate: Boolean(memory.isPrivate),
+      images: [] // Will be populated separately
     }
-    // Note: We don't populate selectedImages for existing images in edit mode
-    // This would require converting URLs back to File objects
+    
+    // Handle existing images for edit mode
+    selectedImages.value = []
+    if (memory.images && memory.images.length > 0) {
+      // Create preview objects for existing images
+      memory.images.forEach((imageUrl, index) => {
+        selectedImages.value.push({
+          file: null as any, // Existing images don't have File objects
+          preview: imageUrl,
+          isExisting: true,
+          url: imageUrl
+        })
+      })
+    }
+    
+    console.log('Memory data loaded:', {
+      mood: memory.mood,
+      isPrivate: memory.isPrivate,
+      tags: memory.tags,
+      images: memory.images
+    })
   }
 }, { immediate: true })
 

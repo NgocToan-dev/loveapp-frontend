@@ -12,6 +12,20 @@
         </div>
 
         <div class="header-actions">
+          <!-- Filter Dropdown -->
+          <select 
+            v-if="isConnected"
+            v-model="selectedFilter" 
+            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mr-3"
+          >
+            <option value="all">{{ $t('reminders.filters.all') }}</option>
+            <option value="overdue">{{ $t('reminders.filters.overdue') }}</option>
+            <option value="upcoming">{{ $t('reminders.filters.upcoming') }}</option>
+            <option value="future">{{ $t('reminders.filters.future') }}</option>
+            <option value="completed">{{ $t('reminders.filters.completed') }}</option>
+            <option value="pending">{{ $t('reminders.filters.pending') }}</option>
+          </select>
+          
           <Button
             v-if="isConnected"
             @click="handleCreateClick"
@@ -84,10 +98,10 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="!isLoading && reminders.length === 0" class="empty-state">
+        <div v-else-if="!isLoading && filteredReminders.length === 0" class="empty-state">
           <div class="empty-icon">📅</div>
-          <h3>{{ $t("reminders.no_reminders_title") }}</h3>
-          <p>{{ $t("reminders.no_reminders_message") }}</p>
+          <h3>{{ getEmptyStateTitle() }}</h3>
+          <p>{{ getEmptyStateMessage() }}</p>
           <Button @click="showCreateForm = true" variant="primary">
             {{ $t("reminders.create_first") }}
           </Button>
@@ -95,64 +109,104 @@
 
         <!-- Reminders List -->
         <div v-else class="reminders-container">
-          <!-- Overdue Reminders -->
-          <div v-if="overdueReminders.length > 0" class="reminders-section">
-            <h2 class="section-title overdue">
-              ⚠️ {{ $t("reminders.overdue_section") }} ({{ overdueReminders.length }})
+          <!-- Filter Results Header -->
+          <div v-if="selectedFilter !== 'all'" class="mb-4">
+            <h2 class="text-lg font-medium text-gray-900">
+              {{ getFilterTitle() }} ({{ filteredReminders.length }})
             </h2>
-            <div class="reminders-grid">
-              <ReminderCard
-                v-for="reminder in overdueReminders.slice(0, 6)"
-                :key="reminder.id"
-                :reminder="reminder"
-                :is-updating="updatingId === reminder.id"
-                @edit="editReminder"
-                @delete="deleteReminder"
-                @toggle-complete="toggleComplete"
-                @snooze="snoozeReminder"
-                @click="showReminderDetail"
-              />
+          </div>
+
+          <!-- All Reminders View - Organized by Sections -->
+          <div v-if="selectedFilter === 'all'">
+            <!-- Overdue Reminders -->
+            <div v-if="overdueReminders.length > 0" class="reminders-section">
+              <h2 class="section-title overdue">
+                ⚠️ {{ $t("reminders.overdue") }} ({{ overdueReminders.length }})
+              </h2>
+              <div class="reminders-grid">
+                <ReminderCard
+                  v-for="reminder in overdueReminders"
+                  :key="reminder.id"
+                  :reminder="reminder"
+                  :is-updating="updatingId === reminder.id"
+                  @edit="editReminder"
+                  @delete="deleteReminder"
+                  @toggle-complete="toggleComplete"
+                  @snooze="snoozeReminder"
+                />
+              </div>
+            </div>
+
+            <!-- Upcoming Reminders -->
+            <div v-if="upcomingReminders.length > 0" class="reminders-section">
+              <h2 class="section-title upcoming">
+                ⏰ {{ $t("reminders.upcoming") }} ({{ upcomingReminders.length }})
+              </h2>
+              <div class="reminders-grid">
+                <ReminderCard
+                  v-for="reminder in upcomingReminders"
+                  :key="reminder.id"
+                  :reminder="reminder"
+                  :is-updating="updatingId === reminder.id"
+                  @edit="editReminder"
+                  @delete="deleteReminder"
+                  @toggle-complete="toggleComplete"
+                  @snooze="snoozeReminder"
+                />
+              </div>
+            </div>
+
+            <!-- Future Reminders -->
+            <div v-if="futureReminders.length > 0" class="reminders-section">
+              <h2 class="section-title future">
+                📅 {{ $t("reminders.future") }} ({{ futureReminders.length }})
+              </h2>
+              <div class="reminders-grid">
+                <ReminderCard
+                  v-for="reminder in futureReminders"
+                  :key="reminder.id"
+                  :reminder="reminder"
+                  :is-updating="updatingId === reminder.id"
+                  @edit="editReminder"
+                  @delete="deleteReminder"
+                  @toggle-complete="toggleComplete"
+                  @snooze="snoozeReminder"
+                />
+              </div>
+            </div>
+
+            <!-- Completed Reminders -->
+            <div v-if="completedReminders.length > 0" class="reminders-section">
+              <h2 class="section-title completed">
+                ✅ {{ $t("reminders.completed") }} ({{ completedReminders.length }})
+              </h2>
+              <div class="reminders-grid">
+                <ReminderCard
+                  v-for="reminder in completedReminders"
+                  :key="reminder.id"
+                  :reminder="reminder"
+                  :is-updating="updatingId === reminder.id"
+                  @edit="editReminder"
+                  @delete="deleteReminder"
+                  @toggle-complete="toggleComplete"
+                  @snooze="snoozeReminder"
+                />
+              </div>
             </div>
           </div>
 
-          <!-- Upcoming Reminders -->
-          <div v-if="upcomingReminders.length > 0" class="reminders-section">
-            <h2 class="section-title upcoming">
-              ⏰ {{ $t("reminders.upcoming_section") }} ({{ upcomingReminders.length }})
-            </h2>
-            <div class="reminders-grid">
-              <ReminderCard
-                v-for="reminder in upcomingReminders.slice(0, 6)"
-                :key="reminder.id"
-                :reminder="reminder"
-                :is-updating="updatingId === reminder.id"
-                @edit="editReminder"
-                @delete="deleteReminder"
-                @toggle-complete="toggleComplete"
-                @snooze="snoozeReminder"
-                @click="showReminderDetail"
-              />
-            </div>
-          </div>
-
-          <!-- Completed Reminders -->
-          <div v-if="completedReminders.length > 0" class="reminders-section">
-            <h2 class="section-title completed">
-              ✅ {{ $t("reminders.completed_section") }} ({{ completedReminders.length }})
-            </h2>
-            <div class="reminders-grid">
-              <ReminderCard
-                v-for="reminder in completedReminders.slice(0, 6)"
-                :key="reminder.id"
-                :reminder="reminder"
-                :is-updating="updatingId === reminder.id"
-                @edit="editReminder"
-                @delete="deleteReminder"
-                @toggle-complete="toggleComplete"
-                @snooze="snoozeReminder"
-                @click="showReminderDetail"
-              />
-            </div>
+          <!-- Filtered Results (when specific filter is selected) -->
+          <div v-else class="reminders-grid">
+            <ReminderCard
+              v-for="reminder in filteredReminders"
+              :key="reminder.id"
+              :reminder="reminder"
+              :is-updating="updatingId === reminder.id"
+              @edit="editReminder"
+              @delete="deleteReminder"
+              @toggle-complete="toggleComplete"
+              @snooze="snoozeReminder"
+            />
           </div>
         </div>
       </div>
@@ -171,24 +225,6 @@
           :is-submitting="isLoading"
           @submit="handleFormSubmit"
           @cancel="closeForm"
-        />
-      </Modal>
-
-      <!-- Detail Modal -->
-      <Modal
-        v-model="showDetailModal"
-        :title="selectedReminder?.title || $t('reminders.detail.title')"
-        size="xl"
-        variant="default"
-      >
-        <ReminderDetail
-          v-if="selectedReminder"
-          :reminder="selectedReminder"
-          :is-updating="updatingId === selectedReminder.id"
-          @edit="editReminderFromDetail"
-          @delete="deleteReminderFromDetail"
-          @toggle-complete="toggleCompleteFromDetail"
-          @snooze="snoozeReminderFromDetail"
         />
       </Modal>
 
@@ -221,7 +257,6 @@ import Modal from "@/components/common/Modal.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import ReminderCard from "@/components/reminders/ReminderCard.vue";
 import ReminderForm from "@/components/reminders/ReminderForm.vue";
-import ReminderDetail from "@/components/reminders/ReminderDetail.vue";
 
 const { t } = useI18n();
 const { isConnected } = useCouple();
@@ -240,15 +275,97 @@ const {
   deleteReminder: deleteReminderFromStore,
   markCompleted,
   markIncomplete,
+  snoozeReminder,
   clearError,
 } = useReminders();
 
 // Local state
 const showCreateForm = ref(false);
-const showDetailModal = ref(false);
 const editingReminder = ref<Reminder | null>(null);
-const selectedReminder = ref<Reminder | null>(null);
 const updatingId = ref<string | null>(null);
+const selectedFilter = ref<'all' | 'overdue' | 'upcoming' | 'future' | 'completed' | 'pending'>('all');
+
+// Computed properties for filtering
+const futureReminders = computed(() => {
+  const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  return reminders.value.filter(reminder => 
+    !reminder.isCompleted && new Date(reminder.datetime) > nextWeek
+  );
+});
+
+const pendingReminders = computed(() => {
+  return reminders.value.filter(reminder => !reminder.isCompleted);
+});
+
+const filteredReminders = computed(() => {
+  switch (selectedFilter.value) {
+    case 'overdue':
+      return overdueReminders.value;
+    case 'upcoming':
+      return upcomingReminders.value;
+    case 'future':
+      return futureReminders.value;
+    case 'completed':
+      return completedReminders.value;
+    case 'pending':
+      return pendingReminders.value;
+    case 'all':
+    default:
+      return reminders.value;
+  }
+});
+
+// Helper methods for empty state and filters
+const getEmptyStateTitle = () => {
+  switch (selectedFilter.value) {
+    case 'overdue':
+      return t('reminders.no_overdue_title');
+    case 'upcoming':
+      return t('reminders.no_upcoming_title');
+    case 'future':
+      return t('reminders.no_future_title');
+    case 'completed':
+      return t('reminders.no_completed_title');
+    case 'pending':
+      return t('reminders.no_pending_title');
+    default:
+      return t('reminders.no_reminders_title');
+  }
+};
+
+const getEmptyStateMessage = () => {
+  switch (selectedFilter.value) {
+    case 'overdue':
+      return t('reminders.no_overdue_message');
+    case 'upcoming':
+      return t('reminders.no_upcoming_message');
+    case 'future':
+      return t('reminders.no_future_message');
+    case 'completed':
+      return t('reminders.no_completed_message');
+    case 'pending':
+      return t('reminders.no_pending_message');
+    default:
+      return t('reminders.no_reminders_message');
+  }
+};
+
+const getFilterTitle = () => {
+  switch (selectedFilter.value) {
+    case 'overdue':
+      return t('reminders.overdue');
+    case 'upcoming':
+      return t('reminders.upcoming');
+    case 'future':
+      return t('reminders.future');
+    case 'completed':
+      return t('reminders.completed');
+    case 'pending':
+      return t('reminders.pending');
+    default:
+      return t('reminders.all');
+  }
+};
 
 // Methods
 const handleCreateClick = () => {
@@ -257,58 +374,18 @@ const handleCreateClick = () => {
 };
 
 const showReminderDetail = (reminder: Reminder) => {
-  selectedReminder.value = reminder;
-  showDetailModal.value = true;
-};
-
-const closeDetailModal = () => {
-  showDetailModal.value = false;
-  selectedReminder.value = null;
+  // Functionality removed - clicking on reminder card does nothing
 };
 
 const editReminder = (reminder: Reminder) => {
+  // Không cho phép sửa reminder đã hoàn thành
+  if (reminder.isCompleted) {
+    console.log("Cannot edit completed reminder");
+    return;
+  }
+  
   editingReminder.value = reminder;
   showCreateForm.value = true;
-};
-
-const editReminderFromDetail = () => {
-  if (selectedReminder.value) {
-    closeDetailModal();
-    editReminder(selectedReminder.value);
-  }
-};
-
-const deleteReminderFromDetail = async () => {
-  if (selectedReminder.value) {
-    await deleteReminder(selectedReminder.value.id);
-    closeDetailModal();
-  }
-};
-
-const toggleCompleteFromDetail = async () => {
-  if (selectedReminder.value) {
-    await toggleComplete(selectedReminder.value.id);
-    // Update the selected reminder to reflect the change
-    const updatedReminder = reminders.find(
-      (r: any) => r.id === selectedReminder.value?.id
-    );
-    if (updatedReminder) {
-      selectedReminder.value = updatedReminder;
-    }
-  }
-};
-
-const snoozeReminderFromDetail = async (snoozeUntil: string) => {
-  if (selectedReminder.value) {
-    await snoozeReminder(selectedReminder.value.id, snoozeUntil);
-    // Update the selected reminder to reflect the change
-    const updatedReminder = reminders.find(
-      (r: any) => r.id === selectedReminder.value?.id
-    );
-    if (updatedReminder) {
-      selectedReminder.value = updatedReminder;
-    }
-  }
 };
 
 const closeForm = () => {
@@ -340,7 +417,7 @@ const deleteReminder = async (id: string) => {
 const toggleComplete = async (id: string) => {
   updatingId.value = id;
   try {
-    const reminder = reminders.find((r: any) => r.id === id);
+    const reminder = reminders.value.find((r: any) => r.id === id);
     if (reminder) {
       if (reminder.isCompleted) {
         await markIncomplete(id);
@@ -350,21 +427,9 @@ const toggleComplete = async (id: string) => {
     }
   } catch (error) {
     // Error handled in composable
+    console.error('Toggle complete error:', error);
   } finally {
     updatingId.value = null;
-  }
-};
-
-const snoozeReminder = async (id: string, snoozeUntil: string) => {
-  try {
-    const updateData = {
-      id: id,
-      reminderDate: snoozeUntil.split("T")[0],
-      reminderTime: snoozeUntil.split("T")[1] || "09:00",
-    };
-    await updateReminder(updateData);
-  } catch (error) {
-    // Error handled in composable
   }
 };
 
@@ -477,6 +542,10 @@ watch(showCreateForm, (newValue) => {
 
 .section-title.overdue {
   color: #f44336;
+}
+
+.section-title.future {
+  color: #9c27b0;
 }
 
 .section-title.completed {

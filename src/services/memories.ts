@@ -16,6 +16,7 @@ const normalizeMemory = (memory: any): Memory => {
     tags: memory.tags || [],
     content: memory.content || '',
     location: memory.location || '',
+    mood: memory.mood || undefined,
     isPrivate: Boolean(memory.isPrivate),
     isFavorite: Boolean(memory.isFavorite),
     // Transform userId to author for frontend compatibility
@@ -58,31 +59,29 @@ export const memoriesService = {
 
   // Create new memory
   async createMemory(data: CreateMemoryRequest): Promise<Memory> {
-    const formData = new FormData()
-    
-    formData.append('title', data.title)
-    formData.append('description', data.description)
-    if (data.content) {
-      formData.append('content', data.content)
-    }
-    formData.append('date', data.date)
-    formData.append('tags', JSON.stringify(data.tags || []))
-    
-    if (data.location) {
-      formData.append('location', data.location)
-    }
-    
-    if (data.isPrivate !== undefined) {
-      formData.append('isPrivate', data.isPrivate.toString())
-    }
-    
-    if (data.image) {
-      formData.append('image', data.image)
-    }
+    console.log('Creating memory with JSON:', {
+      title: data.title,
+      description: data.description,
+      mood: data.mood,
+      isPrivate: data.isPrivate,
+      images: data.images?.length || 0,
+      date: data.date,
+      dateType: typeof data.date
+    })
 
-    const response = await api.post('/memories', formData, {
+    const response = await api.post('/memories', {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      date: data.date,
+      tags: data.tags || [],
+      location: data.location,
+      mood: data.mood,
+      isPrivate: data.isPrivate || false,
+      images: data.images || []
+    }, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'application/json'
       }
     })
     return normalizeMemory(response.data)
@@ -91,24 +90,19 @@ export const memoriesService = {
   // Update memory
   async updateMemory(data: UpdateMemoryRequest): Promise<Memory> {
     const { id, ...updateData } = data
-    
-    const formData = new FormData()
-    
-    Object.entries(updateData).forEach(([key, value]) => {
-      if (value !== undefined) {
-        if (key === 'tags') {
-          formData.append(key, JSON.stringify(value || []))
-        } else if (key === 'image' && value instanceof File) {
-          formData.append(key, value)
-        } else if (key !== 'image') {
-          formData.append(key, value.toString())
-        }
-      }
+
+    console.log('Updating memory with JSON:', {
+      id,
+      mood: data.mood,
+      isPrivate: data.isPrivate,
+      images: data.images?.length || 0,
+      date: data.date,
+      dateType: typeof data.date
     })
 
-    const response = await api.put(`/memories/${id}`, formData, {
+    const response = await api.put(`/memories/${id}`, updateData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'application/json'
       }
     })
     return normalizeMemory(response.data)
@@ -153,6 +147,12 @@ export const memoriesService = {
     return response.data || []
   },
 
+  // Toggle favorite status
+  async toggleFavorite(id: string): Promise<Memory> {
+    const response = await api.patch(`/memories/${id}/favorite`)
+    return normalizeMemory(response.data.memory)
+  },
+
   // Get memories for timeline
   async getTimelineMemories(year?: number, month?: number): Promise<Memory[]> {
     const params = new URLSearchParams()
@@ -166,14 +166,21 @@ export const memoriesService = {
   // Upload image
   async uploadImage(file: File): Promise<FileUploadResponse> {
     const formData = new FormData()
-    formData.append('image', file)
+    formData.append('file', file) // Backend expects 'file' not 'image'
 
-    const response = await api.post('/upload/image', formData, {
+    const response = await api.post('/upload/single', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
-    return response.data
+    
+    // Map backend response to frontend interface
+    return {
+      url: response.data.fileUrl,
+      publicId: response.data.fileName || '',
+      size: response.data.fileSize || 0,
+      format: response.data.fileType || ''
+    }
   },
 
   // Get memory statistics
